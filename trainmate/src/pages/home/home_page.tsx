@@ -504,16 +504,16 @@ export default function HomePage() {
         // Step 3: Fetch Coaches
         console.log("Fetching coaches...");
         const coaches_from_local_storage = JSON.parse(localStorage.getItem('coaches') || '[]');
-        const coaches_timestamp = parseInt(localStorage.getItem('coaches_timestamp') || '0', 10);
+        //const coaches_timestamp = parseInt(localStorage.getItem('coaches_timestamp') || '0', 10);
 
-        if (coaches_from_local_storage.length > 0 && (now - coaches_timestamp < TTL)) {
+        if (coaches_from_local_storage.length > 0 /*&& (now - coaches_timestamp < TTL)*/) {
           setCoaches(coaches_from_local_storage);
           console.log('Coaches loaded from local storage');
         } else {
           const coaches = await getCoaches();
           setCoaches(coaches);
           localStorage.setItem('coaches', JSON.stringify(coaches));
-          localStorage.setItem('coaches_timestamp', Date.now().toString());
+          //localStorage.setItem('coaches_timestamp', Date.now().toString());
         }
 
         // Step 4: Fetch Trainings
@@ -1033,4 +1033,3 @@ export default function HomePage() {
     </div>
   );
 }
-

@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useRef } from 'react';
-import { Button, Card, CardContent, CardHeader, Typography, TextField, InputLabel, Box, Accordion, AccordionSummary, AccordionDetails, Dialog, DialogTitle, DialogContent, DialogActions, IconButton, MenuItem, Select, FormControl, CircularProgress, } from '@mui/material';
-import { Add as PlusIcon, Edit as EditIcon, Delete as DeleteIcon, ArrowBack as ArrowLeftIcon, ExpandMore as ExpandMoreIcon, BorderColor, } from '@mui/icons-material';
+import { Button, Card, CardContent, CardHeader, Typography, TextField, InputLabel, Box, Accordion, AccordionSummary, AccordionDetails, Dialog, DialogTitle, DialogContent, DialogActions, IconButton, MenuItem, Select, FormControl} from '@mui/material';
+import { Add as PlusIcon, Edit as EditIcon, Delete as DeleteIcon, ArrowBack as ArrowLeftIcon, ExpandMore as ExpandMoreIcon } from '@mui/icons-material';
 import EmojiEventsIcon from '@mui/icons-material/EmojiEvents';
 import { useNavigate } from 'react-router-dom';
 import { grey } from '@mui/material/colors';
@@ -12,7 +12,7 @@ import handleCategoryIcon from '../../personalizedComponents/handleCategoryIcon'
 import CreateTrainingDialog from './training_dialog';
 import AreYouSureAlert from '../../personalizedComponents/areYouSureAlert';
 import { getStorage, ref, uploadBytes, getDownloadURL } from "firebase/storage";
-import { Visibility as EyeIcon } from '@mui/icons-material'; // Add the Eye icon import
+import { Visibility as EyeIcon } from '@mui/icons-material';
 import DialogContentText from '@mui/material/DialogContentText';
 
 import { muscularGroups } from "../../enums/muscularGroups";
@@ -555,8 +555,10 @@ export default function CategoriesPage() {
                         id={`panel-${category.id}-header`}
                       >
                         <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                          {handleCategoryIcon(category.icon)}
-                          <Typography sx={{ ml: 1, fontWeight: 'bold', fontSize: '1.2rem' }}>{category.name}</Typography>
+                          <Box sx={{ color: 'white', display: 'flex',alignItems: 'center'}}>
+                            {handleCategoryIcon(category.icon)}
+                          </Box>
+                          <Typography sx={{ ml: 1, fontWeight: 'bold', fontSize: '1.2rem', color: 'white' }}>{category.name}</Typography>
                         </Box>
                         {category.isCustom && (
                           <Box sx={{ ml: 'auto', display: 'flex', alignItems: 'center' }}>
@@ -579,21 +581,23 @@ export default function CategoriesPage() {
                                 <Typography sx={{ fontSize: '0.7rem', marginLeft: 3 }}>({exercise.calories_per_hour} kcal/h)</Typography>
                               </Box>
                               <Box>
-                                {!exercise.public && (
                                   <Box>
+                                    {!exercise.public && (
                                     <IconButton size="small" color="inherit" onClick={() => handleOpenEditExerciseDialog(exercise)}>
                                       <EditIcon />
                                     </IconButton>
+                                    )}
+                                    {!exercise.public && (
                                     <IconButton size="small" color="inherit" onClick={() => handleExerciseDataToDelete(exercise.id, category.id)}>
                                       <DeleteIcon />
                                     </IconButton>
+                                    )}
                                     {exercise.image_url && (
                                       <IconButton size="small" color="inherit" onClick={() => handleOpenImageModal(exercise.image_url)}>
                                         <EyeIcon />
                                       </IconButton>
                                     )}
                                   </Box>
-                                )}
 
                               </Box>
                             </Box>
@@ -615,8 +619,9 @@ export default function CategoriesPage() {
               </CardContent>
             </Card>
             <Dialog open={imageModalOpen} onClose={handleCloseImageModal} fullWidth maxWidth="sm">
-              <DialogTitle>Exercise Image</DialogTitle>
-              <DialogContent>
+            <div className='border border-gray-600 rounded-mx'> 
+              <DialogTitle className='bg-black text-white'>Exercise Image</DialogTitle>
+              <DialogContent className='bg-black'>
                 {selectedImage ? (
                   <Box sx={{ display: 'flex', justifyContent: 'center' }}>
                     <img src={selectedImage} alt="Exercise" style={{ maxWidth: '100%', maxHeight: '400px' }} />
@@ -625,11 +630,12 @@ export default function CategoriesPage() {
                   <DialogContentText>No image available</DialogContentText>
                 )}
               </DialogContent>
-              <DialogActions>
-                <Button onClick={handleCloseImageModal} color="primary">
+              <DialogActions className='bg-black'>
+                <Button onClick={handleCloseImageModal} sx={{ color: 'white' }}>
                   Close
                 </Button>
               </DialogActions>
+            </div>
             </Dialog>
 
             {/* Nueva Card de Trainings */}
@@ -771,6 +777,7 @@ export default function CategoriesPage() {
               <MenuItem value="Skate">{handleCategoryIcon('Skate')}</MenuItem>
               <MenuItem value="Rugby">{handleCategoryIcon('Rugby')}</MenuItem>
               <MenuItem value="Volleyball">{handleCategoryIcon('Volleyball')}</MenuItem>
+              <MenuItem value="Yoga">{handleCategoryIcon('Yoga')}</MenuItem>
             </Select >
           </FormControl >
         </DialogContent >
@@ -1065,6 +1072,7 @@ export default function CategoriesPage() {
                 <MenuItem value="Skate">{handleCategoryIcon('Skate')}</MenuItem>
                 <MenuItem value="Rugby">{handleCategoryIcon('Rugby')}</MenuItem>
                 <MenuItem value="Volleyball">{handleCategoryIcon('Volleyball')}</MenuItem>
+                <MenuItem value="Yoga">{handleCategoryIcon('Yoga')}</MenuItem>
               </Select>
             </FormControl>
           </DialogContent>
