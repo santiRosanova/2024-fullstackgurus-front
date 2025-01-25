@@ -248,7 +248,7 @@ const CreateTrainingDialog: React.FC<CreateTrainingDialogProps> = ({ createNewTr
         ))}
         <Box sx={{ display: 'flex', justifyContent: 'center', mt: 2}}>
           <Typography variant="body1" sx={{ fontSize: { xs: '0.8rem', sm: '0.8rem', color: '#63a355' } }}> 
-            * Remember that it is always important to add Recovery and Stretching exercises to your training
+            * Remember that it is always important to add Recovery or Stretching exercises to your training
           </Typography>
         </Box>
       </DialogContent>

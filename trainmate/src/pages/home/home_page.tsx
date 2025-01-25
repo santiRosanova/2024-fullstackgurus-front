@@ -43,7 +43,8 @@ import WorkspacePremiumTwoToneIcon from '@mui/icons-material/WorkspacePremiumTwo
 import { Tooltip as TooltipMui } from '@mui/material';
 import { calculate_last_30_days_calories_progress } from '../../functions/progress_calories_calcs';
 import Last30DaysProgress from './last30daysCaloriesProgress';
-
+import { addDays, subDays, format } from 'date-fns';
+import { ArrowBack, ArrowForward } from '@mui/icons-material';
 
 interface Workout {
   id: number;
@@ -118,7 +119,8 @@ interface Challenges {
 
 export default function HomePage() {
   const navigate = useNavigate();
-  const [timeRange, setTimeRange] = useState('month');
+  const [timeRange, setTimeRange] = useState<'WEEKLY' | 'TWO_WEEKS'>('WEEKLY');
+  const [rangeIndex, setRangeIndex] = useState(0);
   const [open, setOpen] = useState(false);
   const [alertWorkoutAddedOpen, setAlertWorkoutAddedOpen] = useState(false);
   const [alertWorkoutAddedForAgendaOpen, setAlertWorkoutAddedForAgendaOpen] = useState(false);
@@ -187,16 +189,6 @@ export default function HomePage() {
     }
   };
 
-  useEffect(() => {
-    const updateTimeRange = () => {
-      setTimeRange(window.innerWidth < 768 ? 'WEEKLY' : 'TWO_WEEKS');
-    };
-    updateTimeRange(); // Set initially
-    window.addEventListener('resize', updateTimeRange);
-
-    return () => window.removeEventListener('resize', updateTimeRange);
-  }, []);
-
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
     const day = date.getDate().toString().padStart(2, '0');
@@ -225,6 +217,39 @@ export default function HomePage() {
     coach: '',
     date: new Date().toISOString().split('T')[0],
   });
+
+  useEffect(() => {
+    const updateTimeRange = () => {
+      setTimeRange(window.innerWidth < 768 ? 'WEEKLY' : 'TWO_WEEKS');
+    };
+    updateTimeRange();
+    window.addEventListener('resize', updateTimeRange);
+    return () => window.removeEventListener('resize', updateTimeRange);
+  }, []);
+
+  const daysForPeriod = timeRange === 'WEEKLY' ? 7 : 14;
+
+  const { startDate, endDate } = useMemo(() => {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    const computedEnd = subDays(today, rangeIndex * daysForPeriod);
+    const computedStart = subDays(computedEnd, daysForPeriod - 1);
+
+    return { startDate: computedStart, endDate: computedEnd };
+  }, [rangeIndex, daysForPeriod]);
+
+  const filteredData = useMemo(() => {
+    return getFilteredData(dataForChart, startDate, endDate);
+  }, [dataForChart, startDate, endDate]);
+
+  const handlePrevRange = () => {
+    setRangeIndex(prev => prev + 1);
+  };
+
+  const handleNextRange = () => {
+    setRangeIndex(prev => (prev > 0 ? prev - 1 : 0));
+  };
 
   const handleClickOpen = () => {
     setOpen(true);
@@ -859,6 +884,35 @@ export default function HomePage() {
             </div>
             <CardContent>
 
+              <Box display="flex" justifyContent="center" alignItems="center" mb={1} mt={-5}>
+                <IconButton onClick={handlePrevRange}>
+                  <ArrowBack sx={{color: '#fff'}}/>
+                </IconButton>
+                <Typography variant="h6" sx={{ mx: 1 }}>
+                  {format(startDate, 'dd/MM')} - {format(endDate, 'dd/MM')}
+                </Typography>
+                <IconButton onClick={handleNextRange} disabled={rangeIndex === 0}>
+                  <ArrowForward sx={{color: rangeIndex===0 ? 'grey' : '#fff'}}/>
+                </IconButton>
+                <Button variant="outlined" onClick={() => setRangeIndex(0)} disabled={rangeIndex === 0} 
+                  sx={{
+                    fontSize: 12,
+                    ml: 2,
+                    color: 'white',
+                    borderColor: 'white',
+                    '&:hover': {
+                      borderColor: 'white',
+                      backgroundColor: 'rgba(255, 255, 255, 0.1)',
+                    },
+                    '&.Mui-disabled': {
+                      color: 'gray',
+                      borderColor: 'gray',
+                    },
+                  }}>
+                  Today
+                </Button>
+              </Box>
+
               {(selectedTrainingInFilter && selectedTrainingInFilter.name) ? (
                 <Box
                   sx={{
@@ -910,9 +964,9 @@ export default function HomePage() {
                 <Box></Box>
               )}
 
-              <ResponsiveContainer width="100%" height={440} >
-                {Array.isArray(workoutList) && workoutList.length > 0 ? (
-                  <LineChart data={getFilteredData(dataForChart, timeRange)} margin={{ top: 10, right: 0, left: 0, bottom: 40 }}>
+              <ResponsiveContainer width="100%" height={440}>
+                {filteredData && filteredData.length > 0 ? (
+                  <LineChart data={filteredData} margin={{ top: 10, right: 0, left: 0, bottom: 40 }}>
                     <CartesianGrid strokeDasharray="3 3" />
                     <XAxis dataKey="date" stroke="#fff" tick={{ dy: 13 }} />
                     <YAxis stroke="#E43654" yAxisId="left" tick={{ fontWeight: 'bold' }} />
