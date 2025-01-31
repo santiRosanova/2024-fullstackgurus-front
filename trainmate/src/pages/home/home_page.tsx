@@ -45,6 +45,7 @@ import { calculate_last_30_days_calories_progress } from '../../functions/progre
 import Last30DaysProgress from './last30daysCaloriesProgress';
 import { addDays, subDays, format } from 'date-fns';
 import { ArrowBack, ArrowForward } from '@mui/icons-material';
+import Last30DaysCalendar from './last30daysCalendar';
 
 interface Workout {
   id: number;
@@ -529,16 +530,16 @@ export default function HomePage() {
         // Step 3: Fetch Coaches
         console.log("Fetching coaches...");
         const coaches_from_local_storage = JSON.parse(localStorage.getItem('coaches') || '[]');
-        //const coaches_timestamp = parseInt(localStorage.getItem('coaches_timestamp') || '0', 10);
+        const coaches_timestamp = parseInt(localStorage.getItem('coaches_timestamp') || '0', 10);
 
-        if (coaches_from_local_storage.length > 0 /*&& (now - coaches_timestamp < TTL)*/) {
+        if (coaches_from_local_storage.length > 0 && (now - coaches_timestamp < TTL)) {
           setCoaches(coaches_from_local_storage);
           console.log('Coaches loaded from local storage');
         } else {
           const coaches = await getCoaches();
           setCoaches(coaches);
           localStorage.setItem('coaches', JSON.stringify(coaches));
-          //localStorage.setItem('coaches_timestamp', Date.now().toString());
+          localStorage.setItem('coaches_timestamp', Date.now().toString());
         }
 
         // Step 4: Fetch Trainings
@@ -874,13 +875,14 @@ export default function HomePage() {
         <main className="p-4 space-y-6">
           <Card sx={{ backgroundColor: '#161616', color: '#fff' }} className='border border-gray-600' >
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-              <CardHeader title="Workouts progress" />
-              <TooltipMui title="Challenges" arrow>
-                <Box sx={{ cursor: 'pointer', display: 'flex', flexDirection: 'column', alignItems: 'center' }} onClick={() => setChallengeModalOpen(true)}>
-                  <WorkspacePremiumTwoToneIcon sx={{ fontSize: 50, mt: 2, mb: 1, mr: 2 }} style={{ color: '#AE8625' }}/>
-                  <Typography sx={{mr: 2, mb: 0, mt: 0}} style={{ color: '#AE8625'}}>Challenges</Typography>
+              <CardHeader title="Workouts progress" sx={{ ml: 2, mt:-2}}/>
+              <Box display="flex" justifyContent="center" alignItems="center" gap={5} sx={{mt: 2}}>
+                <Last30DaysCalendar dataForChart={dataForChart}/>
+                  <Box sx={{ cursor: 'pointer', display: 'flex', flexDirection: 'column', alignItems: 'center' }} onClick={() => setChallengeModalOpen(true)}>
+                    <WorkspacePremiumTwoToneIcon sx={{ fontSize: 50, mr: 2 }} style={{ color: '#AE8625' }}/>
+                    <Typography sx={{mr: 2, mb: 0, mt: 1}} style={{ color: '#AE8625'}}>Challenges</Typography>
+                  </Box>
                 </Box>
-              </TooltipMui>
             </div>
             <CardContent>
 

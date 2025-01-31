@@ -38,6 +38,7 @@ export default function ChallengeModal({ pageName, listOfChallenges, open, handl
           padding: 2,
           maxWidth: '600px',
           minWidth: '300px',
+          borderRadius:'8px'
         },
       }}
       className="border border-gray-600 rounded"

@@ -13,7 +13,6 @@ import Last30DaysProgress from './last30daysPhysicalProgress';
 import WorkspacePremiumTwoToneIcon from '@mui/icons-material/WorkspacePremiumTwoTone';
 import { getChallenges } from '../../api/ChallengesApi';
 import ChallengeModal from '../../personalizedComponents/challengeModal';
-import { Tooltip as TooltipMui } from '@mui/material';
 
 interface PhysicalData {
   date: string;
@@ -194,12 +193,10 @@ export default function PhysicalProgressPage() {
           <Card sx={{ flex: 2, backgroundColor: '#161616', color: '#fff'}} className='border border-gray-600'>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
               <CardHeader sx={{ ml: 2}} title="Physical progress"/>
-              <TooltipMui title="Challenges" arrow>
                 <Box sx={{ cursor: 'pointer', display: 'flex', flexDirection: 'column', alignItems: 'center' }} onClick={() => setChallengeModalOpen(true)}>
                   <WorkspacePremiumTwoToneIcon sx={{ fontSize: 50, mt: 2, mb: 1, mr: 2 }} style={{ color: '#AE8625' }}/>
                   <Typography sx={{mr: 2, mb: 0, mt: 0}} style={{ color: '#AE8625'}}>Challenges</Typography>
                 </Box>
-              </TooltipMui>
             </div>
             <CardContent>
               <ResponsiveContainer width="100%" height={510}>
