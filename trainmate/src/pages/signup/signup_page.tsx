@@ -31,7 +31,7 @@ export default function SignUp() {
 
     setFormData((prevState) => ({
       ...prevState,
-      [name || id]: value,
+      [id || name]: value,
     }));
   };
 
@@ -102,7 +102,7 @@ export default function SignUp() {
             </div>
             <form className="space-y-4" onSubmit={handleSubmit}>
               {/* Full Name */}
-              <div className="space-y-2 border border-gray-600 rounded">
+              <div className="space-y-2 border border-gray-600 rounded h-14">
                 <Input
                   id="name"
                   type="text"
@@ -111,13 +111,14 @@ export default function SignUp() {
                   value={formData.name}
                   onChange={handleChange}
                   className="rounded-md p-2 text-white placeholder-white text-sm"  // Rounded borders, smaller size
+                  sx={{height: '100%'}}
                   style={{ borderRadius: '8px', color: 'white' }}  // Optional inline styles
                   placeholder="Full Name"  // White placeholder
                 />
               </div>
 
               {/* Email */}
-              <div className="space-y-2 border border-gray-600 rounded">
+              <div className="space-y-2 border border-gray-600 rounded h-14">
                 <Input
                   id="email"
                   type="email"
@@ -126,13 +127,14 @@ export default function SignUp() {
                   value={formData.email}
                   onChange={handleChange}
                   className="rounded-md p-2 text-white placeholder-white text-sm"  // Rounded borders, smaller size
+                  sx={{height: '100%'}}
                   style={{ borderRadius: '8px', color: 'white' }}  // Optional inline styles
                   placeholder="you@example.com"  // White placeholder
                 />
               </div>
 
               {/* Password */}
-              <div className="space-y-2 border border-gray-600 rounded">
+              <div className="space-y-2 border border-gray-600 rounded h-14">
                 <Input
                   id="password"
                   type="password"
@@ -141,29 +143,41 @@ export default function SignUp() {
                   value={formData.password}
                   onChange={handleChange}
                   className="rounded-md p-2 text-white placeholder-white text-sm"  // Rounded borders, smaller size
+                  sx={{height: '100%'}}
                   style={{ borderRadius: '8px', color: 'white' }}  // Optional inline styles
                   placeholder="Password"  // White placeholder
                 />
               </div>
 
               {/* Sex */}
-              <div className="space-y-2 border border-gray-600 rounded">
-                <select
-                  id="sex"
+              <div className="space-y-2 border border-gray-600 rounded h-14">
+                <Select
+                  name="sex"
                   value={formData.sex}
                   onChange={handleChange}
-                  className="rounded-md p-2 text-white bg-black placeholder-white text-sm w-full"
-                  style={{ borderRadius: '8px', color: 'white' }}
+                  displayEmpty
+                  fullWidth
+                  required
+                  sx = {{color: 'white', height: '100%'}}
+                  MenuProps={{
+                    PaperProps: {
+                      style: {
+                        backgroundColor: 'black',
+                        color: 'white',
+                      },
+                    },
+                  }}
                 >
-                  <option value="" disabled>Select Sex</option> {/* Disabled default option */}
-                  <option value="male">Male</option>
-                  <option value="female">Female</option>
-                  <option value="other">Other</option>
-                </select>
+                  <MenuItem value="" disabled>
+                    <span style={{ color: 'gray'}}>Select Sex</span>
+                  </MenuItem>
+                  <MenuItem value="male">Male</MenuItem>
+                  <MenuItem value="female">Female</MenuItem>
+                </Select>
               </div>
 
               {/* Birthday */}
-              <div className="space-y-2 border border-gray-600 rounded">
+              <div className="space-y-2 border border-gray-600 rounded h-14">
                 <Input
                   id="birthday"
                   type="date"
@@ -172,13 +186,14 @@ export default function SignUp() {
                   value={formData.birthday}
                   onChange={handleChange}
                   className="rounded-md p-2 text-white placeholder-white text-sm"
+                  sx={{height: '100%'}}
                   style={{ borderRadius: '8px', color: 'white' }}
                 />
               </div>
 
               {/* Weight and Height */}
               <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-2 border border-gray-600 rounded">
+                <div className="space-y-2 border border-gray-600 rounded h-14">
                   <Input
                     id="weight"
                     type="number"
@@ -187,11 +202,12 @@ export default function SignUp() {
                     value={formData.weight}
                     onChange={handleChange}
                     className="rounded-md p-2 text-white placeholder-white text-sm"
+                    sx={{height: '100%'}}
                     style={{ borderRadius: '8px', color: 'white' }}
                     placeholder="Weight (kg)"
                   />
                 </div>
-                <div className="space-y-2 border border-gray-600 rounded">
+                <div className="space-y-2 border border-gray-600 rounded h-14">
                   <Input
                     id="height"
                     type="number"
@@ -200,6 +216,7 @@ export default function SignUp() {
                     value={formData.height}
                     onChange={handleChange}
                     className="rounded-md p-2 text-white placeholder-white text-sm"
+                    sx={{height: '100%'}}
                     style={{ borderRadius: '8px', color: 'white' }}
                     placeholder="Height (cm)"
                   />
