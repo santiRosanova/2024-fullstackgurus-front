@@ -336,7 +336,7 @@ export default function CategoriesPage() {
         setLoadingButton(true)
         setLoadingButton(true)
 
-        var image_url = '';
+        let image_url = '';
 
         if (imageFile) {
           const storage = getStorage();
@@ -414,6 +414,7 @@ export default function CategoriesPage() {
       try {
         setLoadingButton(true);
 
+        let image_url_old = '';
         let image_url = editingExercise.image_url;
         if (imageFile) {
           const storage = getStorage();
@@ -422,6 +423,7 @@ export default function CategoriesPage() {
           // Upload the new image to Firebase Storage
           await uploadBytes(storageRef, imageFile);
           // Get the download URL for the uploaded image
+          image_url_old = editingExercise.image_url;
           image_url = await getDownloadURL(storageRef);
         }
 
@@ -432,7 +434,8 @@ export default function CategoriesPage() {
             training_muscle: editingExercise.training_muscle,
             image_url,
           },
-          editingExercise.id
+          editingExercise.id,
+          image_url_old
         );
 
         setCategoryWithExercises(
