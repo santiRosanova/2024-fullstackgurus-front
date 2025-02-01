@@ -332,19 +332,19 @@ export default function CategoriesPage() {
 
   const handleAddExercise = async () => {
     if (newExercise) {
-      if (imageFile) {
         setUploading(true);
-        setLoadingButton(true) // Show loading indicator
         setLoadingButton(true)
-        const storage = getStorage();
-        const storageRef = ref(storage, `exercises/${imageFile.name}`);
+        setLoadingButton(true)
 
-        // Upload the image to Firebase Storage
-        await uploadBytes(storageRef, imageFile);
+        var image_url = '';
 
-        // Get the download URL for the uploaded image
-        const image_url = await getDownloadURL(storageRef);
+        if (imageFile) {
+          const storage = getStorage();
+          const storageRef = ref(storage, `exercises/${imageFile.name}`);
 
+          await uploadBytes(storageRef, imageFile);
+          image_url = await getDownloadURL(storageRef);
+        }
 
         const exerciseToSave = {
           ...newExercise,
@@ -386,10 +386,6 @@ export default function CategoriesPage() {
         else {
           setAlertExerciseFillFieldsOpen(true);
         }
-      }
-      else {
-        setAlertExerciseFillFieldsOpen(true);
-      }
     };
   }
 
@@ -901,7 +897,7 @@ export default function CategoriesPage() {
             }}
           />
           <FormControl fullWidth sx={{ marginTop: 4 }}>
-            <InputLabel id="muscle-label">Muscular Group</InputLabel>
+            <InputLabel id="muscle-label" sx={{color:'#fff'}}>Muscular Group</InputLabel>
             <Select
               labelId="muscle-label"
               id="muscle"
