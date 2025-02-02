@@ -141,7 +141,7 @@ export default function LogIn() {
               </div>
             </div>
             <form className="space-y-4" onSubmit={handleSubmit}>
-              <div className="space-y-2 border border-gray-600 rounded">
+              <div className="space-y-2 border border-gray-600 rounded h-14">
                 <Input
                   id="email"
                   type="email"
@@ -150,12 +150,13 @@ export default function LogIn() {
                   value={email}
                   onChange={handleEmailChange}
                   className="rounded-md p-2 text-white placeholder-white text-sm"  // Add rounded borders and smaller size
+                  sx={{ height: '100%' }}
                   style={{ borderRadius: '8px', color: 'white' }}  // Optional inline styles
                   placeholder="Enter your email"  // White placeholder
                 />
               </div>
 
-              <div className="space-y-2 border border-gray-600 rounded">
+              <div className="space-y-2 border border-gray-600 rounded h-14">
                 <Input
                   id="password"
                   type="password"
@@ -164,6 +165,7 @@ export default function LogIn() {
                   value={password}
                   onChange={handlePasswordChange}
                   className="rounded-md p-2 text-white placeholder-white text-sm"  // Add rounded borders and smaller size
+                  sx={{ height: '100%' }}
                   style={{ borderRadius: '8px', color: 'white' }}  // Optional inline styles
                   placeholder="Enter your password"  // White placeholder
                 />

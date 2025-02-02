@@ -169,7 +169,7 @@ export default function SignUp() {
                   }}
                 >
                   <MenuItem value="" disabled>
-                    <span style={{ color: 'gray'}}>Select Sex</span>
+                    <span style={{ color: 'gray'}}>Select Gender</span>
                   </MenuItem>
                   <MenuItem value="male">Male</MenuItem>
                   <MenuItem value="female">Female</MenuItem>
