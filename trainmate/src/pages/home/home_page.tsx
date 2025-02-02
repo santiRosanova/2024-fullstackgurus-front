@@ -886,7 +886,7 @@ export default function HomePage() {
             </div>
             <CardContent>
 
-              <Box display="flex" justifyContent="center" alignItems="center" mb={1} mt={-5}>
+              <Box display="flex" justifyContent="center" alignItems="center" mb={1} sx={{ mt: { xs: 2, sm: -5, lg:-5 } }}>
                 <IconButton onClick={handlePrevRange}>
                   <ArrowBack sx={{color: '#fff'}}/>
                 </IconButton>

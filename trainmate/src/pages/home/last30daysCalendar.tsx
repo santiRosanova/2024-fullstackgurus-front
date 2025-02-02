@@ -88,7 +88,7 @@ const Last30DaysCalendar: React.FC<Last30DaysCalendarProps> = ({ dataForChart })
       >
         <Typography
           variant="body1"
-          fontSize="0.9rem"
+          sx={{ fontSize: { xs: '0.6rem', sm: '0.9rem', lg: '0.9rem' } }}
           marginBottom={0.5}
         >
           Rest Days:
@@ -102,7 +102,7 @@ const Last30DaysCalendar: React.FC<Last30DaysCalendarProps> = ({ dataForChart })
           variant="body1"
           color="gray"
           fontWeight={1000}
-          fontSize="1.3rem"
+          sx={{ fontSize: { xs: '1.3rem', sm: '1.3rem', lg: '1.3rem' } }}
           marginTop={-4.3}
         >
           {restDaysCount}
@@ -112,7 +112,7 @@ const Last30DaysCalendar: React.FC<Last30DaysCalendarProps> = ({ dataForChart })
           variant="body2"
           color="#fff"
           marginTop={1}
-          fontSize="0.5rem"
+          sx={{ fontSize: { xs: '0.5rem', sm: '0.5rem', lg: '0.5rem' } }}
         >
           (Click to see calendar)
         </Typography>
