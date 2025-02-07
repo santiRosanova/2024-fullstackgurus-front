@@ -26,6 +26,9 @@ export default function SignUp() {
   const provider = new GoogleAuthProvider();
   const [loading, setLoading] = useState(false);
   const [alertExerciseFillFieldsOpen, setAlertExerciseFillFieldsOpen] = useState(false);
+  const [alertEmailAlreadyInUseOpen, setAlertEmailAlreadyInUseOpen] = useState(false);
+  const [alertWeakPassword, setAlertWeakPassword] = useState(false);
+  const [alertSomethingWentWrongOpen, setAlertSomethingWentWrongOpen] = useState(false);
   const navigate = useNavigate();
   const [formData, setFormData] = useState({
     name: '',
@@ -72,6 +75,15 @@ export default function SignUp() {
     } catch (error: any) {
       console.error('Error signing up:', error.message);
       setLoading(false)
+      if (error.code === 'auth/email-already-in-use') {
+        setAlertEmailAlreadyInUseOpen(true);
+      } 
+      else if (error.code === 'auth/weak-password') {
+        setAlertWeakPassword(true);
+      }
+      else {
+        setAlertSomethingWentWrongOpen(true);
+      }
     }
   };
 
@@ -105,6 +117,9 @@ export default function SignUp() {
         <>
       <div className="w-full max-w-md">
         <TopMiddleAlert alertText='Please fill all fields' open={alertExerciseFillFieldsOpen} onClose={() => setAlertExerciseFillFieldsOpen(false)} severity='warning' />
+        <TopMiddleAlert alertText='Email is already in use. If you forgot your password, change it from login page' open={alertEmailAlreadyInUseOpen} onClose={() => setAlertEmailAlreadyInUseOpen(false)} severity='warning' />
+        <TopMiddleAlert alertText='Something went wrong signing up' open={alertSomethingWentWrongOpen} onClose={() => setAlertSomethingWentWrongOpen(false)} severity='warning' /> 
+        <TopMiddleAlert alertText='Password should be at least 6 characters long' open={alertWeakPassword} onClose={() => setAlertWeakPassword(false)} severity='warning' /> 
           <div className="bg-black shadow-lg rounded-lg overflow-hidden border border-gray-600">
               <div className="bg-black p-4 flex items-center justify-center">
                 <Dumbbell className="h-8 w-8 text-white mr-2" />
