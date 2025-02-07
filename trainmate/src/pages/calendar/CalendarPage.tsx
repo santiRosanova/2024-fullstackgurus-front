@@ -142,6 +142,7 @@ const CalendarModal: React.FC<DrawerProps> = ({ showDrawer, onClose, open }) => 
               label="Start Date"
               value={dateRange[0]}
               onChange={(newValue) => handleDateChange([newValue, dateRange[1]])}
+              format="DD/MM/YYYY"
               slotProps={{
                 textField: {
                   variant: 'outlined',
@@ -203,6 +204,7 @@ const CalendarModal: React.FC<DrawerProps> = ({ showDrawer, onClose, open }) => 
               label="End Date"
               value={dateRange[1]}
               onChange={(newValue) => handleDateChange([dateRange[0], newValue])}
+              format="DD/MM/YYYY"
               slotProps={{
                 textField: {
                   variant: 'outlined',

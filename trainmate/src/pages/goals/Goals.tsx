@@ -179,6 +179,7 @@ const GoalsModal: React.FC<GoalsProps> = ({ showDrawer, onClose, open, openForm 
                             label="Start Date"
                             value={dateRange[0]}
                             onChange={(newValue) => handleDateChange([newValue, dateRange[1]])}
+                            format="DD/MM/YYYY"
                             slotProps={{
                                 textField: {
                                     variant: 'outlined',
@@ -240,6 +241,7 @@ const GoalsModal: React.FC<GoalsProps> = ({ showDrawer, onClose, open, openForm 
                             label="End Date"
                             value={dateRange[1]}
                             onChange={(newValue) => handleDateChange([dateRange[0], newValue])}
+                            format="DD/MM/YYYY"
                             slotProps={{
                                 textField: {
                                     variant: 'outlined',
