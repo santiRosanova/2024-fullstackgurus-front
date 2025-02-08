@@ -123,6 +123,45 @@ export default function ProfilePage() {
     }));
   };
 
+  const handleNumericChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement> | SelectChangeEvent<string>
+  ) => {
+    const { name, value } = e.target;
+    let maxValue = 0;
+    let minValue = 0;
+    if (name == 'height') {
+      maxValue = 240
+      minValue = 120
+    } else {
+      maxValue = 300
+      minValue = 25
+    }
+    if (value === "") {
+      setUserProfile((prevProfile) => ({
+        ...prevProfile,
+        [name]: "",
+      }));
+    } else {
+      const numericValue = parseInt(value, 10);
+      if (numericValue >= 1 && numericValue <= maxValue)  {
+        setUserProfile((prevProfile) => ({
+          ...prevProfile,
+          [name]: numericValue,
+        }));
+      } else if (numericValue < 1) {
+        setUserProfile((prevProfile) => ({
+          ...prevProfile,
+          [name]: minValue,
+        }));
+      } else if (numericValue > maxValue) {
+        setUserProfile((prevProfile) => ({
+          ...prevProfile,
+          [name]: maxValue,
+        }));
+      }
+    }
+  };
+
   const handleSave = async () => {
     try {
       const token = localStorage.getItem('token');
@@ -201,20 +240,8 @@ export default function ProfilePage() {
         </Box>
       </Box>
       <TopMiddleAlert alertText='Modified data successfully' open={alertOpen} onClose={() => setAlertOpen(false)} severity='success'/>
-        {alertErrorWeight && 
-          <div className='p-4 -mt-3'>
-            <Alert severity="error">
-              Weight cannot be empty and must be a number between 25 and 300
-            </Alert>
-          </div>
-        }
-        {alertErrorHeight && 
-          <div className='p-4 -mt-3'>
-            <Alert severity="error">
-              Height cannot be empty and must be a number between 120 and 240
-            </Alert>
-          </div>
-        }
+      <TopMiddleAlert alertText='Weight cannot be empty and must be a number between 25 and 300' open={alertErrorWeight} onClose={() => setAlertErrorWeight(false)} severity='error'/>
+      <TopMiddleAlert alertText='Height cannot be empty and must be a number between 120 and 240' open={alertErrorHeight} onClose={() => setAlertErrorHeight(false)} severity='error'/>
       {loading ? (
         <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100%' }}>
           <LoadingAnimation />
@@ -278,7 +305,7 @@ export default function ProfilePage() {
                   name="weight"
                   type='number'
                   value={userProfile.weight}
-                  onChange={handleChange}
+                  onChange={handleNumericChange}
                   disabled={!isEditing}
                   sx={textFieldStyles}
                 />
@@ -288,7 +315,7 @@ export default function ProfilePage() {
                   name="height"
                   type='number'
                   value={userProfile.height}
-                  onChange={handleChange}
+                  onChange={handleNumericChange}
                   disabled={!isEditing}
                   sx={textFieldStyles}
                 />
