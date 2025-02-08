@@ -115,19 +115,19 @@ export default function SignUp() {
         <LoadingAnimation />
       ) : (
         <>
-      <div className="w-full max-w-md">
+      <div className="w-full max-w-md ">
         <TopMiddleAlert alertText='Please fill all fields' open={alertExerciseFillFieldsOpen} onClose={() => setAlertExerciseFillFieldsOpen(false)} severity='warning' />
         <TopMiddleAlert alertText='Email is already in use. If you forgot your password, change it from login page' open={alertEmailAlreadyInUseOpen} onClose={() => setAlertEmailAlreadyInUseOpen(false)} severity='warning' />
         <TopMiddleAlert alertText='Something went wrong signing up' open={alertSomethingWentWrongOpen} onClose={() => setAlertSomethingWentWrongOpen(false)} severity='warning' /> 
         <TopMiddleAlert alertText='Password should be at least 6 characters long' open={alertWeakPassword} onClose={() => setAlertWeakPassword(false)} severity='warning' /> 
-          <div className="bg-black shadow-lg rounded-lg overflow-hidden border border-gray-600">
-              <div className="bg-black p-4 flex items-center justify-center">
+          <div className="bg-[#161616] shadow-lg rounded-lg overflow-hidden border border-gray-600">
+              <div className="bg-[#161616] p-4 flex items-center justify-center">
                 <Dumbbell className="h-8 w-8 text-white mr-2" />
                 <h1 className="text-2xl font-bold text-white">TrainMate</h1>
               </div>
               <div className="p-6">
                 <h2 className="text-2xl font-semibold text-center text-white mb-6">Sign Up</h2>
-                <Button variant="outlined" className="w-full mb-4 flex items-center justify-center border-gray-300 text-white hover:bg-gray-100" type="button" onClick={handleGoogleSignIn}>
+                <Button variant="outlined" className="w-full mb-4 flex items-center justify-center border-gray-300 text-white" type="button" onClick={handleGoogleSignIn}>
                   <img src={require('../../images/google_logo.png')} alt="Google logo" className="w-5 h-5 mr-2" />
                   Sign up with Google
                 </Button>
@@ -136,7 +136,7 @@ export default function SignUp() {
                     <div className="w-full border-t border-gray-300"></div>
                   </div>
                   <div className="relative flex justify-center text-sm">
-                    <span className="px-2 bg-black text-gray-500">Or continue with</span>
+                    <span className="px-2 bg-[#161616] text-gray-500">Or continue with</span>
                   </div>
                 </div>
                 <form className="space-y-4" onSubmit={handleSubmit} noValidate>
@@ -229,7 +229,7 @@ export default function SignUp() {
                           textField: {
                             fullWidth: true,
                             sx: {
-                              backgroundColor: "black",
+                              backgroundColor: "#161616",
                               color: grey[50],
                               borderRadius: '8px',
                               label: { color: grey[600]},

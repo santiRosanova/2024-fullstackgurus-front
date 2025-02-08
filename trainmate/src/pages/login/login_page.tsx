@@ -122,8 +122,8 @@ export default function LogIn() {
       <div className="w-full max-w-md">
         <TopMiddleAlert alertText='Please fill all fields' open={alertExerciseFillFieldsOpen} onClose={() => setAlertExerciseFillFieldsOpen(false)} severity='warning' />
         <TopMiddleAlert alertText='Sent email to restore password' open={alertOpen} onClose={() => setAlertOpen(false)} severity='success' />
-        <div className="bg-black border border-gray-600 shadow-lg rounded-lg overflow-hidden">
-          <div className="bg-black p-4 flex items-center justify-center">
+        <div className="bg-[#161616] border border-gray-600 shadow-lg rounded-lg overflow-hidden">
+          <div className="bg-[#161616] p-4 flex items-center justify-center">
             <Dumbbell className="h-8 w-8 text-white mr-2" />
             <h1 className="text-2xl font-bold text-white">TrainMate</h1>
           </div>
@@ -143,7 +143,7 @@ export default function LogIn() {
                 <div className="w-full border-t border-gray-300"></div>
               </div>
               <div className="relative flex justify-center text-sm">
-                <span className="px-2 bg-black text-gray-500">Or continue with</span>
+                <span className="px-2 bg-[#161616] text-gray-500">Or continue with</span>
               </div>
             </div>
             <form className="space-y-4" onSubmit={handleSubmit} noValidate>

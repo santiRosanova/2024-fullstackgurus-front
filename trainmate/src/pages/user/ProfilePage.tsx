@@ -3,17 +3,18 @@ import Avatar from '@mui/material/Avatar';
 import Button from '@mui/material/Button';
 import TextField from '@mui/material/TextField';
 import Select, { SelectChangeEvent } from '@mui/material/Select';
-import { Card, CardContent, CardHeader, IconButton, InputLabel, MenuItem } from '@mui/material';
+import { Card, CardContent, CardHeader, IconButton, InputLabel, MenuItem, Typography } from '@mui/material';
 import SaveIcon from '@mui/icons-material/Save';
 import EditIcon from '@mui/icons-material/Edit';
 import { useNavigate } from 'react-router-dom';
 import { getUserProfile, updateUserProfile } from '../../api/UserAPI';
 import { grey } from '@mui/material/colors';
 import { getAuth } from 'firebase/auth';
-import CircularProgress from '@mui/material/CircularProgress';
 import Box from '@mui/material/Box';
 import Alert from '@mui/material/Alert';
 import TopMiddleAlert from '../../personalizedComponents/TopMiddleAlert';
+import { ArrowBack as ArrowLeftIcon } from '@mui/icons-material';
+import LoadingAnimation from '../../personalizedComponents/loadingAnimation';
 
 export default function ProfilePage() {
   const [loading, setLoading] = useState(true);
@@ -191,15 +192,14 @@ export default function ProfilePage() {
 
   return (
     <div className="min-h-screen bg-black from-gray-900 to-gray-800 text-white">
-      <header className="p-4 flex justify-between items-center">
-        <Avatar alt="User" src={require('../../images/profile_pic_2.jpg')} />
-        <IconButton
-          aria-label="edit"
-          onClick={() => {setIsEditing((prevState) => !prevState); setAlertErrorWeight(false); setAlertErrorHeight(false)}}
-        >
-          <EditIcon sx={{ color: 'white', fontSize: 30 }} />
-        </IconButton>
-      </header>
+      <Box component="header" sx={{ display: 'flex', flexDirection: 'row', gap: 14}}>
+        <Box className="flex items-center" sx={{flex: 1, mt: 4, ml: 4}}>
+          <IconButton component="a" sx={{ color: 'white' }} onClick={handleBackToHome}>
+            <ArrowLeftIcon />
+          </IconButton>
+            <img src={require('../../images/logo.png')} alt="Logo" width={200} height={150}/>
+        </Box>
+      </Box>
       <TopMiddleAlert alertText='Modified data successfully' open={alertOpen} onClose={() => setAlertOpen(false)} severity='success'/>
         {alertErrorWeight && 
           <div className='p-4 -mt-3'>
@@ -217,12 +217,19 @@ export default function ProfilePage() {
         }
       {loading ? (
         <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100%' }}>
-          <CircularProgress />
+          <LoadingAnimation />
         </Box>
       ) : (
-          <main className="p-4 space-y-6">
-            <Card sx={{ backgroundColor: '#161616', color: '#fff' }}>
-              <CardHeader title="User Profile" sx={{color: 'white'}}/>
+          <main className="p-4 space-y-6 flex flex-col items-center justify-center">
+            <Card sx={{ backgroundColor: '#161616', color: '#fff', mt: 10, borderRadius: 2 }} className='border border-gray-600 w-full max-w-md'>
+              <Box sx={{display: 'flex', justifyContent: 'space-between'}}>
+                <CardHeader title="User Profile" sx={{color: 'white'}}/>
+                <IconButton
+                  aria-label="edit"
+                  onClick={() => {setIsEditing((prevState) => !prevState); setAlertErrorWeight(false); setAlertErrorHeight(false)}}>
+                  <EditIcon sx={{ color: 'white', fontSize: 30, mr: 2 }} />
+                </IconButton>
+              </Box>
               <CardContent>
               <form style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
                 <TextField
@@ -298,18 +305,10 @@ export default function ProfilePage() {
               </form>
               </CardContent>
             </Card>
-
-            <Button
-              variant="outlined"
-              onClick={handleBackToHome}
-              sx={{ mt: 2, color: '#fff', borderColor: '#fff', mr: 2}}
-            >
-              Back to Home
-            </Button>
             <Button
               variant="outlined"
               onClick={handleLogOut}
-              sx={{ mt: 2, color: '#fff', borderColor: '#fff' }}
+              sx={{ mt: 2, color: 'red', borderColor: 'red' }}
             >
               Log out
             </Button>

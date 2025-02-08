@@ -88,7 +88,7 @@ export default function CategoriesPage() {
   const [editExerciseDialogOpen, setEditExerciseDialogOpen] = useState(false);
 
   const handleOpenAddCategoryDialog = () => setAddCategoryDialogOpen(true);
-  const handleCloseAddCategoryDialog = () => setAddCategoryDialogOpen(false);
+  const handleCloseAddCategoryDialog = () => {setAddCategoryDialogOpen(false); setNewCategory({ name: '', icon: '' });};
 
   const [createNewTraining, setCreateNewTraining] = useState(false);
 
@@ -531,7 +531,7 @@ export default function CategoriesPage() {
         ) : (
           <Box sx={{ display: 'flex', gap: 2, height: '100%', flexDirection: { xs: 'column', sm: 'row' } }}>
             {/* Card de Categorías */}
-            <Card sx={{ flex: 1, backgroundColor: '#161616', color: '#fff', width: '100%', height: '100%' }} >
+            <Card sx={{ flex: 1, backgroundColor: '#161616', color: '#fff', width: '100%', height: '100%' }} className='border border-gray-600'>
               <CardHeader
                 title="Categories"
                 titleTypographyProps={{ fontSize: { xs: '1.2rem', sm: '1.3rem', md: '1.5rem' }, variant: 'h6' }}
@@ -601,15 +601,14 @@ export default function CategoriesPage() {
                               </Box>
                             </Box>
                           ))}
-                          <Button
-                            variant="outlined"
+                            <Button
                             size="small"
                             startIcon={<PlusIcon />}
-                            sx={{ mt: 2 }}
+                            sx={{ mt: 2, pr: 1, color: '#fff', border: '0.5px solid white', textTransform: 'none', fontSize: '0.8rem' }}
                             onClick={() => handleOpenAddExerciseDialog(category.id)}
-                          >
+                            >
                             Add Custom Exercise
-                          </Button>
+                            </Button>
                         </Box>
                       </AccordionDetails>
                     </Accordion>
@@ -638,7 +637,7 @@ export default function CategoriesPage() {
             </Dialog>
 
             {/* Nueva Card de Trainings */}
-            <Card sx={{ flex: 1, backgroundColor: '#161616', color: '#fff', width: '100%', height: '100%' }}>
+            <Card sx={{ flex: 1, backgroundColor: '#161616', color: '#fff', width: '100%', height: '100%' }} className='border border-gray-600'>
               <CardHeader
                 title="Trainings"
                 titleTypographyProps={{ fontSize: { xs: '1.2rem', sm: '1.3rem', md: '1.5rem' }, variant: 'h6' }}
@@ -721,7 +720,17 @@ export default function CategoriesPage() {
             onChange={(e) => setNewCategory({ ...newCategory, name: e.target.value, icon: newCategory?.icon || '' })}
             sx={{ mb: 3 }}
           />
-          <FormControl fullWidth margin="dense">
+          <FormControl
+              fullWidth
+              margin="dense"
+              variant="outlined"
+              sx={{
+                // Make the label white
+                '& .MuiInputLabel-root': {
+                  color: '#fff',
+                }
+              }}
+            >
             <InputLabel id="icon-label " sx={{
               color: '#fff',
               '& .MuiOutlinedInput-notchedOutline': {
@@ -740,21 +749,27 @@ export default function CategoriesPage() {
               MenuProps={{
                 PaperProps: {
                   sx: {
-                    /* display: 'flex',
-                    flexWrap: 'wrap',
                     maxWidth: 300,
-                    padding: 1, */
                     backgroundColor: '#444',
-                    color: '#fff', // Color del texto en Select
+                    color: '#fff',
                     '& .MuiOutlinedInput-notchedOutline': {
-                      borderColor: '#fff', // Color del borde
+                      borderColor: '#fff',
                     },
                     '& .MuiSvgIcon-root': {
-                      color: '#fff', // Color del ícono (flecha de selección)
+                      color: '#fff',
                     }
-
                   },
                 },
+              }}
+              sx={{
+                marginBottom: 1,
+                color: '#fff',
+                '& .MuiOutlinedInput-notchedOutline': {
+                  borderColor: '#fff',
+                },
+                '& .MuiSvgIcon-root': {
+                  color: '#fff',
+                }
               }}
             >
               <MenuItem value="">
@@ -827,7 +842,7 @@ export default function CategoriesPage() {
             variant="standard"
             value={newExercise?.name || ''}
             InputLabelProps={{
-              style: { color: '#fff' }, // Color del label (Duration)
+              style: { color: '#fff' }, // Color del label
             }}
             InputProps={{
               style: { color: '#fff' }, // Color del texto dentro del input
@@ -1029,7 +1044,7 @@ export default function CategoriesPage() {
               onChange={(e) => setEditingCategory({ ...editingCategory, name: e.target.value })}
               sx={{ mb: 3 }}
               InputLabelProps={{
-                style: { color: '#fff' }, // Color del label (Duration)
+                style: { color: '#fff' },
               }}
               InputProps={{
                 style: { color: '#fff' }, // Color del texto dentro del input
@@ -1038,21 +1053,50 @@ export default function CategoriesPage() {
                 htmlInput: { min: 1, max: 1000 }
               }}
             />
-            <FormControl fullWidth margin="dense">
+            <FormControl
+              fullWidth
+              margin="dense"
+              variant="outlined"
+              sx={{
+                // Make the label white
+                '& .MuiInputLabel-root': {
+                  color: '#fff',
+                }
+              }}
+            >
               <InputLabel id="icon-label">Icon</InputLabel>
               <Select
                 labelId="icon-label"
                 id="icon"
                 label="Icon"
                 value={editingCategory.icon}
-                onChange={(e) => setEditingCategory({ ...editingCategory, icon: e.target.value })}
+                onChange={(e) =>
+                  setEditingCategory({ ...editingCategory, icon: e.target.value })
+                }
                 MenuProps={{
                   PaperProps: {
                     sx: {
+                      maxWidth: 300,
                       backgroundColor: '#444',
                       color: '#fff',
+                      '& .MuiOutlinedInput-notchedOutline': {
+                        borderColor: '#fff',
+                      },
+                      '& .MuiSvgIcon-root': {
+                        color: '#fff',
+                      }
                     },
                   },
+                }}
+                sx={{
+                  marginBottom: 1,
+                  color: '#fff',
+                  '& .MuiOutlinedInput-notchedOutline': {
+                    borderColor: '#fff',
+                  },
+                  '& .MuiSvgIcon-root': {
+                    color: '#fff',
+                  }
                 }}
               >
                 <MenuItem value="Dumbbell">{handleCategoryIcon('Dumbbell')}</MenuItem>
@@ -1105,10 +1149,16 @@ export default function CategoriesPage() {
                 fullWidth
                 variant="standard"
                 value={editingExercise.name}
+                InputLabelProps={{
+                  style: { color: '#fff' }, // Color del label
+                }}
+                InputProps={{
+                  style: { color: '#fff' }, // Color del texto dentro del input
+                }}
                 onChange={(e) => setEditingExercise({ ...editingExercise, name: e.target.value })}
               />
               <FormControl fullWidth sx={{ marginTop: 2 }}>
-                <InputLabel id="muscle-label">Muscular Group</InputLabel>
+                <InputLabel id="muscle-label" sx={{color:'#fff'}}>Muscular Group</InputLabel>
                 <Select
                   labelId="muscle-label"
                   id="muscle"
@@ -1121,8 +1171,24 @@ export default function CategoriesPage() {
                         maxWidth: 300,
                         backgroundColor: '#444',
                         color: '#fff',
+                        '& .MuiOutlinedInput-notchedOutline': {
+                          borderColor: '#fff',
+                        },
+                        '& .MuiSvgIcon-root': {
+                          color: '#fff',
+                        }
                       },
                     },
+                  }}
+                  sx={{
+                    marginBottom: 1,
+                    color: '#fff',
+                    '& .MuiOutlinedInput-notchedOutline': {
+                      borderColor: '#fff',
+                    },
+                    '& .MuiSvgIcon-root': {
+                      color: '#fff',
+                    }
                   }}
                 >
                   <MenuItem value="">
@@ -1143,6 +1209,12 @@ export default function CategoriesPage() {
                 fullWidth
                 variant="standard"
                 value={editingExercise.calories_per_hour ?? ''}
+                InputLabelProps={{
+                  style: { color: '#fff' }, // Color del label
+                }}
+                InputProps={{
+                  style: { color: '#fff' }, // Color del texto dentro del input
+                }}
                 onChange={(e) => {
                   const value = e.target.value;
                   if (value === "") {
