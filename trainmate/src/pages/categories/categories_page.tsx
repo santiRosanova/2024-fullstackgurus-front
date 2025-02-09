@@ -237,12 +237,16 @@ export default function CategoriesPage() {
       const fetchCategories = async () => {
         try {
           setLoading(true);
+
+        const now = Date.now();
+        const TTL = 60 * 60 * 1000; // 1 hora en milisegundos (Despues de una hora, se reinicia el localStorage)
+
           
           // 1) Fetching Trainings
           const lastModifiedTimestamp = await getLastModifiedTrainingsTimestamp();
           const localTimestamp = parseInt(localStorage.getItem('trainings_timestamp') || '0', 10);
           const storedTrainings = JSON.parse(localStorage.getItem('trainings') || '[]');
-          if (lastModifiedTimestamp && storedTrainings.length > 0 && lastModifiedTimestamp === localTimestamp) {
+          if (lastModifiedTimestamp && storedTrainings.length > 0 && lastModifiedTimestamp === localTimestamp && (now - localTimestamp < TTL)) {
             setTrainings(storedTrainings);
             console.log('Trainings loaded from local storage');
           } else {

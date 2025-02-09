@@ -1,9 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import Avatar from '@mui/material/Avatar';
 import Button from '@mui/material/Button';
 import TextField from '@mui/material/TextField';
-import Select, { SelectChangeEvent } from '@mui/material/Select';
-import { Card, CardContent, CardHeader, IconButton, InputLabel, MenuItem, Typography } from '@mui/material';
+import { SelectChangeEvent } from '@mui/material/Select';
+import { Card, CardContent, CardHeader, IconButton, MenuItem } from '@mui/material';
 import SaveIcon from '@mui/icons-material/Save';
 import EditIcon from '@mui/icons-material/Edit';
 import { useNavigate } from 'react-router-dom';
@@ -11,7 +10,6 @@ import { getUserProfile, updateUserProfile } from '../../api/UserAPI';
 import { grey } from '@mui/material/colors';
 import { getAuth } from 'firebase/auth';
 import Box from '@mui/material/Box';
-import Alert from '@mui/material/Alert';
 import TopMiddleAlert from '../../personalizedComponents/TopMiddleAlert';
 import { ArrowBack as ArrowLeftIcon } from '@mui/icons-material';
 import LoadingAnimation from '../../personalizedComponents/loadingAnimation';
@@ -130,7 +128,7 @@ export default function ProfilePage() {
     const twoDecimalRegex = /^\d+(\.\d{1,2})?$/;
     let maxValue = 0;
     let minValue = 0;
-    if (name == 'height') {
+    if (name === 'height') {
       maxValue = 240
       minValue = 120
     } else {

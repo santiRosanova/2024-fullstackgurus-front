@@ -14,10 +14,10 @@ import DialogTitle from '@mui/material/DialogTitle';
 import TextField from '@mui/material/TextField';
 import { grey } from '@mui/material/colors';
 import CloseIcon from '@mui/icons-material/Close';
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, ResponsiveContainer, Tooltip, Brush, Rectangle, Legend } from 'recharts';
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, ResponsiveContainer, Tooltip, Brush, Legend } from 'recharts';
 import Typography from '@mui/material/Typography';
 import ScrollArea from '@mui/material/Box';
-import { getWorkouts, saveWorkout, getWorkoutsCalories } from '../../api/WorkoutsApi';
+import { getLastModifiedWorkoutsTimestamp, getWorkouts, saveWorkout, updateLastModifiedWorkoutsTimestamp } from '../../api/WorkoutsApi';
 import { calculate_calories_and_duration_per_day } from '../../functions/calculations';
 import { useNavigate } from 'react-router-dom';
 import Box from '@mui/material/Box';
@@ -40,10 +40,9 @@ import { getFilteredData } from './dates_filter';
 import { getChallenges } from '../../api/ChallengesApi';
 import ChallengeModal from '../../personalizedComponents/challengeModal';
 import WorkspacePremiumTwoToneIcon from '@mui/icons-material/WorkspacePremiumTwoTone';
-import { Tooltip as TooltipMui } from '@mui/material';
 import { calculate_last_30_days_calories_progress } from '../../functions/progress_calories_calcs';
 import Last30DaysProgress from './last30daysCaloriesProgress';
-import { addDays, subDays, format } from 'date-fns';
+import { subDays, format } from 'date-fns';
 import { ArrowBack, ArrowForward } from '@mui/icons-material';
 import Last30DaysCalendar from './last30daysCalendar';
 
@@ -420,14 +419,21 @@ export default function HomePage() {
             date: newWorkout.date,
           });
           console.log('Workout saved successfully');
-          setWorkoutsCount((prevCount) => prevCount + 1);
-          // Verificar si la fecha es futura para hacer alertas distintas
+
           const today = new Date().toISOString().split('T')[0];
           if (newWorkout.date > today) {
             setAlertWorkoutAddedForAgendaOpen(true);
           } else {
             setAlertWorkoutAddedOpen(true);
           }
+
+          const updatedTimestamp = await updateLastModifiedWorkoutsTimestamp();
+          localStorage.removeItem('workouts');
+          localStorage.removeItem('calories_duration_per_day');
+          localStorage.removeItem('workouts_timestamp');
+          setWorkoutsCount((prevCount) => prevCount + 1);
+          setLoadingButton(false)
+
         } else {
           setLoadingButton(false)
           console.error('No token found, unable to save workout');
@@ -437,11 +443,8 @@ export default function HomePage() {
         console.error('Error saving workout:', error);
       }
 
-      setLoadingButton(false)
       handleCloseWorkoutAdding();
       handleClose();
-      localStorage.removeItem('workouts');
-      localStorage.removeItem('calories_duration_per_day');
     }
     else {
       setAlertWorkoutFillFieldsOpen(true);
@@ -504,12 +507,15 @@ export default function HomePage() {
 
         // Step 2: Fetch Workouts
         console.log("Fetching workouts...");
+        const lastModifiedWorkoutsTimestamp = await getLastModifiedWorkoutsTimestamp();
+        console.log('Last modified workouts timestamp:', lastModifiedWorkoutsTimestamp);
+        const localWorkoutTimestamp = parseInt(localStorage.getItem('workouts_timestamp') || '0', 10);
         const workouts_from_local_storage = JSON.parse(localStorage.getItem('workouts') || '[]');
-        const workouts_timestamp = parseInt(localStorage.getItem('workouts_timestamp') || '0', 10);
+
         const calories_duration_per_day_from_local_storage = JSON.parse(localStorage.getItem('calories_duration_per_day') || '{}');
         let sortedWorkouts = workouts_from_local_storage;
 
-        if (workouts_from_local_storage.length > 0 && Object.keys(calories_duration_per_day_from_local_storage).length > 0 && (now - workouts_timestamp < TTL)) {
+        if (workouts_from_local_storage.length > 0 && Object.keys(calories_duration_per_day_from_local_storage).length > 0 && (now - localWorkoutTimestamp < TTL) && (lastModifiedWorkoutsTimestamp === localWorkoutTimestamp)) {
           setWorkoutList(workouts_from_local_storage);
           setCaloriesPerDay(calories_duration_per_day_from_local_storage);
           console.log('Workouts and calories per day loaded from local storage');
@@ -523,11 +529,11 @@ export default function HomePage() {
           setCaloriesPerDay(calories_duration_per_day);
 
           localStorage.setItem('workouts', JSON.stringify(sortedWorkouts));
-          localStorage.setItem('workouts_timestamp', Date.now().toString());
+          localStorage.setItem('workouts_timestamp', lastModifiedWorkoutsTimestamp);
           localStorage.setItem('calories_duration_per_day', JSON.stringify(calories_duration_per_day));
         }
 
-        // Step 3: Fetch Coaches
+        // Step 3: Fetch Coaches (fijarse si vale la pena guardar en local storage)
         console.log("Fetching coaches...");
         const coaches_from_local_storage = JSON.parse(localStorage.getItem('coaches') || '[]');
         const coaches_timestamp = parseInt(localStorage.getItem('coaches_timestamp') || '0', 10);
@@ -543,10 +549,10 @@ export default function HomePage() {
         }
 
         // Step 4: Fetch Trainings
-        const lastModifiedTimestamp = await getLastModifiedTrainingsTimestamp();
-        const localTimestamp = parseInt(localStorage.getItem('trainings_timestamp') || '0', 10);
+        const lastModifiedTrainingTimestamp = await getLastModifiedTrainingsTimestamp();
+        const localTrainingTimestamp = parseInt(localStorage.getItem('trainings_timestamp') || '0', 10);
         const storedTrainings = JSON.parse(localStorage.getItem('trainings') || '[]');
-        if (lastModifiedTimestamp && storedTrainings.length > 0 && lastModifiedTimestamp === localTimestamp) {
+        if (lastModifiedTrainingTimestamp && storedTrainings.length > 0 && lastModifiedTrainingTimestamp === localTrainingTimestamp && (now - localTrainingTimestamp < TTL)) {
           setTrainings(storedTrainings);
           console.log('Trainings loaded from local storage');
         } else {
@@ -555,7 +561,7 @@ export default function HomePage() {
           if (trainings) {
             setTrainings(trainings);
             localStorage.setItem('trainings', JSON.stringify(trainings));
-            localStorage.setItem('trainings_timestamp', lastModifiedTimestamp);
+            localStorage.setItem('trainings_timestamp', lastModifiedTrainingTimestamp);
           }
         }
 
