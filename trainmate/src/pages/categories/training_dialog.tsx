@@ -1,7 +1,7 @@
 import * as React from 'react';
 import { Dialog, DialogTitle, DialogContent, DialogActions, Button, TextField, Select, MenuItem, InputLabel, FormControl, Checkbox, ListItemText, SelectChangeEvent } from '@mui/material';
 import grey from '@mui/material/colors/grey';
-import { saveTraining } from '../../api/TrainingApi';
+import { saveTraining, updateLastModifiedTrainingsTimestamp } from '../../api/TrainingApi';
 import handleCategoryIcon from '../../personalizedComponents/handleCategoryIcon';
 import LoadingButton from '../../personalizedComponents/buttons/LoadingButton';
 import { Box, Typography } from '@mui/material';
@@ -73,6 +73,7 @@ const CreateTrainingDialog: React.FC<CreateTrainingDialogProps> = ({ createNewTr
       try {
         setLoadingButton(true)
         const training = await saveTraining(newTraining);
+        const updatedTimestamp = await updateLastModifiedTrainingsTimestamp();
         const trainingWithId = { ...newTraining, id: training.id, calories_per_hour_mean: training.calories_per_hour_mean, owner: training.owner };
         setTrainings((prevTrainings) => [...prevTrainings, trainingWithId]);
         setAlertTrainingAddedOpen(true);

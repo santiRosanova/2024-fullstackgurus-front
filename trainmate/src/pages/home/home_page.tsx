@@ -29,7 +29,7 @@ import { FilterTrainingDialog } from './filter_training';
 import { Divider } from '@mui/material';
 import { top_exercises_done } from '../../functions/top_exercises_done';
 import DynamicBarChart from './bars_graph';
-import { getTrainings } from '../../api/TrainingApi';
+import { getTrainings, getLastModifiedTrainingsTimestamp } from '../../api/TrainingApi';
 import { FilterCoachDialog } from './filter_coach';
 import WaterIntakeCard from './water_intake';
 import ResponsiveMenu from './menu_responsive';
@@ -543,11 +543,20 @@ export default function HomePage() {
         }
 
         // Step 4: Fetch Trainings
-        console.log("Fetching trainings...");
-        const trainings = await getAllTrainings();
-        if (trainings) {
-          setTrainings(trainings);
-          console.log(trainings);
+        const lastModifiedTimestamp = await getLastModifiedTrainingsTimestamp();
+        const localTimestamp = parseInt(localStorage.getItem('trainings_timestamp') || '0', 10);
+        const storedTrainings = JSON.parse(localStorage.getItem('trainings') || '[]');
+        if (lastModifiedTimestamp && storedTrainings.length > 0 && lastModifiedTimestamp === localTimestamp) {
+          setTrainings(storedTrainings);
+          console.log('Trainings loaded from local storage');
+        } else {
+          console.log("Fetching trainings...");
+          const trainings = await getAllTrainings();
+          if (trainings) {
+            setTrainings(trainings);
+            localStorage.setItem('trainings', JSON.stringify(trainings));
+            localStorage.setItem('trainings_timestamp', lastModifiedTimestamp);
+          }
         }
 
         // Step 5: Fetch Challenges

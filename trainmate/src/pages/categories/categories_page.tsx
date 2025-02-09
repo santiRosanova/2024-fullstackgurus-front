@@ -6,7 +6,7 @@ import { useNavigate } from 'react-router-dom';
 import { grey } from '@mui/material/colors';
 import { deleteCategory, editCategory, getCategories, saveCategory } from '../../api/CategoryApi';
 import { deleteExercise, editExercise, getExerciseFromCategory, saveExercise } from '../../api/ExerciseApi';
-import { getTrainings } from '../../api/TrainingApi';
+import { getLastModifiedTrainingsTimestamp, getTrainings } from '../../api/TrainingApi';
 import TopMiddleAlert from '../../personalizedComponents/TopMiddleAlert';
 import handleCategoryIcon from '../../personalizedComponents/handleCategoryIcon';
 import CreateTrainingDialog from './training_dialog';
@@ -237,12 +237,25 @@ export default function CategoriesPage() {
       const fetchCategories = async () => {
         try {
           setLoading(true);
-
-          const trainings = await getAllTrainings();
-          if (trainings) {
-            setTrainings(trainings);
+          
+          // 1) Fetching Trainings
+          const lastModifiedTimestamp = await getLastModifiedTrainingsTimestamp();
+          const localTimestamp = parseInt(localStorage.getItem('trainings_timestamp') || '0', 10);
+          const storedTrainings = JSON.parse(localStorage.getItem('trainings') || '[]');
+          if (lastModifiedTimestamp && storedTrainings.length > 0 && lastModifiedTimestamp === localTimestamp) {
+            setTrainings(storedTrainings);
+            console.log('Trainings loaded from local storage');
+          } else {
+            console.log("Fetching trainings...");
+            const trainings = await getAllTrainings();
+            if (trainings) {
+              setTrainings(trainings);
+              localStorage.setItem('trainings', JSON.stringify(trainings));
+              localStorage.setItem('trainings_timestamp', lastModifiedTimestamp);
+            }
           }
-
+          
+          // 2) Fetching Categories
           const categories = await getAllCategories();
           for (const category of categories) {
             await getExercisesFromCategory(category);
