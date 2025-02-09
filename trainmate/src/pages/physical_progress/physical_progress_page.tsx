@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { LineChart, Line, XAxis, YAxis, Tooltip, PieChart, Pie, Cell, ResponsiveContainer, CartesianGrid, Legend } from 'recharts';
-import { Box, Typography, IconButton, TextField, Button, Card, CardContent, CardHeader } from '@mui/material';
+import { Box, Typography, IconButton, TextField, Button, Card, CardContent, CardHeader, SelectChangeEvent } from '@mui/material';
 import { ArrowBack as ArrowLeftIcon } from '@mui/icons-material';
 import { useNavigate } from 'react-router-dom';
 import { getPhysicalData, savePhysicalData } from '../../api/PhysicalDataApi';
@@ -46,6 +46,8 @@ export default function PhysicalProgressPage() {
   const [loadingButton, setLoadingButton] = useState<boolean>(false)
   const [alertDataAddedOpen, setAlertDataAddedOpen] = useState(false)
   const [alertFillFieldsOpen, setAlertFillFieldsOpen] = useState(false)
+  const [alertIncorrectNumbersOpen, setAlertIncorrectNumbersOpen] = useState(false)
+  const [alertInocrrectNumersSumOpen, setAlertIncorrectNumbersSumOpen] = useState(false)
   const [physicalDataCount, setPhysicalDataCount] = useState(0)
   const [challengeModalOpen, setChallengeModalOpen] = useState(false)
   const [challengesList, setChallengesList] = useState<Challenges[]>([])
@@ -96,14 +98,63 @@ export default function PhysicalProgressPage() {
     setSelectedDay(day);
   };
 
+  const handleNumericChange = (
+      e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement> | SelectChangeEvent<string>
+    ) => {
+      const { name, value } = e.target;
+      const twoDecimalRegex = /^\d+(\.\d{1,2})?$/;
+      let maxValue = 0;
+      let minValue = 0;
+      let setter: React.Dispatch<React.SetStateAction<string>>;
+      if (name == 'weight') {
+        maxValue = 300
+        minValue = 25
+        setter = setWeight
+      } 
+      else if (name == 'bodyFat') {
+        maxValue = 150
+        minValue = 1
+        setter = setBodyFat
+      }
+      else {
+        maxValue = 150
+        minValue = 1
+        setter = setBodyMuscle
+      }
+      if (value === "") {
+        setter("");
+      } else {
+        if (!twoDecimalRegex.test(value)) {
+          return;
+        }
+        const numericValue = parseFloat(value);
+        if (numericValue >= 1 && numericValue <= maxValue)  {
+          setter(value);
+        } else if (numericValue < 1) {
+          setter(minValue.toString());
+        } else if (numericValue > maxValue) {
+          setter(maxValue.toString());
+        }
+      }
+    };
+
   const handleSave = async () => {
-    // Validar y convertir los datos ingresados a números antes de guardar
     const parsedWeight = parseFloat(weight);
     const parsedBodyFat = parseFloat(bodyFat);
     const parsedBodyMuscle = parseFloat(bodyMuscle);
     
     if (isNaN(parsedWeight) || isNaN(parsedBodyFat) || isNaN(parsedBodyMuscle)) {
       setAlertFillFieldsOpen(true)
+      return;
+    }
+
+    if (parsedWeight < 25 || parsedWeight > 300 || parsedBodyFat < 1 || parsedBodyFat > 150 || parsedBodyMuscle < 1 || parsedBodyMuscle > 150) {
+      setAlertIncorrectNumbersOpen(true)
+      return;
+    }
+
+    if (parsedWeight < (parsedBodyFat + parsedBodyMuscle)) {
+      setAlertIncorrectNumbersSumOpen(true)
       return;
     }
 
@@ -180,6 +231,8 @@ export default function PhysicalProgressPage() {
 
       <TopMiddleAlert alertText='Added new entry successfully' open={alertDataAddedOpen} onClose={() => setAlertDataAddedOpen(false)} severity='success'/>
       <TopMiddleAlert alertText='Please fill in all the fields' open={alertFillFieldsOpen} onClose={() => setAlertFillFieldsOpen(false)} severity='warning'/>
+      <TopMiddleAlert alertText='Please enter valid numbers. Weight must be a number between 25 and 300. Body Fat and Body Muscle must be between 1 and 150' open={alertIncorrectNumbersOpen} onClose={() => setAlertIncorrectNumbersOpen(false)} severity='warning'/>
+      <TopMiddleAlert alertText='Please enter valid numbers. The sum of Body Fat and Body Muscle must be less than the Weight' open={alertInocrrectNumersSumOpen} onClose={() => setAlertIncorrectNumbersSumOpen(false)} severity='warning'/>
 
       {challengeModalOpen &&
         <ChallengeModal pageName='Physical Challenges' listOfChallenges={challengesList} open={challengeModalOpen} handleClose={handleChallengeModalClose}/>
@@ -264,10 +317,10 @@ export default function PhysicalProgressPage() {
                   value={date}
                   onChange={(e) => setDate(e.target.value)}
                   InputLabelProps={{
-                    style: { color: '#fff' }, // Color del label (Date)
+                    style: { color: '#fff' },
                   }}
                   InputProps={{
-                    style: { color: '#fff' }, // Color del texto dentro del input
+                    style: { color: '#fff' },
                   }}
                   sx={{
                     '& .MuiOutlinedInput-notchedOutline': {
@@ -278,66 +331,69 @@ export default function PhysicalProgressPage() {
                 <TextField
                   label="Weight (kg)"
                   type="number"
+                  name="weight"
                   margin="dense"
                   fullWidth
                   value={weight}
-                  onChange={(e) => setWeight(e.target.value)}
+                  onChange={(e) => handleNumericChange(e)}
                   InputLabelProps={{
-                    style: { color: '#fff' }, // Color del label (Duration)
+                    style: { color: '#fff' },
                   }}
                   InputProps={{
-                    style: { color: '#fff' }, // Color del texto dentro del input
+                    style: { color: '#fff' },
                   }}
                   slotProps={{
                     htmlInput: { min: 1, max: 1000 }
                   }}
                   sx={{
                     '& .MuiOutlinedInput-notchedOutline': {
-                      borderColor: '#fff', // Color del borde
-                    },
-                  }}
-                />
-                <TextField
-                  label="Body Fat (kg)"
-                  type="number"
-                  margin="dense"
-                  fullWidth
-                  value={bodyFat}
-                  onChange={(e) => setBodyFat(e.target.value)}
-                  InputLabelProps={{
-                    style: { color: '#fff' }, // Color del label (Duration)
-                  }}
-                  InputProps={{
-                    style: { color: '#fff' }, // Color del texto dentro del input
-                  }}
-                  slotProps={{
-                    htmlInput: { min: 1, max: 1000 }
-                  }}
-                  sx={{
-                    '& .MuiOutlinedInput-notchedOutline': {
-                      borderColor: '#fff', // Color del borde
+                      borderColor: '#fff',
                     },
                   }}
                 />
                 <TextField
                   label="Body Muscle (kg)"
                   type="number"
+                  name='bodyMuscle'
                   margin="dense"
                   fullWidth
                   value={bodyMuscle}
-                  onChange={(e) => setBodyMuscle(e.target.value)}
+                  onChange={(e) => handleNumericChange(e)}
                   InputLabelProps={{
-                    style: { color: '#fff' }, // Color del label (Duration)
+                    style: { color: '#fff' },
                   }}
                   InputProps={{
-                    style: { color: '#fff' }, // Color del texto dentro del input
+                    style: { color: '#fff' },
                   }}
                   slotProps={{
                     htmlInput: { min: 1, max: 1000 }
                   }}
                   sx={{
                     '& .MuiOutlinedInput-notchedOutline': {
-                      borderColor: '#fff', // Color del borde
+                      borderColor: '#fff',
+                    },
+                  }}
+                />
+                <TextField
+                  label="Body Fat (kg)"
+                  type="number"
+                  name='bodyFat'
+                  margin="dense"
+                  fullWidth
+                  value={bodyFat}
+                  onChange={(e) => handleNumericChange(e)}
+                  InputLabelProps={{
+                    style: { color: '#fff' },
+                  }}
+                  InputProps={{
+                    style: { color: '#fff' },
+                  }}
+                  slotProps={{
+                    htmlInput: { min: 1, max: 1000 }
+                  }}
+                  sx={{
+                    '& .MuiOutlinedInput-notchedOutline': {
+                      borderColor: '#fff',
                     },
                   }}
                 />

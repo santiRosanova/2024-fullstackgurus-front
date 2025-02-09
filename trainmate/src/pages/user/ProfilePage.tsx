@@ -127,6 +127,7 @@ export default function ProfilePage() {
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement> | SelectChangeEvent<string>
   ) => {
     const { name, value } = e.target;
+    const twoDecimalRegex = /^\d+(\.\d{1,2})?$/;
     let maxValue = 0;
     let minValue = 0;
     if (name == 'height') {
@@ -136,27 +137,31 @@ export default function ProfilePage() {
       maxValue = 300
       minValue = 25
     }
+
     if (value === "") {
       setUserProfile((prevProfile) => ({
         ...prevProfile,
         [name]: "",
       }));
     } else {
-      const numericValue = parseInt(value, 10);
+      if (!twoDecimalRegex.test(value)) {
+        return;
+      }
+      const numericValue = parseFloat(value);
       if (numericValue >= 1 && numericValue <= maxValue)  {
         setUserProfile((prevProfile) => ({
           ...prevProfile,
-          [name]: numericValue,
+          [name]: value,
         }));
       } else if (numericValue < 1) {
         setUserProfile((prevProfile) => ({
           ...prevProfile,
-          [name]: minValue,
+          [name]: minValue.toString(),
         }));
       } else if (numericValue > maxValue) {
         setUserProfile((prevProfile) => ({
           ...prevProfile,
-          [name]: maxValue,
+          [name]: maxValue.toString(),
         }));
       }
     }
@@ -167,8 +172,8 @@ export default function ProfilePage() {
       const token = localStorage.getItem('token');
       if (!token) throw new Error('Token no encontrado');
   
-      let weight = userProfile.weight ? parseInt(userProfile.weight) : null;
-      let height = userProfile.height ? parseInt(userProfile.height) : null;
+      let weight = userProfile.weight ? parseFloat(userProfile.weight) : null;
+      let height = userProfile.height ? parseFloat(userProfile.height) : null;
       let hasError = false;
 
       if (weight !== null) {
