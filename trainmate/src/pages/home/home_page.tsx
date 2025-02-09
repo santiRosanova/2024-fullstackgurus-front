@@ -484,7 +484,7 @@ export default function HomePage() {
         const categories_from_local_storage = JSON.parse(localStorage.getItem('categories') || '[]');
         const categories_timestamp = parseInt(localStorage.getItem('categories_timestamp') || '0', 10);
         const exercises_from_local_storage = JSON.parse(localStorage.getItem('categories_with_exercises') || '[]');
-
+        // ADD CATEGORIES TIMESTAMP ALSO
         if (categories_from_local_storage.length > 0 && exercises_from_local_storage.length > 0 && (now - categories_timestamp < TTL)) {
           setCategories(categories_from_local_storage);
           setCategoryWithExercises(exercises_from_local_storage);
@@ -515,7 +515,7 @@ export default function HomePage() {
         const calories_duration_per_day_from_local_storage = JSON.parse(localStorage.getItem('calories_duration_per_day') || '{}');
         let sortedWorkouts = workouts_from_local_storage;
 
-        if (workouts_from_local_storage.length > 0 && Object.keys(calories_duration_per_day_from_local_storage).length > 0 && (now - localWorkoutTimestamp < TTL) && (lastModifiedWorkoutsTimestamp === localWorkoutTimestamp)) {
+        if (workouts_from_local_storage.length > 0 && Object.keys(calories_duration_per_day_from_local_storage).length > 0 && (lastModifiedWorkoutsTimestamp === localWorkoutTimestamp)) {
           setWorkoutList(workouts_from_local_storage);
           setCaloriesPerDay(calories_duration_per_day_from_local_storage);
           console.log('Workouts and calories per day loaded from local storage');
@@ -552,7 +552,7 @@ export default function HomePage() {
         const lastModifiedTrainingTimestamp = await getLastModifiedTrainingsTimestamp();
         const localTrainingTimestamp = parseInt(localStorage.getItem('trainings_timestamp') || '0', 10);
         const storedTrainings = JSON.parse(localStorage.getItem('trainings') || '[]');
-        if (lastModifiedTrainingTimestamp && storedTrainings.length > 0 && lastModifiedTrainingTimestamp === localTrainingTimestamp && (now - localTrainingTimestamp < TTL)) {
+        if (lastModifiedTrainingTimestamp && storedTrainings.length > 0 && lastModifiedTrainingTimestamp === localTrainingTimestamp) {
           setTrainings(storedTrainings);
           console.log('Trainings loaded from local storage');
         } else {
