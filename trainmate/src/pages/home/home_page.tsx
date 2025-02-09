@@ -22,7 +22,7 @@ import { calculate_calories_and_duration_per_day } from '../../functions/calcula
 import { useNavigate } from 'react-router-dom';
 import Box from '@mui/material/Box';
 import TopMiddleAlert from '../../personalizedComponents/TopMiddleAlert';
-import { getCategories } from '../../api/CategoryApi';
+import { getCategories, getLastModifiedCategoryTimestamp } from '../../api/CategoryApi';
 import { getExerciseFromCategory } from '../../api/ExerciseApi';
 import { getCoaches } from '../../api/CoachesApi_external';
 import { FilterTrainingDialog } from './filter_training';
@@ -481,11 +481,12 @@ export default function HomePage() {
 
         // Step 1: Fetch Categories and Exercises
         console.log("Fetching categories and exercises...");
+        const lastModifiedCategoriesTimestamp = await getLastModifiedCategoryTimestamp();
         const categories_from_local_storage = JSON.parse(localStorage.getItem('categories') || '[]');
         const categories_timestamp = parseInt(localStorage.getItem('categories_timestamp') || '0', 10);
         const exercises_from_local_storage = JSON.parse(localStorage.getItem('categories_with_exercises') || '[]');
-        // ADD CATEGORIES TIMESTAMP ALSO
-        if (categories_from_local_storage.length > 0 && exercises_from_local_storage.length > 0 && (now - categories_timestamp < TTL)) {
+
+        if (categories_from_local_storage.length > 0 && exercises_from_local_storage.length > 0 && lastModifiedCategoriesTimestamp === categories_timestamp) {
           setCategories(categories_from_local_storage);
           setCategoryWithExercises(exercises_from_local_storage);
         } else {
@@ -502,7 +503,7 @@ export default function HomePage() {
 
           localStorage.setItem('categories_with_exercises', JSON.stringify(categories_with_exercises));
           localStorage.setItem('categories', JSON.stringify(categories));
-          localStorage.setItem('categories_timestamp', Date.now().toString());
+          localStorage.setItem('categories_timestamp', lastModifiedCategoriesTimestamp);
         }
 
         // Step 2: Fetch Workouts

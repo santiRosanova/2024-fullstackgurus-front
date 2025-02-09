@@ -4,7 +4,7 @@ import { Add as PlusIcon, Edit as EditIcon, Delete as DeleteIcon, ArrowBack as A
 import EmojiEventsIcon from '@mui/icons-material/EmojiEvents';
 import { useNavigate } from 'react-router-dom';
 import { grey } from '@mui/material/colors';
-import { deleteCategory, editCategory, getCategories, saveCategory } from '../../api/CategoryApi';
+import { deleteCategory, editCategory, getCategories, saveCategory, updateLastModifiedCategoryTimestamp } from '../../api/CategoryApi';
 import { deleteExercise, editExercise, getExerciseFromCategory, saveExercise } from '../../api/ExerciseApi';
 import { getLastModifiedTrainingsTimestamp, getTrainings } from '../../api/TrainingApi';
 import TopMiddleAlert from '../../personalizedComponents/TopMiddleAlert';
@@ -167,6 +167,7 @@ export default function CategoriesPage() {
       await deleteCategory(categoryId, trainings);
       setCategoryWithExercises(categoryWithExercises.filter((category) => category.id !== categoryId));
       setAlertCategoryDeletedSuccessOpen(true);
+      await updateLastModifiedCategoryTimestamp();
       localStorage.removeItem('categories');
       localStorage.removeItem('categories_with_exercises');
     } catch (error) {
@@ -194,6 +195,7 @@ export default function CategoriesPage() {
           return category;
         })
       );
+      await updateLastModifiedCategoryTimestamp();
       setAlertExerciseDeletedSuccessOpen(true);
       localStorage.removeItem('categories_with_exercises'); // Ya que se actualizaron exercises, hago que después se vuelva a cargar
     } catch (error) {
@@ -327,6 +329,7 @@ export default function CategoriesPage() {
           { ...category, exercises: [] }
         ]);
         setAlertCategoryAddedOpen(true);
+        await updateLastModifiedCategoryTimestamp();
         localStorage.removeItem('categories');
         localStorage.removeItem('categories_with_exercises');
       } catch (error) {
@@ -387,6 +390,7 @@ export default function CategoriesPage() {
             setNewExercise(null);
             setAlertExerciseAddedOpen(true);
             setLoadingButton(false);
+            await updateLastModifiedCategoryTimestamp();
             localStorage.removeItem('categories');
             localStorage.removeItem('categories_with_exercises');
           } catch (error) {
@@ -412,6 +416,7 @@ export default function CategoriesPage() {
           )
         );
         setAlertCategoryEditedOpen(true);
+        await updateLastModifiedCategoryTimestamp();
         localStorage.removeItem('categories');
         localStorage.removeItem('categories_with_exercises');
       } catch (error) {
@@ -475,6 +480,7 @@ export default function CategoriesPage() {
           setTrainings(trainings);
         }
         setLoading(false);
+        await updateLastModifiedCategoryTimestamp();
         localStorage.removeItem('categories');
         localStorage.removeItem('categories_with_exercises');
       } catch (error) {
