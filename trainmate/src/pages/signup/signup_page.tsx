@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import Button from '@mui/material/Button';
 import TextField from '@mui/material/TextField';
 import { Dumbbell } from "lucide-react";
-import Select from '@mui/material/Select';
+import Select, { SelectChangeEvent } from '@mui/material/Select';
 import MenuItem from '@mui/material/MenuItem';
 import InputLabel from '@mui/material/InputLabel';
 import FormControl from '@mui/material/FormControl';
@@ -29,6 +29,7 @@ export default function SignUp() {
   const [alertEmailAlreadyInUseOpen, setAlertEmailAlreadyInUseOpen] = useState(false);
   const [alertWeakPassword, setAlertWeakPassword] = useState(false);
   const [alertSomethingWentWrongOpen, setAlertSomethingWentWrongOpen] = useState(false);
+  const [alertIncorrectNumbersOpen, setAlertIncorrectNumbersOpen] = useState(false);
   const navigate = useNavigate();
   const [formData, setFormData] = useState({
     name: '',
@@ -49,11 +50,61 @@ export default function SignUp() {
     }));
   };
 
+  const handleNumericChange = (
+      e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement> | SelectChangeEvent<string>
+    ) => {
+      const { name, value } = e.target;
+      const twoDecimalRegex = /^\d+(\.\d{1,2})?$/;
+      let maxValue = 0;
+      let minValue = 0;
+      if (name === 'height') {
+        maxValue = 240
+        minValue = 120
+      } else {
+        maxValue = 300
+        minValue = 25
+      }
+  
+      if (value === "") {
+        setFormData((prevState) => ({
+          ...prevState,
+          [name]: "",
+        }));
+      } else {
+        if (!twoDecimalRegex.test(value)) {
+          return;
+        }
+        const numericValue = parseFloat(value);
+        if (numericValue >= 1 && numericValue <= maxValue)  {
+          setFormData((prevState) => ({
+            ...prevState,
+            [name]: value,
+          }));
+        } else if (numericValue < 1) {
+          setFormData((prevState) => ({
+            ...prevState,
+            [name]: minValue.toString(),
+          }));
+        } else if (numericValue > maxValue) {
+          setFormData((prevState) => ({
+            ...prevState,
+            [name]: maxValue.toString(),
+          }));
+        }
+      }
+    };
+
   const handleSubmit = async (e: any) => {
     e.preventDefault();
     const { name, email, password, sex, birthday, weight, height } = formData;
     if (!name || !email || !password || !sex || !birthday || !weight || !height) {
       setAlertExerciseFillFieldsOpen(true);
+      return;
+    }
+    const parsedWeight = parseFloat(weight);
+    const parsedHeight = parseFloat(height);
+    if (parsedWeight < 25 || parsedWeight > 300 || parsedHeight < 120 || parsedHeight > 240) {
+      setAlertIncorrectNumbersOpen(true);
       return;
     }
     setLoading(true)
@@ -119,7 +170,8 @@ export default function SignUp() {
         <TopMiddleAlert alertText='Please fill all fields' open={alertExerciseFillFieldsOpen} onClose={() => setAlertExerciseFillFieldsOpen(false)} severity='warning' />
         <TopMiddleAlert alertText='Email is already in use. If you forgot your password, change it from login page' open={alertEmailAlreadyInUseOpen} onClose={() => setAlertEmailAlreadyInUseOpen(false)} severity='warning' />
         <TopMiddleAlert alertText='Something went wrong signing up' open={alertSomethingWentWrongOpen} onClose={() => setAlertSomethingWentWrongOpen(false)} severity='warning' /> 
-        <TopMiddleAlert alertText='Password should be at least 6 characters long' open={alertWeakPassword} onClose={() => setAlertWeakPassword(false)} severity='warning' /> 
+        <TopMiddleAlert alertText='Password should be at least 6 characters long' open={alertWeakPassword} onClose={() => setAlertWeakPassword(false)} severity='warning' />
+        <TopMiddleAlert alertText='Please enter valid numbers. Weight must be a number between 25 and 300 and Height between 120 and 240' open={alertIncorrectNumbersOpen} onClose={() => setAlertIncorrectNumbersOpen(false)} severity='warning'/>
           <div className="bg-[#161616] shadow-lg rounded-lg overflow-hidden border border-gray-600">
               <div className="bg-[#161616] p-4 flex items-center justify-center">
                 <Dumbbell className="h-8 w-8 text-white mr-2" />
@@ -279,9 +331,10 @@ export default function SignUp() {
                       <Input
                         id="weight"
                         type="number"
+                        name='weight'
                         fullWidth
                         value={formData.weight}
-                        onChange={handleChange}
+                        onChange={handleNumericChange}
                         className="rounded-md p-2 text-white placeholder-white text-sm"
                         sx={{ height: '100%' }}
                         style={{ borderRadius: '8px', color: 'white' }}
@@ -291,9 +344,10 @@ export default function SignUp() {
                       <Input
                         id="height"
                         type="number"
+                        name='height'
                         fullWidth
                         value={formData.height}
-                        onChange={handleChange}
+                        onChange={handleNumericChange}
                         className="rounded-md p-2 text-white placeholder-white text-sm"
                         sx={{ height: '100%' }}
                         style={{ borderRadius: '8px', color: 'white' }}
