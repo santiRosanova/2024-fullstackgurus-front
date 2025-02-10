@@ -13,6 +13,13 @@ import Last30DaysProgress from './last30daysPhysicalProgress';
 import WorkspacePremiumTwoToneIcon from '@mui/icons-material/WorkspacePremiumTwoTone';
 import { getChallenges } from '../../api/ChallengesApi';
 import ChallengeModal from '../../personalizedComponents/challengeModal';
+import { DatePicker, LocalizationProvider } from '@mui/x-date-pickers';
+import dayjs, { Dayjs } from 'dayjs';
+import isSameOrAfter from 'dayjs/plugin/isSameOrAfter';
+import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
+import { grey } from '@mui/material/colors';
+
+dayjs.extend(isSameOrAfter);
 
 interface PhysicalData {
   date: string;
@@ -41,7 +48,7 @@ export default function PhysicalProgressPage() {
   const [weight, setWeight] = useState<string>('');
   const [bodyFat, setBodyFat] = useState<string>('');
   const [bodyMuscle, setBodyMuscle] = useState<string>('');
-  const [date, setDate] = useState<string>(new Date().toISOString().split('T')[0]);
+  const [date, setDate] = useState(null as Dayjs | null);
   const [loading, setLoading] = useState(true);
   const [loadingButton, setLoadingButton] = useState<boolean>(false)
   const [alertDataAddedOpen, setAlertDataAddedOpen] = useState(false)
@@ -143,7 +150,7 @@ export default function PhysicalProgressPage() {
     const parsedBodyFat = parseFloat(bodyFat);
     const parsedBodyMuscle = parseFloat(bodyMuscle);
     
-    if (isNaN(parsedWeight) || isNaN(parsedBodyFat) || isNaN(parsedBodyMuscle)) {
+    if (isNaN(parsedWeight) || isNaN(parsedBodyFat) || isNaN(parsedBodyMuscle) || !date) {
       setAlertFillFieldsOpen(true)
       return;
     }
@@ -161,7 +168,7 @@ export default function PhysicalProgressPage() {
     try {
       setLoadingButton(true)
       await savePhysicalData({ 
-        date: date, 
+        date: date ? date.format('YYYY-MM-DD') : '', 
         weight: parsedWeight, 
         body_fat: parsedBodyFat, 
         body_muscle: parsedBodyMuscle 
@@ -173,7 +180,7 @@ export default function PhysicalProgressPage() {
       setBodyFat('');
       setBodyMuscle('');
       setWeight('');
-      setDate(new Date().toISOString().split('T')[0]);
+      setDate(null as Dayjs | null);
   } catch (error) {
     console.error('Error al guardar datos físicos:', error);
     setLoadingButton(false)
@@ -309,25 +316,61 @@ export default function PhysicalProgressPage() {
                 title="New entry"
               />
               <CardContent>
-                <TextField
-                  label="Date"
-                  type="date"
-                  margin="dense"
-                  fullWidth
-                  value={date}
-                  onChange={(e) => setDate(e.target.value)}
-                  InputLabelProps={{
-                    style: { color: '#fff' },
-                  }}
-                  InputProps={{
-                    style: { color: '#fff' },
-                  }}
-                  sx={{
-                    '& .MuiOutlinedInput-notchedOutline': {
-                      borderColor: '#fff',
-                    },
-                  }}
-                />
+                <Box sx={{mb: 0.5}}>
+                  <LocalizationProvider dateAdapter={AdapterDayjs}>
+                    <DatePicker
+                      label="Date"
+                      value={date}
+                      onChange={(newValue: Dayjs | null) =>setDate(newValue)}
+                      format="DD/MM/YYYY"
+                      maxDate={dayjs()}
+                      slotProps={{
+                        textField: {
+                          fullWidth: true,
+                          sx: {
+                            backgroundColor: "#161616",
+                            color: grey[50],
+                            borderRadius: '8px',
+                            label: { color: '#fff'},
+                            input: { color: '#fff' },
+                            "& .MuiOutlinedInput-root": {
+                              "& fieldset": { borderColor: '#fff' },
+                              "&:hover fieldset": { borderColor: 'black' },
+                              "&.Mui-focused fieldset": { borderColor: grey[100] },
+                            },
+                          },
+                        },
+                        popper: {
+                          sx: {
+                            "& .MuiPaper-root": { backgroundColor: grey[800] },
+                            "& .MuiPickersCalendarHeader-root": { color: grey[50] },
+                            "& .MuiDayCalendar-weekDayLabel": { color: grey[400] },
+                            "& .MuiPickersDay-root": { color: grey[50] },
+                            "& .MuiPickersDay-root.Mui-selected": {
+                              backgroundColor: '#000000 !important',
+                              color: grey[50],
+                              fontWeight: 'bold',
+                            },
+                            "& .MuiPickersDay-root.Mui-selected:hover": {
+                              backgroundColor: '#000000 !important',
+                            },
+                            "& .MuiPickersDay-root.MuiPickersDay-today": {
+                              border: `1px solid ${grey[700]}`,
+                            },
+                            "& .MuiPickersDay-root:hover": {
+                              backgroundColor: grey[600],
+                            },
+                          },
+                        },
+                        openPickerButton: {
+                          sx: {
+                            color: '#fff',
+                          },
+                        },
+                      }}
+                    />
+                  </LocalizationProvider>
+                </Box>
                 <TextField
                   label="Weight (kg)"
                   type="number"

@@ -45,6 +45,12 @@ import Last30DaysProgress from './last30daysCaloriesProgress';
 import { subDays, format } from 'date-fns';
 import { ArrowBack, ArrowForward } from '@mui/icons-material';
 import Last30DaysCalendar from './last30daysCalendar';
+import dayjs, { Dayjs } from 'dayjs';
+import isSameOrAfter from 'dayjs/plugin/isSameOrAfter';
+import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
+import { DatePicker, LocalizationProvider } from '@mui/x-date-pickers';
+
+dayjs.extend(isSameOrAfter);
 
 interface Workout {
   id: number;
@@ -215,7 +221,7 @@ export default function HomePage() {
     training_id: '',
     duration: '',
     coach: '',
-    date: new Date().toISOString().split('T')[0],
+    date: null as Dayjs | null,
   });
 
   useEffect(() => {
@@ -394,7 +400,7 @@ export default function HomePage() {
       training_id: '',
       duration: '',
       coach: '',
-      date: new Date().toISOString().split('T')[0],
+      date: null as Dayjs | null,
     });
   }
 
@@ -406,7 +412,7 @@ export default function HomePage() {
         training_id: '',
         coach: '',
         duration: '',
-        date: new Date().toISOString().split('T')[0],
+        date: null as Dayjs | null,
       });
 
       try {
@@ -416,12 +422,12 @@ export default function HomePage() {
             training_id: newWorkout.training_id,
             coach: newWorkout.coach,
             duration: parseInt(newWorkout.duration, 10),
-            date: newWorkout.date,
+            date: newWorkout.date.format('YYYY-MM-DD'),
           });
           console.log('Workout saved successfully');
 
-          const today = new Date().toISOString().split('T')[0];
-          if (newWorkout.date > today) {
+          const today = dayjs().format('YYYY-MM-DD');
+          if (newWorkout.date.format('YYYY-MM-DD') > today) {
             setAlertWorkoutAddedForAgendaOpen(true);
           } else {
             setAlertWorkoutAddedOpen(true);
@@ -666,14 +672,14 @@ export default function HomePage() {
       >
         <DialogActions>
           <IconButton aria-label="add" onClick={handleClose}>
-            <CloseIcon sx={{ color: grey[900], fontSize: { xs: '1.2rem', sm: '1.5rem', md: '2rem' } }} className="h-8 w-8" />
+            <CloseIcon sx={{ color: '#fff', mt: -2, mr: -2, fontSize: { xs: '1.2rem', sm: '1.5rem', md: '2rem' } }} className="h-8 w-8" />
           </IconButton>
         </DialogActions>
 
         <DialogTitle sx={{
           textAlign: 'center',
           fontWeight: 'bold',
-          mt: -6,
+          mt: -4,
           fontSize: { xs: '1.2rem', sm: '1.5rem', md: '2rem' },
         }}>
           What do you want to add?
@@ -772,7 +778,7 @@ export default function HomePage() {
             onChange={(e) => { setCoachSelected(e.target.value); setNewWorkout({ ...newWorkout, coach: e.target.value }) }}
             displayEmpty
             sx={{
-              marginBottom: 1,
+              marginBottom: 0,
               color: '#fff',
               '& .MuiOutlinedInput-notchedOutline': {
                 borderColor: '#fff',
@@ -837,29 +843,64 @@ export default function HomePage() {
             }}
             sx={{
               '& .MuiOutlinedInput-notchedOutline': {
-                borderColor: '#fff', // Color del borde
-              },
-            }}
-          />
-          <TextField
-            fullWidth
-            margin="dense"
-            label="Date"
-            type="date"
-            value={newWorkout.date}
-            onChange={(e) => setNewWorkout({ ...newWorkout, date: e.target.value })}
-            InputLabelProps={{
-              style: { color: '#fff' }, // Color del label (Date)
-            }}
-            InputProps={{
-              style: { color: '#fff' }, // Color del texto dentro del input
-            }}
-            sx={{
-              '& .MuiOutlinedInput-notchedOutline': {
                 borderColor: '#fff',
               },
             }}
           />
+          <Box sx={{mt: 0.5}}>
+            <LocalizationProvider dateAdapter={AdapterDayjs}>
+              <DatePicker
+                label="Date"
+                value={newWorkout.date}
+                onChange={(newValue: Dayjs | null) =>setNewWorkout((prevState) => ({...prevState,date: newValue,}))}
+                format="DD/MM/YYYY"
+                slotProps={{
+                  textField: {
+                    fullWidth: true,
+                    sx: {
+                      backgroundColor: "#444",
+                      color: grey[50],
+                      borderRadius: '8px',
+                      label: { color: '#fff'},
+                      input: { color: '#fff' },
+                      "& .MuiOutlinedInput-root": {
+                        "& fieldset": { borderColor: '#fff' },
+                        "&:hover fieldset": { borderColor: 'black' },
+                        "&.Mui-focused fieldset": { borderColor: grey[100] },
+                      },
+                    },
+                  },
+                  popper: {
+                    sx: {
+                      "& .MuiPaper-root": { backgroundColor: grey[800] },
+                      "& .MuiPickersCalendarHeader-root": { color: grey[50] },
+                      "& .MuiDayCalendar-weekDayLabel": { color: grey[400] },
+                      "& .MuiPickersDay-root": { color: grey[50] },
+                      "& .MuiPickersDay-root.Mui-selected": {
+                        backgroundColor: '#000000 !important',
+                        color: grey[50],
+                        fontWeight: 'bold',
+                      },
+                      "& .MuiPickersDay-root.Mui-selected:hover": {
+                        backgroundColor: '#000000 !important',
+                      },
+                      "& .MuiPickersDay-root.MuiPickersDay-today": {
+                        border: `1px solid ${grey[700]}`,
+                      },
+                      "& .MuiPickersDay-root:hover": {
+                        backgroundColor: grey[600],
+                      },
+                    },
+                  },
+                  openPickerButton: {
+                    sx: {
+                      color: '#fff',
+                    },
+                  },
+                }}
+              />
+            </LocalizationProvider>
+          </Box>
         </DialogContent>
         <DialogActions>
           <LoadingButton
