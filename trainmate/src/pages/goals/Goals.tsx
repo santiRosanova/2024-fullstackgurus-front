@@ -17,8 +17,6 @@ import isSameOrBefore from 'dayjs/plugin/isSameOrBefore';
 import { Tooltip as TooltipMui } from '@mui/material'; // Alias Tooltip if needed
 import SmsFailedIcon from '@mui/icons-material/SmsFailed';
 import PieChartIcon from '@mui/icons-material/PieChart';
-import TopMiddleAlert from '../../personalizedComponents/TopMiddleAlert';
-
 
 dayjs.extend(isSameOrBefore);
 
@@ -233,6 +231,11 @@ const GoalsModal: React.FC<GoalsProps> = ({ showDrawer, onClose, open, openForm 
                                         },
                                     },
                                 },
+                                openPickerButton: {
+                                    sx: {
+                                      color: '#fff',
+                                    },
+                                  },
                             }}
                         />
                         <DatePicker
@@ -240,6 +243,7 @@ const GoalsModal: React.FC<GoalsProps> = ({ showDrawer, onClose, open, openForm 
                             value={dateRange[1]}
                             onChange={(newValue) => handleDateChange([dateRange[0], newValue])}
                             format="DD/MM/YYYY"
+                            minDate={dateRange[0] || dayjs()}
                             slotProps={{
                                 textField: {
                                     variant: 'outlined',
@@ -295,12 +299,15 @@ const GoalsModal: React.FC<GoalsProps> = ({ showDrawer, onClose, open, openForm 
                                         },
                                     },
                                 },
+                                openPickerButton: {
+                                    sx: {
+                                      color: '#fff',
+                                    },
+                                  },
                             }}
                         />
                     </Box>
                 </LocalizationProvider>
-
-
 
                 <Divider sx={{ marginY: 2, backgroundColor: grey[700] }} />
 
@@ -390,7 +397,7 @@ const GoalsModal: React.FC<GoalsProps> = ({ showDrawer, onClose, open, openForm 
                                 {showPending ? <ExpandLessIcon /> : <ExpandMoreIcon />}
                             </Box>
                         </Divider>
-                        <Divider sx={{ backgroundColor: grey[600] }} />
+                        <Divider sx={{ backgroundColor: grey[600], mb: 2 }} />
                         <Collapse in={showPending}>
                             {pendingGoals.filter((goal) => !goal.completed).map((goal: Goal) => (
                                 <Box

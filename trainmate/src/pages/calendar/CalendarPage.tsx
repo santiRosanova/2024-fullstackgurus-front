@@ -198,6 +198,11 @@ const CalendarModal: React.FC<DrawerProps> = ({ showDrawer, onClose, open }) => 
                     },
                   },
                 },
+                openPickerButton: {
+                  sx: {
+                    color: '#fff',
+                  },
+                },
               }}
             />
             <DatePicker
@@ -205,6 +210,7 @@ const CalendarModal: React.FC<DrawerProps> = ({ showDrawer, onClose, open }) => 
               value={dateRange[1]}
               onChange={(newValue) => handleDateChange([dateRange[0], newValue])}
               format="DD/MM/YYYY"
+              minDate={dateRange[0] || dayjs()}
               slotProps={{
                 textField: {
                   variant: 'outlined',
@@ -258,6 +264,11 @@ const CalendarModal: React.FC<DrawerProps> = ({ showDrawer, onClose, open }) => 
                     "& .MuiPickersDay-root:hover": {
                       backgroundColor: grey[600],
                     },
+                  },
+                },
+                openPickerButton: {
+                  sx: {
+                    color: '#fff',
                   },
                 },
               }}

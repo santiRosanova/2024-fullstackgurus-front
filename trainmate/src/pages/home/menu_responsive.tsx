@@ -9,7 +9,7 @@ import CalendarModal from '../calendar/CalendarPage';
 import TrendingUpIcon from '@mui/icons-material/TrendingUp';
 import { useNavigate } from 'react-router-dom';
 import GoalsModal from '../goals/Goals';
-import ChallengeForm from './ChallengeForm';
+import ChallengeForm from '../goals/challenge_form';
 import OutlinedFlagIcon from '@mui/icons-material/OutlinedFlag';
 
 interface ResponsiveMenuProps {
@@ -143,11 +143,7 @@ const ResponsiveMenu: React.FC<ResponsiveMenuProps> = ({ handleFilterOpen, handl
 
       <CalendarModal showDrawer={showDrawer} onClose={onClose} open={open} />
       <GoalsModal showDrawer={showGoalsDrawer} onClose={onCloseGoalsDrawer} open={goalsDrawerOpen} openForm={openForm} />
-      <ChallengeForm
-        isOpen={showForm}
-        onSave={() => { }} // Define saveChallenge if needed
-        onCancel={closeForm} // Closes form and optionally reopens ChallengeModal
-      />
+      <ChallengeForm isOpen={showForm} onSave={() => { }} onCancel={closeForm}/>
     </>
   );
 };
