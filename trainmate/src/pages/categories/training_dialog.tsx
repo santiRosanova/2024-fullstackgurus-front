@@ -73,7 +73,7 @@ const CreateTrainingDialog: React.FC<CreateTrainingDialogProps> = ({ createNewTr
       try {
         setLoadingButton(true)
         const training = await saveTraining(newTraining);
-        const updatedTimestamp = await updateLastModifiedTrainingsTimestamp();
+        await updateLastModifiedTrainingsTimestamp();
         const trainingWithId = { ...newTraining, id: training.id, calories_per_hour_mean: training.calories_per_hour_mean, owner: training.owner };
         setTrainings((prevTrainings) => [...prevTrainings, trainingWithId]);
         setAlertTrainingAddedOpen(true);

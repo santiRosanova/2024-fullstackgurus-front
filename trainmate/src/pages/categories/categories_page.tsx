@@ -6,7 +6,7 @@ import { useNavigate } from 'react-router-dom';
 import { grey } from '@mui/material/colors';
 import { deleteCategory, editCategory, getCategories, saveCategory, updateLastModifiedCategoryTimestamp } from '../../api/CategoryApi';
 import { deleteExercise, editExercise, getExerciseFromCategory, saveExercise } from '../../api/ExerciseApi';
-import { getLastModifiedTrainingsTimestamp, getTrainings } from '../../api/TrainingApi';
+import { getLastModifiedTrainingsTimestamp, getTrainings, updateLastModifiedTrainingsTimestamp } from '../../api/TrainingApi';
 import TopMiddleAlert from '../../personalizedComponents/TopMiddleAlert';
 import handleCategoryIcon from '../../personalizedComponents/handleCategoryIcon';
 import CreateTrainingDialog from './training_dialog';
@@ -479,6 +479,7 @@ export default function CategoriesPage() {
         if (trainings) {
           setTrainings(trainings);
         }
+        await updateLastModifiedTrainingsTimestamp();
         setLoading(false);
         await updateLastModifiedCategoryTimestamp();
         localStorage.removeItem('categories');
