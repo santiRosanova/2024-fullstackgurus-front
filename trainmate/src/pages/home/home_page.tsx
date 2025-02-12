@@ -408,13 +408,6 @@ export default function HomePage() {
     if (newWorkout.training_id && newWorkout.duration && newWorkout.date) {
       setLoadingButton(true)
 
-      setNewWorkout({
-        training_id: '',
-        coach: '',
-        duration: '',
-        date: null as Dayjs | null,
-      });
-
       try {
         const token = localStorage.getItem('token');
         if (token) {
@@ -528,7 +521,7 @@ export default function HomePage() {
           console.log('Workouts and calories per day loaded from local storage');
         } else {
           const workouts = await getAllWorkouts();
-          const validWorkouts = workouts.filter((workout: Workout) => workout.duration && workout.date && workout.total_calories && workout.coach);
+          const validWorkouts = workouts.filter((workout: Workout) => workout.duration && workout.date && workout.total_calories);
           sortedWorkouts = validWorkouts.sort((a: Workout, b: Workout) => new Date(b.date).getTime() - new Date(a.date).getTime());
           setWorkoutList(sortedWorkouts);
 
@@ -656,7 +649,6 @@ export default function HomePage() {
             color: '#fff',
             borderRadius: '8px',
             padding: 2,
-            maxWidth: '30vw',
             width: '100%',
             height: 'auto',
             '@media (max-width: 1024px)': {
@@ -729,6 +721,7 @@ export default function HomePage() {
             backgroundColor: grey[800],
             color: '#fff', // Esto ajusta el color del texto principal
             padding: 2,
+            width: '100%',
           },
         }} className='border border-gray-600 rounded'>
         <DialogTitle sx={{ color: '#fff', textAlign: 'center' }}>Add New Workout</DialogTitle>
@@ -771,44 +764,50 @@ export default function HomePage() {
               </MenuItem>
             ))}
           </Select>
-
-          <Select
-            fullWidth
-            value={coachSelected}
-            onChange={(e) => { setCoachSelected(e.target.value); setNewWorkout({ ...newWorkout, coach: e.target.value }) }}
-            displayEmpty
-            sx={{
-              marginBottom: 0,
-              color: '#fff',
-              '& .MuiOutlinedInput-notchedOutline': {
-                borderColor: '#fff',
-              },
-              '& .MuiSvgIcon-root': {
+          
+          <Box sx={{width: '100%'}} display={ 'flex' } justifyContent="space-between" alignItems="center" gap={2}>
+            <Select
+              fullWidth
+              value={coachSelected}
+              onChange={(e) => { setCoachSelected(e.target.value); setNewWorkout({ ...newWorkout, coach: e.target.value }) }}
+              displayEmpty
+              sx={{
+                marginBottom: 0,
                 color: '#fff',
-              }
-            }}
-            MenuProps={{
-              PaperProps: {
-                sx: {
-                  display: 'flex',
-                  flexWrap: 'wrap',
-                  maxWidth: 300,
-                  padding: 1,
-                  backgroundColor: '#444',
-                  color: '#fff',
+                '& .MuiOutlinedInput-notchedOutline': {
+                  borderColor: '#fff',
                 },
-              },
-            }}
-          >
-            <MenuItem value="" disabled>
-              Select Coach
-            </MenuItem>
-            {coaches.map((coach: any) => (
-              <MenuItem key={coach.fullName} value={coach.fullName}>
-                {coach.fullName}
+                '& .MuiSvgIcon-root': {
+                  color: '#fff',
+                }
+              }}
+              MenuProps={{
+                PaperProps: {
+                  sx: {
+                    display: 'flex',
+                    flexWrap: 'wrap',
+                    maxWidth: 300,
+                    padding: 1,
+                    backgroundColor: '#444',
+                    color: '#fff',
+                  },
+                },
+              }}
+            >
+              <MenuItem value="" disabled>
+                Select Coach
               </MenuItem>
-            ))}
-          </Select>
+              {coaches.map((coach: any) => (
+                <MenuItem key={coach.fullName} value={coach.fullName}>
+                  {coach.fullName}
+                </MenuItem>
+              ))}
+            </Select>
+            <Box alignContent={'center'} display={'flex'} flexDirection={'column'} justifyContent={'center'} alignItems={'center'}>
+              <Typography variant="body1" sx={{ fontWeight: 'bold', fontSize: '0.56rem', textAlign: 'center' }}>From GymGenius ©</Typography>
+              <img src={require('../../images/LogoGymGeniusIcon.png')} alt="Logo" width={50} height={50} />
+            </Box>
+          </Box>
 
           <TextField
             fullWidth
@@ -847,7 +846,7 @@ export default function HomePage() {
               },
             }}
           />
-          <Box sx={{mt: 0.5}}>
+          <Box sx={{mt: 1.2}}>
             <LocalizationProvider dateAdapter={AdapterDayjs}>
               <DatePicker
                 label="Date"
@@ -1117,7 +1116,7 @@ export default function HomePage() {
                               </span>
                             ))}
                           </Typography>
-                          <Typography variant="body2" color="gray">Coach: {workout.coach}</Typography>
+                          <Typography variant="body2" color="gray">Coach: {workout.coach ? workout.coach : '-'}</Typography>
                         </div>
                       </div>
                     ))

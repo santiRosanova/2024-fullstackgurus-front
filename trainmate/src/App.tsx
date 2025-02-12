@@ -7,7 +7,6 @@ import SignUp from './pages/signup/signup_page';
 import { getAuth, onAuthStateChanged } from 'firebase/auth';
 import ProfilePage from './pages/user/ProfilePage';
 import CategoriesPage from './pages/categories/categories_page';
-import CalendarPage from './pages/calendar/CalendarPage';
 import PhysicalProgressPage from './pages/physical_progress/physical_progress_page';
 import ResetPassword from './pages/login/reset_password_page';
 
@@ -40,7 +39,7 @@ function App() {
   
 
   if (isAuthenticated === null) {
-    return <div>Loading...</div>; // Show a loading state until auth is verified
+    return (<div className="min-h-screen bg-black from-gray-900 to-gray-800"></div>);
   }
 
   return (
