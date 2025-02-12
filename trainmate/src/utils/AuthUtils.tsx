@@ -1,4 +1,5 @@
-import { getAuth, sendPasswordResetEmail, updatePassword } from "firebase/auth";
+import { getAuth, sendPasswordResetEmail, updatePassword, Auth } from "firebase/auth";
+import { PAGE_URL } from "../constants";
 
 /**
  * Sends a password reset email to the user's email.
@@ -62,3 +63,11 @@ export const refreshAuthToken = async () => {
     console.error('Error al renovar el token:', error);
   }
 };
+
+export async function sendCustomResetPasswordEmail(auth: Auth, email: string) {
+  const actionCodeSettings = {
+    url: `${PAGE_URL}/resetpassword`,
+    handleCodeInApp: true,
+  };
+  return sendPasswordResetEmail(auth, email, actionCodeSettings);
+}

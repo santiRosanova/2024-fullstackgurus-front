@@ -130,9 +130,8 @@ const Last30DaysCalendar: React.FC<Last30DaysCalendarProps> = ({ dataForChart })
                 const hasExercise = exerciseSet.has(dayStr);
 
                 return (
-                  <Tooltip title={hasExercise ? 'Exercise day' : 'Rest day'}>
+                  <Tooltip title={hasExercise ? 'Exercise day' : 'Rest day'} key={index}>
                   <Box
-                    key={index}
                     sx={{
                       width: 36,
                       height: 36,

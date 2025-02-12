@@ -9,6 +9,7 @@ import ProfilePage from './pages/user/ProfilePage';
 import CategoriesPage from './pages/categories/categories_page';
 import CalendarPage from './pages/calendar/CalendarPage';
 import PhysicalProgressPage from './pages/physical_progress/physical_progress_page';
+import ResetPassword from './pages/login/reset_password_page';
 
 function App() {
   const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null);
@@ -47,6 +48,7 @@ function App() {
       <Routes>
         <Route path="/login" element={<LogIn />} />
         <Route path="/signup" element={<SignUp />} />
+        <Route path="/resetpassword" element={<ResetPassword/>}/>
         
         {/* If authenticated, show HomePage. If not, redirect to login */}
         <Route 

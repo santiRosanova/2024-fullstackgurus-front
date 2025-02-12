@@ -6,7 +6,7 @@ import { Dumbbell } from "lucide-react";
 import { Link, useNavigate } from 'react-router-dom';
 import { auth } from '../../FirebaseConfig';
 import { signInWithEmailAndPassword, signInWithPopup, GoogleAuthProvider } from 'firebase/auth';
-import { sendResetPasswordEmail } from '../../utils/AuthUtils';
+import { sendCustomResetPasswordEmail, sendResetPasswordEmail } from '../../utils/AuthUtils';
 import Dialog from '@mui/material/Dialog';
 import DialogActions from '@mui/material/DialogActions';
 import DialogContent from '@mui/material/DialogContent';
@@ -97,7 +97,7 @@ export default function LogIn() {
 
   const handleSendResetPassword = () => {
     if (forgotEmail) {
-      sendResetPasswordEmail(forgotEmail)
+      sendCustomResetPasswordEmail(auth, forgotEmail)
         .then(() => {
           console.log(`Password reset email sent to ${forgotEmail}`);
           setIsModalOpen(false);
@@ -154,7 +154,7 @@ export default function LogIn() {
                   fullWidth
                   value={email}
                   onChange={handleEmailChange}
-                  className="rounded-md p-2 text-white placeholder-white text-sm"  // Add rounded borders and smaller size
+                  className="rounded-md p-2 text-white placeholder-white text-sm"
                   sx={{ height: '100%' }}
                   style={{ borderRadius: '8px', color: 'white' }}  // Optional inline styles
                   placeholder="Enter your email"  // White placeholder
@@ -168,7 +168,7 @@ export default function LogIn() {
                   fullWidth
                   value={password}
                   onChange={handlePasswordChange}
-                  className="rounded-md p-2 text-white placeholder-white text-sm"  // Add rounded borders and smaller size
+                  className="rounded-md p-2 text-white placeholder-white text-sm"
                   sx={{ height: '100%' }}
                   style={{ borderRadius: '8px', color: 'white' }}  // Optional inline styles
                   placeholder="Enter your password"  // White placeholder
