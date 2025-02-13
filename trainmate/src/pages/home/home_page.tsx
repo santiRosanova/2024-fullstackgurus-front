@@ -289,6 +289,9 @@ export default function HomePage() {
     setFilterDateOpen(false);
   }
 
+  const handleGoToNewTraining = () => {
+    navigate('/categories');
+  }
 
   const handleFilterTrainingClose = (selectedTraining: { id: string }) => {
     setFilterTrainingOpen(false);
@@ -596,7 +599,7 @@ export default function HomePage() {
           <img src={require('../../images/logo.png')} alt="Logo" width={200} height={150} />
         </div>
         <Box sx={{ display: 'flex', flexDirection: 'row', gap: 3 }}>
-          <ResponsiveMenu handleFilterOpen={handleFilterOpen} handleClickOpen={handleClickOpen} />
+          {loading ? <></> : (<ResponsiveMenu handleFilterOpen={handleFilterOpen} handleClickOpen={handleClickOpen} />)}
         </Box>
       </header>
       <TopMiddleAlert alertText='Added workout successfully' open={alertWorkoutAddedOpen} onClose={() => setAlertWorkoutAddedOpen(false)} severity='success' />
@@ -727,6 +730,7 @@ export default function HomePage() {
         <DialogTitle sx={{ color: '#fff', textAlign: 'center' }}>Add New Workout</DialogTitle>
         <DialogContent className='text-white'>
 
+        <Box sx={{width: '100%'}} display={ 'flex' } justifyContent="space-between" alignItems="center" gap={0}>
           <Select
             fullWidth
             value={selectedTraining?.id || ""}
@@ -764,6 +768,12 @@ export default function HomePage() {
               </MenuItem>
             ))}
           </Select>
+          <Box>
+            <a href="#" className="underline" onClick={handleGoToNewTraining} style={{ color: 'gray' }}>
+              <Typography sx={{ fontSize: '0.70rem', textAlign: 'center', mt: -1 }} variant="body2" color="white">Create New Training +</Typography>
+            </a>
+          </Box>
+        </Box>
           
           <Box sx={{width: '100%'}} display={ 'flex' } justifyContent="space-between" alignItems="center" gap={2}>
             <Select
@@ -932,7 +942,7 @@ export default function HomePage() {
           <Card sx={{ backgroundColor: '#161616', color: '#fff' }} className='border border-gray-600' >
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
               <CardHeader title="Workouts progress" sx={{ ml: 2, mt:-2}}/>
-              <Box display="flex" justifyContent="center" alignItems="center" gap={5} sx={{mt: 2}}>
+              <Box display="flex" justifyContent="center" alignItems="center" gap={3} sx={{mt: 2}}>
                 <Last30DaysCalendar dataForChart={dataForChart}/>
                   <Box sx={{ cursor: 'pointer', display: 'flex', flexDirection: 'column', alignItems: 'center' }} onClick={() => setChallengeModalOpen(true)}>
                     <WorkspacePremiumTwoToneIcon sx={{ fontSize: 50, mr: 2 }} style={{ color: '#AE8625' }}/>

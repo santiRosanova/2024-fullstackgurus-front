@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Dialog, DialogContent, DialogTitle, CircularProgress, Box } from '@mui/material';
 import { BASE_URL } from '../../constants';
+import { grey } from '@mui/material/colors';
 
 interface Exercise {
     count: number;
@@ -44,13 +45,21 @@ const PopularExercisesModal: React.FC<PopularExercisesModalProps> = ({ open, onC
     return (
         <>
             {/* Modal */}
-            <Dialog open={open} onClose={onClose} fullWidth maxWidth="sm">
-                <div className='border border-gray-600 rounded-mx'> 
-                <DialogTitle sx={{textAlign: 'center'}} className='bg-black text-white'>Top 5 Popular Exercises</DialogTitle>
-                <DialogContent className='bg-black '>
+            <Dialog open={open} onClose={onClose} fullWidth maxWidth="sm"
+            PaperProps={{
+                sx: {
+                  backgroundColor: grey[800],
+                  color: '#fff',
+                  borderRadius: '8px',
+                  width: '100%',
+                },
+              }}>
+                <div> 
+                <DialogTitle sx={{textAlign: 'center'}} className=' text-white'>Top 5 Popular Exercises</DialogTitle>
+                <DialogContent >
                     {loading ? (
                         <Box display="flex" justifyContent="center" alignItems="center" height="100%">
-                            <CircularProgress />
+                            <CircularProgress sx={{color: '#fff'}}/>
                         </Box>
                     ) : (
                         <div className="space-y-4">
@@ -68,7 +77,7 @@ const PopularExercisesModal: React.FC<PopularExercisesModalProps> = ({ open, onC
                                                 }}
                                             />
                                         </div>
-                                        <span className="text-sm font-medium text-gray-500">{exercise.count}</span>
+                                        <span className="text-sm font-medium text-white">{exercise.count}</span>
                                     </div>
                                 ))
                             )}

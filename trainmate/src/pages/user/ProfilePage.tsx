@@ -327,7 +327,7 @@ export default function ProfilePage() {
       if (isFirstTime) {
         setIsEditing(false);
         window.location.reload();
-        navigate("/homepage");
+        //navigate("/homepage");
       } else {
         console.log("Profile updated successfully");
         setIsEditing(false);
@@ -571,6 +571,13 @@ export default function ProfilePage() {
               </form>
             </CardContent>
           </Card>
+          <Button 
+            variant="outlined"
+            onClick={handleBackToHome}
+            sx={{ mt: 2, color: grey[400], borderColor: grey[400] }}
+          >
+            Go to Homepage
+          </Button>
           <Button
             variant="outlined"
             onClick={handleLogOut}

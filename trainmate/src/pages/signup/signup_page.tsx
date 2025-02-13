@@ -24,9 +24,12 @@ export default function SignUp() {
   const [alertExerciseFillFieldsOpen, setAlertExerciseFillFieldsOpen] = useState(false);
   const [alertEmailAlreadyInUseOpen, setAlertEmailAlreadyInUseOpen] = useState(false);
   const [alertWeakPassword, setAlertWeakPassword] = useState(false);
+  const [alertIncorrectEmail, setAlertIncorrectEmail] = useState(false);
   const [alertSomethingWentWrongOpen, setAlertSomethingWentWrongOpen] = useState(false);
   const [alertIncorrectNumbersOpen, setAlertIncorrectNumbersOpen] = useState(false);
   const [alertEmailVerificationSent, setAlertEmailVerificationSent] = useState(false);
+  const [incorrectEmail, setIncorrectEmail] = useState(false);
+  const [weakPassword, setWeakPassword] = useState(false);
   const [sentEmail, setSentEmail] = useState(false);
   const navigate = useNavigate();
   const [formData, setFormData] = useState({
@@ -47,6 +50,23 @@ export default function SignUp() {
       [id || name]: value,
     }));
   };
+
+  const verifyEmail = (e: any) => {
+    const emailRegex = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,6}$/;
+    if (!emailRegex.test(e.target.value) && e.target.value !== '') {
+      setIncorrectEmail(true);
+    } else {
+      setIncorrectEmail(false);
+    }
+  };
+
+  const verifyPassword = (e: any) => {
+    if (e.target.value.length < 6 && e.target.value !== '') {
+      setWeakPassword(true);
+    } else {
+      setWeakPassword(false);
+    }
+  }
 
   const handleNumericChange = (
       e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement> | SelectChangeEvent<string>
@@ -97,6 +117,14 @@ export default function SignUp() {
     const { name, email, password, sex, birthday, weight, height } = formData;
     if (!name || !email || !password || !sex || !birthday || !weight || !height) {
       setAlertExerciseFillFieldsOpen(true);
+      return;
+    }
+    if (weakPassword) {
+      setAlertWeakPassword(true);
+      return;
+    }
+    if (incorrectEmail) {
+      setAlertIncorrectEmail(true);
       return;
     }
     const parsedWeight = parseFloat(weight);
@@ -177,6 +205,7 @@ export default function SignUp() {
         <TopMiddleAlert alertText='Email is already in use. If you forgot your password, change it from login page' open={alertEmailAlreadyInUseOpen} onClose={() => setAlertEmailAlreadyInUseOpen(false)} severity='warning' />
         <TopMiddleAlert alertText='Something went wrong signing up' open={alertSomethingWentWrongOpen} onClose={() => setAlertSomethingWentWrongOpen(false)} severity='warning' /> 
         <TopMiddleAlert alertText='Password should be at least 6 characters long' open={alertWeakPassword} onClose={() => setAlertWeakPassword(false)} severity='warning' />
+        <TopMiddleAlert alertText='Please enter a valid email' open={alertIncorrectEmail} onClose={() => setAlertIncorrectEmail(false)} severity='warning' />
         <TopMiddleAlert alertText='Please enter valid numbers. Weight must be a number between 25 and 300 and Height between 120 and 240' open={alertIncorrectNumbersOpen} onClose={() => setAlertIncorrectNumbersOpen(false)} severity='warning'/>
         <TopMiddleAlert alertText='Email verification sent' open={alertEmailVerificationSent} onClose={() => setAlertEmailVerificationSent(false)} severity='success'/>
 
@@ -225,11 +254,15 @@ export default function SignUp() {
                       fullWidth
                       value={formData.email}
                       onChange={handleChange}
+                      onBlur={verifyEmail}
                       className="rounded-md p-2 text-white placeholder-white text-sm" // Rounded borders, smaller size
                       sx={{ height: '100%' }}
                       style={{ borderRadius: '8px', color: 'white' }} // Optional inline styles
                       placeholder="you@example.com" // White placeholder
                     />
+                  </div>
+                  <div>
+                    {incorrectEmail && <p className="text-red-500 text-xs">Please enter a valid email</p>}
                   </div>
 
                   {/* Password */}
@@ -240,11 +273,15 @@ export default function SignUp() {
                       fullWidth
                       value={formData.password}
                       onChange={handleChange}
+                      onBlur={verifyPassword}
                       className="rounded-md p-2 text-white placeholder-white text-sm" // Rounded borders, smaller size
                       sx={{ height: '100%' }}
                       style={{ borderRadius: '8px', color: 'white' }} // Optional inline styles
                       placeholder="Password" // White placeholder
                     />
+                  </div>
+                  <div>
+                    {weakPassword && <p className="text-red-500 text-xs">Password should be at least 6 characters long</p>}
                   </div>
 
                   {/* Sex */}
