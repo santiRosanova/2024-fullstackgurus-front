@@ -1,18 +1,18 @@
 import React, { useEffect, useState, useRef } from 'react';
-import { Button, Card, CardContent, CardHeader, Typography, TextField, InputLabel, Box, Accordion, AccordionSummary, AccordionDetails, Dialog, DialogTitle, DialogContent, DialogActions, IconButton, MenuItem, Select, FormControl, CircularProgress, } from '@mui/material';
-import { Add as PlusIcon, Edit as EditIcon, Delete as DeleteIcon, ArrowBack as ArrowLeftIcon, ExpandMore as ExpandMoreIcon, BorderColor, } from '@mui/icons-material';
+import { Button, Card, CardContent, CardHeader, Typography, TextField, InputLabel, Box, Accordion, AccordionSummary, AccordionDetails, Dialog, DialogTitle, DialogContent, DialogActions, IconButton, MenuItem, Select, FormControl} from '@mui/material';
+import { Add as PlusIcon, Edit as EditIcon, Delete as DeleteIcon, ArrowBack as ArrowLeftIcon, ExpandMore as ExpandMoreIcon } from '@mui/icons-material';
 import EmojiEventsIcon from '@mui/icons-material/EmojiEvents';
 import { useNavigate } from 'react-router-dom';
 import { grey } from '@mui/material/colors';
-import { deleteCategory, editCategory, getCategories, saveCategory } from '../../api/CategoryApi';
+import { deleteCategory, editCategory, getCategories, saveCategory, updateLastModifiedCategoryTimestamp } from '../../api/CategoryApi';
 import { deleteExercise, editExercise, getExerciseFromCategory, saveExercise } from '../../api/ExerciseApi';
-import { getTrainings } from '../../api/TrainingApi';
+import { getLastModifiedTrainingsTimestamp, getTrainings, updateLastModifiedTrainingsTimestamp } from '../../api/TrainingApi';
 import TopMiddleAlert from '../../personalizedComponents/TopMiddleAlert';
 import handleCategoryIcon from '../../personalizedComponents/handleCategoryIcon';
 import CreateTrainingDialog from './training_dialog';
 import AreYouSureAlert from '../../personalizedComponents/areYouSureAlert';
 import { getStorage, ref, uploadBytes, getDownloadURL } from "firebase/storage";
-import { Visibility as EyeIcon } from '@mui/icons-material'; // Add the Eye icon import
+import { Visibility as EyeIcon } from '@mui/icons-material';
 import DialogContentText from '@mui/material/DialogContentText';
 
 import { muscularGroups } from "../../enums/muscularGroups";
@@ -88,7 +88,7 @@ export default function CategoriesPage() {
   const [editExerciseDialogOpen, setEditExerciseDialogOpen] = useState(false);
 
   const handleOpenAddCategoryDialog = () => setAddCategoryDialogOpen(true);
-  const handleCloseAddCategoryDialog = () => setAddCategoryDialogOpen(false);
+  const handleCloseAddCategoryDialog = () => {setAddCategoryDialogOpen(false); setNewCategory({ name: '', icon: '' });};
 
   const [createNewTraining, setCreateNewTraining] = useState(false);
 
@@ -167,6 +167,7 @@ export default function CategoriesPage() {
       await deleteCategory(categoryId, trainings);
       setCategoryWithExercises(categoryWithExercises.filter((category) => category.id !== categoryId));
       setAlertCategoryDeletedSuccessOpen(true);
+      await updateLastModifiedCategoryTimestamp();
       localStorage.removeItem('categories');
       localStorage.removeItem('categories_with_exercises');
     } catch (error) {
@@ -194,6 +195,7 @@ export default function CategoriesPage() {
           return category;
         })
       );
+      await updateLastModifiedCategoryTimestamp();
       setAlertExerciseDeletedSuccessOpen(true);
       localStorage.removeItem('categories_with_exercises'); // Ya que se actualizaron exercises, hago que después se vuelva a cargar
     } catch (error) {
@@ -237,12 +239,25 @@ export default function CategoriesPage() {
       const fetchCategories = async () => {
         try {
           setLoading(true);
-
-          const trainings = await getAllTrainings();
-          if (trainings) {
-            setTrainings(trainings);
+          
+          // 1) Fetching Trainings
+          const lastModifiedTimestamp = await getLastModifiedTrainingsTimestamp();
+          const localTimestamp = parseInt(localStorage.getItem('trainings_timestamp') || '0', 10);
+          const storedTrainings = JSON.parse(localStorage.getItem('trainings') || '[]');
+          if (lastModifiedTimestamp && storedTrainings.length > 0 && lastModifiedTimestamp === localTimestamp) {
+            setTrainings(storedTrainings);
+            console.log('Trainings loaded from local storage');
+          } else {
+            console.log("Fetching trainings...");
+            const trainings = await getAllTrainings();
+            if (trainings) {
+              setTrainings(trainings);
+              localStorage.setItem('trainings', JSON.stringify(trainings));
+              localStorage.setItem('trainings_timestamp', lastModifiedTimestamp);
+            }
           }
-
+          
+          // 2) Fetching Categories
           const categories = await getAllCategories();
           for (const category of categories) {
             await getExercisesFromCategory(category);
@@ -314,6 +329,7 @@ export default function CategoriesPage() {
           { ...category, exercises: [] }
         ]);
         setAlertCategoryAddedOpen(true);
+        await updateLastModifiedCategoryTimestamp();
         localStorage.removeItem('categories');
         localStorage.removeItem('categories_with_exercises');
       } catch (error) {
@@ -332,19 +348,19 @@ export default function CategoriesPage() {
 
   const handleAddExercise = async () => {
     if (newExercise) {
-      if (imageFile) {
         setUploading(true);
-        setLoadingButton(true) // Show loading indicator
         setLoadingButton(true)
-        const storage = getStorage();
-        const storageRef = ref(storage, `exercises/${imageFile.name}`);
+        setLoadingButton(true)
 
-        // Upload the image to Firebase Storage
-        await uploadBytes(storageRef, imageFile);
+        let image_url = '';
 
-        // Get the download URL for the uploaded image
-        const image_url = await getDownloadURL(storageRef);
+        if (imageFile) {
+          const storage = getStorage();
+          const storageRef = ref(storage, `exercises/${imageFile.name}`);
 
+          await uploadBytes(storageRef, imageFile);
+          image_url = await getDownloadURL(storageRef);
+        }
 
         const exerciseToSave = {
           ...newExercise,
@@ -374,6 +390,7 @@ export default function CategoriesPage() {
             setNewExercise(null);
             setAlertExerciseAddedOpen(true);
             setLoadingButton(false);
+            await updateLastModifiedCategoryTimestamp();
             localStorage.removeItem('categories');
             localStorage.removeItem('categories_with_exercises');
           } catch (error) {
@@ -386,10 +403,6 @@ export default function CategoriesPage() {
         else {
           setAlertExerciseFillFieldsOpen(true);
         }
-      }
-      else {
-        setAlertExerciseFillFieldsOpen(true);
-      }
     };
   }
 
@@ -403,6 +416,7 @@ export default function CategoriesPage() {
           )
         );
         setAlertCategoryEditedOpen(true);
+        await updateLastModifiedCategoryTimestamp();
         localStorage.removeItem('categories');
         localStorage.removeItem('categories_with_exercises');
       } catch (error) {
@@ -418,6 +432,7 @@ export default function CategoriesPage() {
       try {
         setLoadingButton(true);
 
+        let image_url_old = '';
         let image_url = editingExercise.image_url;
         if (imageFile) {
           const storage = getStorage();
@@ -426,6 +441,7 @@ export default function CategoriesPage() {
           // Upload the new image to Firebase Storage
           await uploadBytes(storageRef, imageFile);
           // Get the download URL for the uploaded image
+          image_url_old = editingExercise.image_url;
           image_url = await getDownloadURL(storageRef);
         }
 
@@ -436,7 +452,8 @@ export default function CategoriesPage() {
             training_muscle: editingExercise.training_muscle,
             image_url,
           },
-          editingExercise.id
+          editingExercise.id,
+          image_url_old
         );
 
         setCategoryWithExercises(
@@ -462,7 +479,9 @@ export default function CategoriesPage() {
         if (trainings) {
           setTrainings(trainings);
         }
+        await updateLastModifiedTrainingsTimestamp();
         setLoading(false);
+        await updateLastModifiedCategoryTimestamp();
         localStorage.removeItem('categories');
         localStorage.removeItem('categories_with_exercises');
       } catch (error) {
@@ -532,7 +551,7 @@ export default function CategoriesPage() {
         ) : (
           <Box sx={{ display: 'flex', gap: 2, height: '100%', flexDirection: { xs: 'column', sm: 'row' } }}>
             {/* Card de Categorías */}
-            <Card sx={{ flex: 1, backgroundColor: '#161616', color: '#fff', width: '100%', height: '100%' }} >
+            <Card sx={{ flex: 1, backgroundColor: '#161616', color: '#fff', width: '100%', height: '100%' }} className='border border-gray-600'>
               <CardHeader
                 title="Categories"
                 titleTypographyProps={{ fontSize: { xs: '1.2rem', sm: '1.3rem', md: '1.5rem' }, variant: 'h6' }}
@@ -555,8 +574,10 @@ export default function CategoriesPage() {
                         id={`panel-${category.id}-header`}
                       >
                         <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                          {handleCategoryIcon(category.icon)}
-                          <Typography sx={{ ml: 1, fontWeight: 'bold', fontSize: '1.2rem' }}>{category.name}</Typography>
+                          <Box sx={{ color: 'white', display: 'flex',alignItems: 'center'}}>
+                            {handleCategoryIcon(category.icon)}
+                          </Box>
+                          <Typography sx={{ ml: 1, fontWeight: 'bold', fontSize: '1.2rem', color: 'white' }}>{category.name}</Typography>
                         </Box>
                         {category.isCustom && (
                           <Box sx={{ ml: 'auto', display: 'flex', alignItems: 'center' }}>
@@ -579,34 +600,35 @@ export default function CategoriesPage() {
                                 <Typography sx={{ fontSize: '0.7rem', marginLeft: 3 }}>({exercise.calories_per_hour} kcal/h)</Typography>
                               </Box>
                               <Box>
-                                {!exercise.public && (
                                   <Box>
+                                    {!exercise.public && (
                                     <IconButton size="small" color="inherit" onClick={() => handleOpenEditExerciseDialog(exercise)}>
                                       <EditIcon />
                                     </IconButton>
+                                    )}
+                                    {!exercise.public && (
                                     <IconButton size="small" color="inherit" onClick={() => handleExerciseDataToDelete(exercise.id, category.id)}>
                                       <DeleteIcon />
                                     </IconButton>
+                                    )}
                                     {exercise.image_url && (
                                       <IconButton size="small" color="inherit" onClick={() => handleOpenImageModal(exercise.image_url)}>
                                         <EyeIcon />
                                       </IconButton>
                                     )}
                                   </Box>
-                                )}
 
                               </Box>
                             </Box>
                           ))}
-                          <Button
-                            variant="outlined"
+                            <Button
                             size="small"
                             startIcon={<PlusIcon />}
-                            sx={{ mt: 2 }}
+                            sx={{ mt: 2, pr: 1, color: '#fff', border: '0.5px solid white', textTransform: 'none', fontSize: '0.8rem' }}
                             onClick={() => handleOpenAddExerciseDialog(category.id)}
-                          >
+                            >
                             Add Custom Exercise
-                          </Button>
+                            </Button>
                         </Box>
                       </AccordionDetails>
                     </Accordion>
@@ -615,8 +637,9 @@ export default function CategoriesPage() {
               </CardContent>
             </Card>
             <Dialog open={imageModalOpen} onClose={handleCloseImageModal} fullWidth maxWidth="sm">
-              <DialogTitle>Exercise Image</DialogTitle>
-              <DialogContent>
+            <div className='border border-gray-600 rounded-mx'> 
+              <DialogTitle className='bg-black text-white'>Exercise Image</DialogTitle>
+              <DialogContent className='bg-black'>
                 {selectedImage ? (
                   <Box sx={{ display: 'flex', justifyContent: 'center' }}>
                     <img src={selectedImage} alt="Exercise" style={{ maxWidth: '100%', maxHeight: '400px' }} />
@@ -625,15 +648,16 @@ export default function CategoriesPage() {
                   <DialogContentText>No image available</DialogContentText>
                 )}
               </DialogContent>
-              <DialogActions>
-                <Button onClick={handleCloseImageModal} color="primary">
+              <DialogActions className='bg-black'>
+                <Button onClick={handleCloseImageModal} sx={{ color: 'white' }}>
                   Close
                 </Button>
               </DialogActions>
+            </div>
             </Dialog>
 
             {/* Nueva Card de Trainings */}
-            <Card sx={{ flex: 1, backgroundColor: '#161616', color: '#fff', width: '100%', height: '100%' }}>
+            <Card sx={{ flex: 1, backgroundColor: '#161616', color: '#fff', width: '100%', height: '100%' }} className='border border-gray-600'>
               <CardHeader
                 title="Trainings"
                 titleTypographyProps={{ fontSize: { xs: '1.2rem', sm: '1.3rem', md: '1.5rem' }, variant: 'h6' }}
@@ -716,7 +740,17 @@ export default function CategoriesPage() {
             onChange={(e) => setNewCategory({ ...newCategory, name: e.target.value, icon: newCategory?.icon || '' })}
             sx={{ mb: 3 }}
           />
-          <FormControl fullWidth margin="dense">
+          <FormControl
+              fullWidth
+              margin="dense"
+              variant="outlined"
+              sx={{
+                // Make the label white
+                '& .MuiInputLabel-root': {
+                  color: '#fff',
+                }
+              }}
+            >
             <InputLabel id="icon-label " sx={{
               color: '#fff',
               '& .MuiOutlinedInput-notchedOutline': {
@@ -735,21 +769,27 @@ export default function CategoriesPage() {
               MenuProps={{
                 PaperProps: {
                   sx: {
-                    /* display: 'flex',
-                    flexWrap: 'wrap',
                     maxWidth: 300,
-                    padding: 1, */
                     backgroundColor: '#444',
-                    color: '#fff', // Color del texto en Select
+                    color: '#fff',
                     '& .MuiOutlinedInput-notchedOutline': {
-                      borderColor: '#fff', // Color del borde
+                      borderColor: '#fff',
                     },
                     '& .MuiSvgIcon-root': {
-                      color: '#fff', // Color del ícono (flecha de selección)
+                      color: '#fff',
                     }
-
                   },
                 },
+              }}
+              sx={{
+                marginBottom: 1,
+                color: '#fff',
+                '& .MuiOutlinedInput-notchedOutline': {
+                  borderColor: '#fff',
+                },
+                '& .MuiSvgIcon-root': {
+                  color: '#fff',
+                }
               }}
             >
               <MenuItem value="">
@@ -771,6 +811,7 @@ export default function CategoriesPage() {
               <MenuItem value="Skate">{handleCategoryIcon('Skate')}</MenuItem>
               <MenuItem value="Rugby">{handleCategoryIcon('Rugby')}</MenuItem>
               <MenuItem value="Volleyball">{handleCategoryIcon('Volleyball')}</MenuItem>
+              <MenuItem value="Yoga">{handleCategoryIcon('Yoga')}</MenuItem>
             </Select >
           </FormControl >
         </DialogContent >
@@ -821,7 +862,7 @@ export default function CategoriesPage() {
             variant="standard"
             value={newExercise?.name || ''}
             InputLabelProps={{
-              style: { color: '#fff' }, // Color del label (Duration)
+              style: { color: '#fff' }, // Color del label
             }}
             InputProps={{
               style: { color: '#fff' }, // Color del texto dentro del input
@@ -894,7 +935,7 @@ export default function CategoriesPage() {
             }}
           />
           <FormControl fullWidth sx={{ marginTop: 4 }}>
-            <InputLabel id="muscle-label">Muscular Group</InputLabel>
+            <InputLabel id="muscle-label" sx={{color:'#fff'}}>Muscular Group</InputLabel>
             <Select
               labelId="muscle-label"
               id="muscle"
@@ -1023,7 +1064,7 @@ export default function CategoriesPage() {
               onChange={(e) => setEditingCategory({ ...editingCategory, name: e.target.value })}
               sx={{ mb: 3 }}
               InputLabelProps={{
-                style: { color: '#fff' }, // Color del label (Duration)
+                style: { color: '#fff' },
               }}
               InputProps={{
                 style: { color: '#fff' }, // Color del texto dentro del input
@@ -1032,21 +1073,50 @@ export default function CategoriesPage() {
                 htmlInput: { min: 1, max: 1000 }
               }}
             />
-            <FormControl fullWidth margin="dense">
+            <FormControl
+              fullWidth
+              margin="dense"
+              variant="outlined"
+              sx={{
+                // Make the label white
+                '& .MuiInputLabel-root': {
+                  color: '#fff',
+                }
+              }}
+            >
               <InputLabel id="icon-label">Icon</InputLabel>
               <Select
                 labelId="icon-label"
                 id="icon"
                 label="Icon"
                 value={editingCategory.icon}
-                onChange={(e) => setEditingCategory({ ...editingCategory, icon: e.target.value })}
+                onChange={(e) =>
+                  setEditingCategory({ ...editingCategory, icon: e.target.value })
+                }
                 MenuProps={{
                   PaperProps: {
                     sx: {
+                      maxWidth: 300,
                       backgroundColor: '#444',
                       color: '#fff',
+                      '& .MuiOutlinedInput-notchedOutline': {
+                        borderColor: '#fff',
+                      },
+                      '& .MuiSvgIcon-root': {
+                        color: '#fff',
+                      }
                     },
                   },
+                }}
+                sx={{
+                  marginBottom: 1,
+                  color: '#fff',
+                  '& .MuiOutlinedInput-notchedOutline': {
+                    borderColor: '#fff',
+                  },
+                  '& .MuiSvgIcon-root': {
+                    color: '#fff',
+                  }
                 }}
               >
                 <MenuItem value="Dumbbell">{handleCategoryIcon('Dumbbell')}</MenuItem>
@@ -1065,6 +1135,7 @@ export default function CategoriesPage() {
                 <MenuItem value="Skate">{handleCategoryIcon('Skate')}</MenuItem>
                 <MenuItem value="Rugby">{handleCategoryIcon('Rugby')}</MenuItem>
                 <MenuItem value="Volleyball">{handleCategoryIcon('Volleyball')}</MenuItem>
+                <MenuItem value="Yoga">{handleCategoryIcon('Yoga')}</MenuItem>
               </Select>
             </FormControl>
           </DialogContent>
@@ -1098,10 +1169,16 @@ export default function CategoriesPage() {
                 fullWidth
                 variant="standard"
                 value={editingExercise.name}
+                InputLabelProps={{
+                  style: { color: '#fff' }, // Color del label
+                }}
+                InputProps={{
+                  style: { color: '#fff' }, // Color del texto dentro del input
+                }}
                 onChange={(e) => setEditingExercise({ ...editingExercise, name: e.target.value })}
               />
               <FormControl fullWidth sx={{ marginTop: 2 }}>
-                <InputLabel id="muscle-label">Muscular Group</InputLabel>
+                <InputLabel id="muscle-label" sx={{color:'#fff'}}>Muscular Group</InputLabel>
                 <Select
                   labelId="muscle-label"
                   id="muscle"
@@ -1114,8 +1191,24 @@ export default function CategoriesPage() {
                         maxWidth: 300,
                         backgroundColor: '#444',
                         color: '#fff',
+                        '& .MuiOutlinedInput-notchedOutline': {
+                          borderColor: '#fff',
+                        },
+                        '& .MuiSvgIcon-root': {
+                          color: '#fff',
+                        }
                       },
                     },
+                  }}
+                  sx={{
+                    marginBottom: 1,
+                    color: '#fff',
+                    '& .MuiOutlinedInput-notchedOutline': {
+                      borderColor: '#fff',
+                    },
+                    '& .MuiSvgIcon-root': {
+                      color: '#fff',
+                    }
                   }}
                 >
                   <MenuItem value="">
@@ -1136,6 +1229,12 @@ export default function CategoriesPage() {
                 fullWidth
                 variant="standard"
                 value={editingExercise.calories_per_hour ?? ''}
+                InputLabelProps={{
+                  style: { color: '#fff' }, // Color del label
+                }}
+                InputProps={{
+                  style: { color: '#fff' }, // Color del texto dentro del input
+                }}
                 onChange={(e) => {
                   const value = e.target.value;
                   if (value === "") {

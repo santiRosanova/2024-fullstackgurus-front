@@ -14,5 +14,6 @@ export const muscularGroups = [
     "Glutes",
     "Calves",
     "Hip Flexors",
-    "Adductors"
+    "Adductors",
+    "Core"
   ];

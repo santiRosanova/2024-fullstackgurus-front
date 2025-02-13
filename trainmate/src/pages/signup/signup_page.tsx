@@ -1,27 +1,40 @@
 import React, { useState } from 'react';
 import Button from '@mui/material/Button';
-import TextField from '@mui/material/TextField';
 import { Dumbbell } from "lucide-react";
-import Select from '@mui/material/Select';
+import Select, { SelectChangeEvent } from '@mui/material/Select';
 import MenuItem from '@mui/material/MenuItem';
-import InputLabel from '@mui/material/InputLabel';
-import FormControl from '@mui/material/FormControl';
 import { Link, useNavigate } from 'react-router-dom';
-import { auth } from '../../FirebaseConfig';  // Import Firebase auth
-import { createUserWithEmailAndPassword } from 'firebase/auth';
-import { signInWithEmailAndPassword, signInWithPopup, GoogleAuthProvider } from 'firebase/auth';
+import { auth } from '../../FirebaseConfig';
+import { createUserWithEmailAndPassword, signInWithPopup, GoogleAuthProvider, sendEmailVerification, signOut } from 'firebase/auth';
 import { saveUserInfo } from '../../api/UserAPI';
 import { Input } from '@mui/material';
+import LoadingAnimation from '../../personalizedComponents/loadingAnimation';
+import { DatePicker, LocalizationProvider } from '@mui/x-date-pickers';
+import { grey } from '@mui/material/colors';
+import dayjs, { Dayjs } from 'dayjs';
+import isSameOrAfter from 'dayjs/plugin/isSameOrAfter';
+import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
+import TopMiddleAlert from '../../personalizedComponents/TopMiddleAlert';
+
+dayjs.extend(isSameOrAfter);
 
 export default function SignUp() {
   const provider = new GoogleAuthProvider();
+  const [loading, setLoading] = useState(false);
+  const [alertExerciseFillFieldsOpen, setAlertExerciseFillFieldsOpen] = useState(false);
+  const [alertEmailAlreadyInUseOpen, setAlertEmailAlreadyInUseOpen] = useState(false);
+  const [alertWeakPassword, setAlertWeakPassword] = useState(false);
+  const [alertSomethingWentWrongOpen, setAlertSomethingWentWrongOpen] = useState(false);
+  const [alertIncorrectNumbersOpen, setAlertIncorrectNumbersOpen] = useState(false);
+  const [alertEmailVerificationSent, setAlertEmailVerificationSent] = useState(false);
+  const [sentEmail, setSentEmail] = useState(false);
   const navigate = useNavigate();
   const [formData, setFormData] = useState({
     name: '',
     email: '',
     password: '',
     sex: '',
-    birthday: '',
+    birthday: null as Dayjs | null,
     weight: '',
     height: ''
   });
@@ -31,28 +44,102 @@ export default function SignUp() {
 
     setFormData((prevState) => ({
       ...prevState,
-      [name || id]: value,
+      [id || name]: value,
     }));
   };
 
+  const handleNumericChange = (
+      e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement> | SelectChangeEvent<string>
+    ) => {
+      const { name, value } = e.target;
+      const twoDecimalRegex = /^\d+(\.\d{1,2})?$/;
+      let maxValue = 0;
+      let minValue = 0;
+      if (name === 'height') {
+        maxValue = 240
+        minValue = 120
+      } else {
+        maxValue = 300
+        minValue = 25
+      }
+  
+      if (value === "") {
+        setFormData((prevState) => ({
+          ...prevState,
+          [name]: "",
+        }));
+      } else {
+        if (!twoDecimalRegex.test(value)) {
+          return;
+        }
+        const numericValue = parseFloat(value);
+        if (numericValue >= 1 && numericValue <= maxValue)  {
+          setFormData((prevState) => ({
+            ...prevState,
+            [name]: value,
+          }));
+        } else if (numericValue < 1) {
+          setFormData((prevState) => ({
+            ...prevState,
+            [name]: minValue.toString(),
+          }));
+        } else if (numericValue > maxValue) {
+          setFormData((prevState) => ({
+            ...prevState,
+            [name]: maxValue.toString(),
+          }));
+        }
+      }
+    };
+
   const handleSubmit = async (e: any) => {
     e.preventDefault();
-
+    const { name, email, password, sex, birthday, weight, height } = formData;
+    if (!name || !email || !password || !sex || !birthday || !weight || !height) {
+      setAlertExerciseFillFieldsOpen(true);
+      return;
+    }
+    const parsedWeight = parseFloat(weight);
+    const parsedHeight = parseFloat(height);
+    if (parsedWeight < 25 || parsedWeight > 300 || parsedHeight < 120 || parsedHeight > 240) {
+      setAlertIncorrectNumbersOpen(true);
+      return;
+    }
+    setLoading(true)
     const formDataWithIntegers = {
       ...formData,
       weight: parseInt(formData.weight, 10),
       height: parseInt(formData.height, 10),
+      birthday: formData.birthday ? formData.birthday.format('YYYY-MM-DD') : '',
     };
 
     try {
-      await createUserWithEmailAndPassword(auth, formDataWithIntegers.email, formDataWithIntegers.password);
-      const data: any = await signInWithEmailAndPassword(auth, formDataWithIntegers.email, formDataWithIntegers.password);
-      localStorage.setItem("token", data.user.accessToken);
-      await saveUserInfo(formDataWithIntegers)
-      navigate('/homepage');
-      window.location.reload();
+      const userCredential = await createUserWithEmailAndPassword(auth, formDataWithIntegers.email, formDataWithIntegers.password);
+      const user = userCredential.user;
+      const idToken = await user.getIdToken();
+      await saveUserInfo(idToken, formDataWithIntegers);
+      await sendEmailVerification(user);
+      await signOut(auth);
+      setFormData({name: '', email: '', password: '', sex: '', birthday: null as Dayjs | null, weight: '', height: ''});
+      setAlertEmailVerificationSent(true);
+      setSentEmail(true);
+      setLoading(false);
+      setTimeout(() => {
+        navigate('/login');
+      }, 6000);
+
     } catch (error: any) {
       console.error('Error signing up:', error.message);
+      setLoading(false)
+      if (error.code === 'auth/email-already-in-use') {
+        setAlertEmailAlreadyInUseOpen(true);
+      } 
+      else if (error.code === 'auth/weak-password') {
+        setAlertWeakPassword(true);
+      }
+      else {
+        setAlertSomethingWentWrongOpen(true);
+      }
     }
   };
 
@@ -60,6 +147,7 @@ export default function SignUp() {
     const provider = new GoogleAuthProvider();
 
     try {
+      setLoading(true);
       const result = await signInWithPopup(auth, provider);
       const user = result.user;
       const idToken = await user.getIdToken();
@@ -80,148 +168,229 @@ export default function SignUp() {
   };
   return (
     <div className="min-h-screen bg-black from-gray-900 to-gray-800 flex flex-col items-center justify-center p-4">
-      <div className="w-full max-w-md">
-        <div className="bg-black shadow-lg rounded-lg overflow-hidden border border-gray-600">
-          <div className="bg-black p-4 flex items-center justify-center">
-            <Dumbbell className="h-8 w-8 text-white mr-2" />
-            <h1 className="text-2xl font-bold text-white">TrainMate</h1>
-          </div>
-          <div className="p-6">
-            <h2 className="text-2xl font-semibold text-center text-white mb-6">Sign Up</h2>
-            <Button variant="outlined" className="w-full mb-4 flex items-center justify-center border-gray-300 text-white hover:bg-gray-100" type="button" onClick={handleGoogleSignIn}>
-              <img src={require('../../images/google_logo.png')} alt="Google logo" className="w-5 h-5 mr-2" />
-              Sign up with Google
-            </Button>
-            <div className="relative my-6">
-              <div className="absolute inset-0 flex items-center">
-                <div className="w-full border-t border-gray-300"></div>
-              </div>
-              <div className="relative flex justify-center text-sm">
-                <span className="px-2 bg-black text-gray-500">Or continue with</span>
-              </div>
-            </div>
-            <form className="space-y-4" onSubmit={handleSubmit}>
-              {/* Full Name */}
-              <div className="space-y-2 border border-gray-600 rounded">
-                <Input
-                  id="name"
-                  type="text"
-                  fullWidth
-                  required
-                  value={formData.name}
-                  onChange={handleChange}
-                  className="rounded-md p-2 text-white placeholder-white text-sm"  // Rounded borders, smaller size
-                  style={{ borderRadius: '8px', color: 'white' }}  // Optional inline styles
-                  placeholder="Full Name"  // White placeholder
-                />
-              </div>
+      {loading ? (
+        <LoadingAnimation />
+      ) : (
+        <>
+      <div className="w-full max-w-md ">
+        <TopMiddleAlert alertText='Please fill all fields' open={alertExerciseFillFieldsOpen} onClose={() => setAlertExerciseFillFieldsOpen(false)} severity='warning' />
+        <TopMiddleAlert alertText='Email is already in use. If you forgot your password, change it from login page' open={alertEmailAlreadyInUseOpen} onClose={() => setAlertEmailAlreadyInUseOpen(false)} severity='warning' />
+        <TopMiddleAlert alertText='Something went wrong signing up' open={alertSomethingWentWrongOpen} onClose={() => setAlertSomethingWentWrongOpen(false)} severity='warning' /> 
+        <TopMiddleAlert alertText='Password should be at least 6 characters long' open={alertWeakPassword} onClose={() => setAlertWeakPassword(false)} severity='warning' />
+        <TopMiddleAlert alertText='Please enter valid numbers. Weight must be a number between 25 and 300 and Height between 120 and 240' open={alertIncorrectNumbersOpen} onClose={() => setAlertIncorrectNumbersOpen(false)} severity='warning'/>
+        <TopMiddleAlert alertText='Email verification sent' open={alertEmailVerificationSent} onClose={() => setAlertEmailVerificationSent(false)} severity='success'/>
 
-              {/* Email */}
-              <div className="space-y-2 border border-gray-600 rounded">
-                <Input
-                  id="email"
-                  type="email"
-                  fullWidth
-                  required
-                  value={formData.email}
-                  onChange={handleChange}
-                  className="rounded-md p-2 text-white placeholder-white text-sm"  // Rounded borders, smaller size
-                  style={{ borderRadius: '8px', color: 'white' }}  // Optional inline styles
-                  placeholder="you@example.com"  // White placeholder
-                />
+          <div className="bg-[#161616] shadow-lg rounded-lg overflow-hidden border border-gray-600">
+              <div className="bg-[#161616] p-4 flex items-center justify-center">
+                <Dumbbell className="h-8 w-8 text-white mr-2" />
+                <h1 className="text-2xl font-bold text-white">TrainMate</h1>
               </div>
-
-              {/* Password */}
-              <div className="space-y-2 border border-gray-600 rounded">
-                <Input
-                  id="password"
-                  type="password"
-                  fullWidth
-                  required
-                  value={formData.password}
-                  onChange={handleChange}
-                  className="rounded-md p-2 text-white placeholder-white text-sm"  // Rounded borders, smaller size
-                  style={{ borderRadius: '8px', color: 'white' }}  // Optional inline styles
-                  placeholder="Password"  // White placeholder
-                />
-              </div>
-
-              {/* Sex */}
-              <div className="space-y-2 border border-gray-600 rounded">
-                <select
-                  id="sex"
-                  value={formData.sex}
-                  onChange={handleChange}
-                  className="rounded-md p-2 text-white bg-black placeholder-white text-sm w-full"
-                  style={{ borderRadius: '8px', color: 'white' }}
-                >
-                  <option value="" disabled>Select Sex</option> {/* Disabled default option */}
-                  <option value="male">Male</option>
-                  <option value="female">Female</option>
-                  <option value="other">Other</option>
-                </select>
-              </div>
-
-              {/* Birthday */}
-              <div className="space-y-2 border border-gray-600 rounded">
-                <Input
-                  id="birthday"
-                  type="date"
-                  fullWidth
-                  required
-                  value={formData.birthday}
-                  onChange={handleChange}
-                  className="rounded-md p-2 text-white placeholder-white text-sm"
-                  style={{ borderRadius: '8px', color: 'white' }}
-                />
-              </div>
-
-              {/* Weight and Height */}
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-2 border border-gray-600 rounded">
-                  <Input
-                    id="weight"
-                    type="number"
-                    fullWidth
-                    required
-                    value={formData.weight}
-                    onChange={handleChange}
-                    className="rounded-md p-2 text-white placeholder-white text-sm"
-                    style={{ borderRadius: '8px', color: 'white' }}
-                    placeholder="Weight (kg)"
-                  />
+              <div className="p-6">
+                {!sentEmail && (
+                  <>
+                <h2 className="text-2xl font-semibold text-center text-white mb-6">Sign Up</h2>
+                <Button variant="outlined" className="w-full mb-4 flex items-center justify-center border-gray-300 text-white" type="button" onClick={handleGoogleSignIn}>
+                  <img src={require('../../images/google_logo.png')} alt="Google logo" className="w-5 h-5 mr-2" />
+                  Sign up with Google
+                </Button>
+                <div className="relative my-6">
+                  <div className="absolute inset-0 flex items-center">
+                    <div className="w-full border-t border-gray-300"></div>
+                  </div>
+                  <div className="relative flex justify-center text-sm">
+                    <span className="px-2 bg-[#161616] text-gray-500">Or continue with</span>
+                  </div>
                 </div>
-                <div className="space-y-2 border border-gray-600 rounded">
-                  <Input
-                    id="height"
-                    type="number"
-                    fullWidth
-                    required
-                    value={formData.height}
-                    onChange={handleChange}
-                    className="rounded-md p-2 text-white placeholder-white text-sm"
-                    style={{ borderRadius: '8px', color: 'white' }}
-                    placeholder="Height (cm)"
-                  />
+                <form className="space-y-4" onSubmit={handleSubmit} noValidate>
+                  {/* Full Name */}
+                  <div className="space-y-2 border border-gray-600 rounded h-14">
+                    <Input
+                      id="name"
+                      type="text"
+                      fullWidth
+                      value={formData.name}
+                      onChange={handleChange}
+                      className="rounded-md p-2 text-white placeholder-white text-sm" // Rounded borders, smaller size
+                      sx={{ height: '100%' }}
+                      style={{ borderRadius: '8px', color: 'white' }} // Optional inline styles
+                      placeholder="Full Name" // White placeholder
+                    />
+                  </div>
+
+                  {/* Email */}
+                  <div className="space-y-2 border border-gray-600 rounded h-14">
+                    <Input
+                      id="email"
+                      type="email"
+                      fullWidth
+                      value={formData.email}
+                      onChange={handleChange}
+                      className="rounded-md p-2 text-white placeholder-white text-sm" // Rounded borders, smaller size
+                      sx={{ height: '100%' }}
+                      style={{ borderRadius: '8px', color: 'white' }} // Optional inline styles
+                      placeholder="you@example.com" // White placeholder
+                    />
+                  </div>
+
+                  {/* Password */}
+                  <div className="space-y-2 border border-gray-600 rounded h-14">
+                    <Input
+                      id="password"
+                      type="password"
+                      fullWidth
+                      value={formData.password}
+                      onChange={handleChange}
+                      className="rounded-md p-2 text-white placeholder-white text-sm" // Rounded borders, smaller size
+                      sx={{ height: '100%' }}
+                      style={{ borderRadius: '8px', color: 'white' }} // Optional inline styles
+                      placeholder="Password" // White placeholder
+                    />
+                  </div>
+
+                  {/* Sex */}
+                  <div className="space-y-2 border border-gray-600 rounded h-14">
+                    <Select
+                      name="sex"
+                      value={formData.sex}
+                      onChange={handleChange}
+                      displayEmpty
+                      fullWidth
+                      sx={{ color: 'white', height: '100%' }}
+                      MenuProps={{
+                        PaperProps: {
+                          style: {
+                            backgroundColor: '#161616',
+                            color: 'white',
+                          },
+                        },
+                      }}
+                    >
+                      <MenuItem value="" disabled>
+                        <span style={{ color: 'gray' }}>Select Gender</span>
+                      </MenuItem>
+                      <MenuItem value="male">Male</MenuItem>
+                      <MenuItem value="female">Female</MenuItem>
+                    </Select>
+                  </div>
+
+                  {/* Birthday */}
+                  <div className="space-y-2 border border-gray-600 rounded h-14">
+                    <LocalizationProvider dateAdapter={AdapterDayjs}>
+                      <DatePicker
+                        label="Birthday"
+                        value={formData.birthday}
+                        onChange={(newValue: Dayjs | null) =>
+                          setFormData((prevState) => ({
+                            ...prevState,
+                            birthday: newValue,
+                          }))
+                        }
+                        format="DD/MM/YYYY"
+                        maxDate={dayjs()}
+                        slotProps={{
+                          textField: {
+                            fullWidth: true,
+                            sx: {
+                              backgroundColor: "#161616",
+                              color: grey[50],
+                              borderRadius: '8px',
+                              label: { color: grey[600]},
+                              input: { color: '#fff' },
+                              "& .MuiOutlinedInput-root": {
+                                "& fieldset": { borderColor: grey[700] },
+                                "&:hover fieldset": { borderColor: grey[700] },
+                                "&.Mui-focused fieldset": { borderColor: grey[100] },
+                              },
+                            },
+                          },
+                          popper: {
+                            sx: {
+                              "& .MuiPaper-root": { backgroundColor: grey[800] },
+                              "& .MuiPickersCalendarHeader-root": { color: grey[50] },
+                              "& .MuiDayCalendar-weekDayLabel": { color: grey[400] },
+                              "& .MuiPickersDay-root": { color: grey[50] },
+                              "& .MuiPickersDay-root.Mui-selected": {
+                                backgroundColor: '#000000 !important',
+                                color: grey[50],
+                                fontWeight: 'bold',
+                              },
+                              "& .MuiPickersDay-root.Mui-selected:hover": {
+                                backgroundColor: '#000000 !important',
+                              },
+                              "& .MuiPickersDay-root.MuiPickersDay-today": {
+                                border: `1px solid ${grey[700]}`,
+                              },
+                              "& .MuiPickersDay-root:hover": {
+                                backgroundColor: grey[600],
+                              },
+                            },
+                          },
+                          openPickerButton: {
+                            sx: {
+                              color: grey[600],
+                            },
+                          },
+                        }}
+                      />
+                    </LocalizationProvider>
+                  </div>
+
+                  {/* Weight and Height */}
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="space-y-2 border border-gray-600 rounded h-14">
+                      <Input
+                        id="weight"
+                        type="number"
+                        name='weight'
+                        fullWidth
+                        value={formData.weight}
+                        onChange={handleNumericChange}
+                        className="rounded-md p-2 text-white placeholder-white text-sm"
+                        sx={{ height: '100%' }}
+                        style={{ borderRadius: '8px', color: 'white' }}
+                        placeholder="Weight (kg)" />
+                    </div>
+                    <div className="space-y-2 border border-gray-600 rounded h-14">
+                      <Input
+                        id="height"
+                        type="number"
+                        name='height'
+                        fullWidth
+                        value={formData.height}
+                        onChange={handleNumericChange}
+                        className="rounded-md p-2 text-white placeholder-white text-sm"
+                        sx={{ height: '100%' }}
+                        style={{ borderRadius: '8px', color: 'white' }}
+                        placeholder="Height (cm)" />
+                    </div>
+                  </div>
+                  {/* Submit Button */}
+                  <Button fullWidth variant="contained" type="submit">
+                    Sign Up
+                  </Button>
+                </form>
+                <div className="mt-6 border-t pt-4">
+                  <p className="text-center text-sm text-white">
+                    Already have an account?{" "}
+                    <Link to="/login" className="text-white hover:underline">Log In</Link>
+                  </p>
                 </div>
+              </>
+              )}
+              {sentEmail && (
+              <div className="text-white text-center">
+                <h2 className="text-xl mb-4">Verification email sent. Please check your email to verify your account before logging in</h2>
+                <Button fullWidth variant="contained" onClick={() => navigate('/login')}>
+                  Back to Log In
+                </Button>
               </div>
-              {/* Submit Button */}
-              <Button fullWidth variant="contained" type="submit">
-                Sign Up
-              </Button>
-            </form>
-            <div className="mt-6 border-t pt-4">
-              <p className="text-center text-sm text-white">
-                Already have an account?{" "}
-                <Link to="/login" className="text-white hover:underline">Log In</Link>
-              </p>
+              )}
             </div>
+            </div><div className="mt-8 text-center text-white text-sm">
+                <p>© 2024 TrainMate. All rights reserved.</p>
           </div>
-        </div>
-        <div className="mt-8 text-center text-white text-sm">
-          <p>© 2024 TrainMate. All rights reserved.</p>
-        </div>
       </div>
+      </>)}
     </div>
   );
 }

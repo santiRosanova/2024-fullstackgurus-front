@@ -34,10 +34,10 @@ export default function AreYouSureAlert({areYouSureTitle, areYouSureText, open, 
           </DialogContentText>
         </DialogContent>
         <DialogActions>
-          <Button onClick={handleCloseDisagree} color="primary">
+          <Button onClick={handleCloseDisagree} sx={{color: 'white'}}>
             Disagree
           </Button>
-          <Button onClick={() => handleCloseAgree(dataToDelete)} color="primary" autoFocus>
+          <Button onClick={() => handleCloseAgree(dataToDelete)} sx={{color: 'white'}} autoFocus>
             Agree
           </Button>
         </DialogActions>

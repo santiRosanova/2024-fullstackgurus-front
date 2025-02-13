@@ -11,7 +11,7 @@ export const getCoaches = async () => {
     if (!token) throw new Error('Token no encontrado');
     
     try {
-    const response = await fetch(`${EXTERNAL_URL}/get_users`, {
+    const response = await fetch(`${EXTERNAL_URL}/get_coach_users`, {
       method: 'GET',
       headers: {
         'Authorization': token

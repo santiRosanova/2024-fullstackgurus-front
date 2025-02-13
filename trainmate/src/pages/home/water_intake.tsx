@@ -89,7 +89,7 @@ const WaterIntakeCard: React.FC = () => {
             <ArrowBackIcon style={{ color: '#fff' }} />
           </IconButton>
           <Typography variant="h6">
-            {currentDate}
+            {currentDate.split('-').slice(1).reverse().join('/')}
           </Typography>
           <IconButton onClick={handleNextDay}>
             <ArrowForwardIcon style={{ color: '#fff' }} />

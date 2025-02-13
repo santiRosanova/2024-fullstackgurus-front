@@ -14,22 +14,22 @@ import DialogTitle from '@mui/material/DialogTitle';
 import TextField from '@mui/material/TextField';
 import { grey } from '@mui/material/colors';
 import CloseIcon from '@mui/icons-material/Close';
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, ResponsiveContainer, Tooltip, Brush, Rectangle, Legend } from 'recharts';
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, ResponsiveContainer, Tooltip, Brush, Legend } from 'recharts';
 import Typography from '@mui/material/Typography';
 import ScrollArea from '@mui/material/Box';
-import { getWorkouts, saveWorkout, getWorkoutsCalories } from '../../api/WorkoutsApi';
+import { getLastModifiedWorkoutsTimestamp, getWorkouts, saveWorkout, updateLastModifiedWorkoutsTimestamp } from '../../api/WorkoutsApi';
 import { calculate_calories_and_duration_per_day } from '../../functions/calculations';
 import { useNavigate } from 'react-router-dom';
 import Box from '@mui/material/Box';
 import TopMiddleAlert from '../../personalizedComponents/TopMiddleAlert';
-import { getCategories } from '../../api/CategoryApi';
+import { getCategories, getLastModifiedCategoryTimestamp } from '../../api/CategoryApi';
 import { getExerciseFromCategory } from '../../api/ExerciseApi';
 import { getCoaches } from '../../api/CoachesApi_external';
 import { FilterTrainingDialog } from './filter_training';
 import { Divider } from '@mui/material';
 import { top_exercises_done } from '../../functions/top_exercises_done';
 import DynamicBarChart from './bars_graph';
-import { getTrainings } from '../../api/TrainingApi';
+import { getTrainings, getLastModifiedTrainingsTimestamp } from '../../api/TrainingApi';
 import { FilterCoachDialog } from './filter_coach';
 import WaterIntakeCard from './water_intake';
 import ResponsiveMenu from './menu_responsive';
@@ -40,10 +40,17 @@ import { getFilteredData } from './dates_filter';
 import { getChallenges } from '../../api/ChallengesApi';
 import ChallengeModal from '../../personalizedComponents/challengeModal';
 import WorkspacePremiumTwoToneIcon from '@mui/icons-material/WorkspacePremiumTwoTone';
-import { Tooltip as TooltipMui } from '@mui/material';
 import { calculate_last_30_days_calories_progress } from '../../functions/progress_calories_calcs';
 import Last30DaysProgress from './last30daysCaloriesProgress';
+import { subDays, format } from 'date-fns';
+import { ArrowBack, ArrowForward } from '@mui/icons-material';
+import Last30DaysCalendar from './last30daysCalendar';
+import dayjs, { Dayjs } from 'dayjs';
+import isSameOrAfter from 'dayjs/plugin/isSameOrAfter';
+import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
+import { DatePicker, LocalizationProvider } from '@mui/x-date-pickers';
 
+dayjs.extend(isSameOrAfter);
 
 interface Workout {
   id: number;
@@ -118,7 +125,8 @@ interface Challenges {
 
 export default function HomePage() {
   const navigate = useNavigate();
-  const [timeRange, setTimeRange] = useState('month');
+  const [timeRange, setTimeRange] = useState<'WEEKLY' | 'TWO_WEEKS'>('WEEKLY');
+  const [rangeIndex, setRangeIndex] = useState(0);
   const [open, setOpen] = useState(false);
   const [alertWorkoutAddedOpen, setAlertWorkoutAddedOpen] = useState(false);
   const [alertWorkoutAddedForAgendaOpen, setAlertWorkoutAddedForAgendaOpen] = useState(false);
@@ -187,16 +195,6 @@ export default function HomePage() {
     }
   };
 
-  useEffect(() => {
-    const updateTimeRange = () => {
-      setTimeRange(window.innerWidth < 768 ? 'WEEKLY' : 'TWO_WEEKS');
-    };
-    updateTimeRange(); // Set initially
-    window.addEventListener('resize', updateTimeRange);
-
-    return () => window.removeEventListener('resize', updateTimeRange);
-  }, []);
-
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
     const day = date.getDate().toString().padStart(2, '0');
@@ -223,8 +221,41 @@ export default function HomePage() {
     training_id: '',
     duration: '',
     coach: '',
-    date: new Date().toISOString().split('T')[0],
+    date: null as Dayjs | null,
   });
+
+  useEffect(() => {
+    const updateTimeRange = () => {
+      setTimeRange(window.innerWidth < 768 ? 'WEEKLY' : 'TWO_WEEKS');
+    };
+    updateTimeRange();
+    window.addEventListener('resize', updateTimeRange);
+    return () => window.removeEventListener('resize', updateTimeRange);
+  }, []);
+
+  const daysForPeriod = timeRange === 'WEEKLY' ? 7 : 14;
+
+  const { startDate, endDate } = useMemo(() => {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    const computedEnd = subDays(today, rangeIndex * daysForPeriod);
+    const computedStart = subDays(computedEnd, daysForPeriod - 1);
+
+    return { startDate: computedStart, endDate: computedEnd };
+  }, [rangeIndex, daysForPeriod]);
+
+  const filteredData = useMemo(() => {
+    return getFilteredData(dataForChart, startDate, endDate);
+  }, [dataForChart, startDate, endDate]);
+
+  const handlePrevRange = () => {
+    setRangeIndex(prev => prev + 1);
+  };
+
+  const handleNextRange = () => {
+    setRangeIndex(prev => (prev > 0 ? prev - 1 : 0));
+  };
 
   const handleClickOpen = () => {
     setOpen(true);
@@ -369,20 +400,13 @@ export default function HomePage() {
       training_id: '',
       duration: '',
       coach: '',
-      date: new Date().toISOString().split('T')[0],
+      date: null as Dayjs | null,
     });
   }
 
   const handleAddWorkout = async () => {
     if (newWorkout.training_id && newWorkout.duration && newWorkout.date) {
       setLoadingButton(true)
-
-      setNewWorkout({
-        training_id: '',
-        coach: '',
-        duration: '',
-        date: new Date().toISOString().split('T')[0],
-      });
 
       try {
         const token = localStorage.getItem('token');
@@ -391,17 +415,24 @@ export default function HomePage() {
             training_id: newWorkout.training_id,
             coach: newWorkout.coach,
             duration: parseInt(newWorkout.duration, 10),
-            date: newWorkout.date,
+            date: newWorkout.date.format('YYYY-MM-DD'),
           });
           console.log('Workout saved successfully');
-          setWorkoutsCount((prevCount) => prevCount + 1);
-          // Verificar si la fecha es futura para hacer alertas distintas
-          const today = new Date().toISOString().split('T')[0];
-          if (newWorkout.date > today) {
+
+          const today = dayjs().format('YYYY-MM-DD');
+          if (newWorkout.date.format('YYYY-MM-DD') > today) {
             setAlertWorkoutAddedForAgendaOpen(true);
           } else {
             setAlertWorkoutAddedOpen(true);
           }
+
+          const updatedTimestamp = await updateLastModifiedWorkoutsTimestamp();
+          localStorage.removeItem('workouts');
+          localStorage.removeItem('calories_duration_per_day');
+          localStorage.removeItem('workouts_timestamp');
+          setWorkoutsCount((prevCount) => prevCount + 1);
+          setLoadingButton(false)
+
         } else {
           setLoadingButton(false)
           console.error('No token found, unable to save workout');
@@ -411,11 +442,8 @@ export default function HomePage() {
         console.error('Error saving workout:', error);
       }
 
-      setLoadingButton(false)
       handleCloseWorkoutAdding();
       handleClose();
-      localStorage.removeItem('workouts');
-      localStorage.removeItem('calories_duration_per_day');
     }
     else {
       setAlertWorkoutFillFieldsOpen(true);
@@ -452,11 +480,12 @@ export default function HomePage() {
 
         // Step 1: Fetch Categories and Exercises
         console.log("Fetching categories and exercises...");
+        const lastModifiedCategoriesTimestamp = await getLastModifiedCategoryTimestamp();
         const categories_from_local_storage = JSON.parse(localStorage.getItem('categories') || '[]');
         const categories_timestamp = parseInt(localStorage.getItem('categories_timestamp') || '0', 10);
         const exercises_from_local_storage = JSON.parse(localStorage.getItem('categories_with_exercises') || '[]');
 
-        if (categories_from_local_storage.length > 0 && exercises_from_local_storage.length > 0 && (now - categories_timestamp < TTL)) {
+        if (categories_from_local_storage.length > 0 && exercises_from_local_storage.length > 0 && lastModifiedCategoriesTimestamp === categories_timestamp) {
           setCategories(categories_from_local_storage);
           setCategoryWithExercises(exercises_from_local_storage);
         } else {
@@ -473,23 +502,26 @@ export default function HomePage() {
 
           localStorage.setItem('categories_with_exercises', JSON.stringify(categories_with_exercises));
           localStorage.setItem('categories', JSON.stringify(categories));
-          localStorage.setItem('categories_timestamp', Date.now().toString());
+          localStorage.setItem('categories_timestamp', lastModifiedCategoriesTimestamp);
         }
 
         // Step 2: Fetch Workouts
         console.log("Fetching workouts...");
+        const lastModifiedWorkoutsTimestamp = await getLastModifiedWorkoutsTimestamp();
+        console.log('Last modified workouts timestamp:', lastModifiedWorkoutsTimestamp);
+        const localWorkoutTimestamp = parseInt(localStorage.getItem('workouts_timestamp') || '0', 10);
         const workouts_from_local_storage = JSON.parse(localStorage.getItem('workouts') || '[]');
-        const workouts_timestamp = parseInt(localStorage.getItem('workouts_timestamp') || '0', 10);
+
         const calories_duration_per_day_from_local_storage = JSON.parse(localStorage.getItem('calories_duration_per_day') || '{}');
         let sortedWorkouts = workouts_from_local_storage;
 
-        if (workouts_from_local_storage.length > 0 && Object.keys(calories_duration_per_day_from_local_storage).length > 0 && (now - workouts_timestamp < TTL)) {
+        if (workouts_from_local_storage.length > 0 && Object.keys(calories_duration_per_day_from_local_storage).length > 0 && (lastModifiedWorkoutsTimestamp === localWorkoutTimestamp)) {
           setWorkoutList(workouts_from_local_storage);
           setCaloriesPerDay(calories_duration_per_day_from_local_storage);
           console.log('Workouts and calories per day loaded from local storage');
         } else {
           const workouts = await getAllWorkouts();
-          const validWorkouts = workouts.filter((workout: Workout) => workout.duration && workout.date && workout.total_calories && workout.coach);
+          const validWorkouts = workouts.filter((workout: Workout) => workout.duration && workout.date && workout.total_calories);
           sortedWorkouts = validWorkouts.sort((a: Workout, b: Workout) => new Date(b.date).getTime() - new Date(a.date).getTime());
           setWorkoutList(sortedWorkouts);
 
@@ -497,11 +529,11 @@ export default function HomePage() {
           setCaloriesPerDay(calories_duration_per_day);
 
           localStorage.setItem('workouts', JSON.stringify(sortedWorkouts));
-          localStorage.setItem('workouts_timestamp', Date.now().toString());
+          localStorage.setItem('workouts_timestamp', lastModifiedWorkoutsTimestamp);
           localStorage.setItem('calories_duration_per_day', JSON.stringify(calories_duration_per_day));
         }
 
-        // Step 3: Fetch Coaches
+        // Step 3: Fetch Coaches (fijarse si vale la pena guardar en local storage)
         console.log("Fetching coaches...");
         const coaches_from_local_storage = JSON.parse(localStorage.getItem('coaches') || '[]');
         const coaches_timestamp = parseInt(localStorage.getItem('coaches_timestamp') || '0', 10);
@@ -517,11 +549,20 @@ export default function HomePage() {
         }
 
         // Step 4: Fetch Trainings
-        console.log("Fetching trainings...");
-        const trainings = await getAllTrainings();
-        if (trainings) {
-          setTrainings(trainings);
-          console.log(trainings);
+        const lastModifiedTrainingTimestamp = await getLastModifiedTrainingsTimestamp();
+        const localTrainingTimestamp = parseInt(localStorage.getItem('trainings_timestamp') || '0', 10);
+        const storedTrainings = JSON.parse(localStorage.getItem('trainings') || '[]');
+        if (lastModifiedTrainingTimestamp && storedTrainings.length > 0 && lastModifiedTrainingTimestamp === localTrainingTimestamp) {
+          setTrainings(storedTrainings);
+          console.log('Trainings loaded from local storage');
+        } else {
+          console.log("Fetching trainings...");
+          const trainings = await getAllTrainings();
+          if (trainings) {
+            setTrainings(trainings);
+            localStorage.setItem('trainings', JSON.stringify(trainings));
+            localStorage.setItem('trainings_timestamp', lastModifiedTrainingTimestamp);
+          }
         }
 
         // Step 5: Fetch Challenges
@@ -608,7 +649,6 @@ export default function HomePage() {
             color: '#fff',
             borderRadius: '8px',
             padding: 2,
-            maxWidth: '30vw',
             width: '100%',
             height: 'auto',
             '@media (max-width: 1024px)': {
@@ -624,14 +664,14 @@ export default function HomePage() {
       >
         <DialogActions>
           <IconButton aria-label="add" onClick={handleClose}>
-            <CloseIcon sx={{ color: grey[900], fontSize: { xs: '1.2rem', sm: '1.5rem', md: '2rem' } }} className="h-8 w-8" />
+            <CloseIcon sx={{ color: '#fff', mt: -2, mr: -2, fontSize: { xs: '1.2rem', sm: '1.5rem', md: '2rem' } }} className="h-8 w-8" />
           </IconButton>
         </DialogActions>
 
         <DialogTitle sx={{
           textAlign: 'center',
           fontWeight: 'bold',
-          mt: -6,
+          mt: -4,
           fontSize: { xs: '1.2rem', sm: '1.5rem', md: '2rem' },
         }}>
           What do you want to add?
@@ -681,6 +721,7 @@ export default function HomePage() {
             backgroundColor: grey[800],
             color: '#fff', // Esto ajusta el color del texto principal
             padding: 2,
+            width: '100%',
           },
         }} className='border border-gray-600 rounded'>
         <DialogTitle sx={{ color: '#fff', textAlign: 'center' }}>Add New Workout</DialogTitle>
@@ -723,44 +764,50 @@ export default function HomePage() {
               </MenuItem>
             ))}
           </Select>
-
-          <Select
-            fullWidth
-            value={coachSelected}
-            onChange={(e) => { setCoachSelected(e.target.value); setNewWorkout({ ...newWorkout, coach: e.target.value }) }}
-            displayEmpty
-            sx={{
-              marginBottom: 1,
-              color: '#fff',
-              '& .MuiOutlinedInput-notchedOutline': {
-                borderColor: '#fff',
-              },
-              '& .MuiSvgIcon-root': {
+          
+          <Box sx={{width: '100%'}} display={ 'flex' } justifyContent="space-between" alignItems="center" gap={2}>
+            <Select
+              fullWidth
+              value={coachSelected}
+              onChange={(e) => { setCoachSelected(e.target.value); setNewWorkout({ ...newWorkout, coach: e.target.value }) }}
+              displayEmpty
+              sx={{
+                marginBottom: 0,
                 color: '#fff',
-              }
-            }}
-            MenuProps={{
-              PaperProps: {
-                sx: {
-                  display: 'flex',
-                  flexWrap: 'wrap',
-                  maxWidth: 300,
-                  padding: 1,
-                  backgroundColor: '#444',
-                  color: '#fff',
+                '& .MuiOutlinedInput-notchedOutline': {
+                  borderColor: '#fff',
                 },
-              },
-            }}
-          >
-            <MenuItem value="" disabled>
-              Select Coach
-            </MenuItem>
-            {coaches.map((coach: any) => (
-              <MenuItem key={coach.fullName} value={coach.fullName}>
-                {coach.fullName}
+                '& .MuiSvgIcon-root': {
+                  color: '#fff',
+                }
+              }}
+              MenuProps={{
+                PaperProps: {
+                  sx: {
+                    display: 'flex',
+                    flexWrap: 'wrap',
+                    maxWidth: 300,
+                    padding: 1,
+                    backgroundColor: '#444',
+                    color: '#fff',
+                  },
+                },
+              }}
+            >
+              <MenuItem value="" disabled>
+                Select Coach
               </MenuItem>
-            ))}
-          </Select>
+              {coaches.map((coach: any) => (
+                <MenuItem key={coach.fullName} value={coach.fullName}>
+                  {coach.fullName}
+                </MenuItem>
+              ))}
+            </Select>
+            <Box alignContent={'center'} display={'flex'} flexDirection={'column'} justifyContent={'center'} alignItems={'center'}>
+              <Typography variant="body1" sx={{ fontWeight: 'bold', fontSize: '0.56rem', textAlign: 'center' }}>From GymGenius ©</Typography>
+              <img src={require('../../images/LogoGymGeniusIcon.png')} alt="Logo" width={50} height={50} />
+            </Box>
+          </Box>
 
           <TextField
             fullWidth
@@ -795,29 +842,64 @@ export default function HomePage() {
             }}
             sx={{
               '& .MuiOutlinedInput-notchedOutline': {
-                borderColor: '#fff', // Color del borde
-              },
-            }}
-          />
-          <TextField
-            fullWidth
-            margin="dense"
-            label="Date"
-            type="date"
-            value={newWorkout.date}
-            onChange={(e) => setNewWorkout({ ...newWorkout, date: e.target.value })}
-            InputLabelProps={{
-              style: { color: '#fff' }, // Color del label (Date)
-            }}
-            InputProps={{
-              style: { color: '#fff' }, // Color del texto dentro del input
-            }}
-            sx={{
-              '& .MuiOutlinedInput-notchedOutline': {
                 borderColor: '#fff',
               },
             }}
           />
+          <Box sx={{mt: 1.2}}>
+            <LocalizationProvider dateAdapter={AdapterDayjs}>
+              <DatePicker
+                label="Date"
+                value={newWorkout.date}
+                onChange={(newValue: Dayjs | null) =>setNewWorkout((prevState) => ({...prevState,date: newValue,}))}
+                format="DD/MM/YYYY"
+                slotProps={{
+                  textField: {
+                    fullWidth: true,
+                    sx: {
+                      backgroundColor: "#444",
+                      color: grey[50],
+                      borderRadius: '8px',
+                      label: { color: '#fff'},
+                      input: { color: '#fff' },
+                      "& .MuiOutlinedInput-root": {
+                        "& fieldset": { borderColor: '#fff' },
+                        "&:hover fieldset": { borderColor: 'black' },
+                        "&.Mui-focused fieldset": { borderColor: grey[100] },
+                      },
+                    },
+                  },
+                  popper: {
+                    sx: {
+                      "& .MuiPaper-root": { backgroundColor: grey[800] },
+                      "& .MuiPickersCalendarHeader-root": { color: grey[50] },
+                      "& .MuiDayCalendar-weekDayLabel": { color: grey[400] },
+                      "& .MuiPickersDay-root": { color: grey[50] },
+                      "& .MuiPickersDay-root.Mui-selected": {
+                        backgroundColor: '#000000 !important',
+                        color: grey[50],
+                        fontWeight: 'bold',
+                      },
+                      "& .MuiPickersDay-root.Mui-selected:hover": {
+                        backgroundColor: '#000000 !important',
+                      },
+                      "& .MuiPickersDay-root.MuiPickersDay-today": {
+                        border: `1px solid ${grey[700]}`,
+                      },
+                      "& .MuiPickersDay-root:hover": {
+                        backgroundColor: grey[600],
+                      },
+                    },
+                  },
+                  openPickerButton: {
+                    sx: {
+                      color: '#fff',
+                    },
+                  },
+                }}
+              />
+            </LocalizationProvider>
+          </Box>
         </DialogContent>
         <DialogActions>
           <LoadingButton
@@ -849,15 +931,45 @@ export default function HomePage() {
         <main className="p-4 space-y-6">
           <Card sx={{ backgroundColor: '#161616', color: '#fff' }} className='border border-gray-600' >
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-              <CardHeader title="Workouts progress" />
-              <TooltipMui title="Challenges" arrow>
-                <Box sx={{ cursor: 'pointer', display: 'flex', flexDirection: 'column', alignItems: 'center' }} onClick={() => setChallengeModalOpen(true)}>
-                  <WorkspacePremiumTwoToneIcon sx={{ fontSize: 50, mt: 2, mb: 1, mr: 2 }} style={{ color: '#AE8625' }}/>
-                  <Typography sx={{mr: 2, mb: 0, mt: 0}} style={{ color: '#AE8625'}}>Challenges</Typography>
+              <CardHeader title="Workouts progress" sx={{ ml: 2, mt:-2}}/>
+              <Box display="flex" justifyContent="center" alignItems="center" gap={5} sx={{mt: 2}}>
+                <Last30DaysCalendar dataForChart={dataForChart}/>
+                  <Box sx={{ cursor: 'pointer', display: 'flex', flexDirection: 'column', alignItems: 'center' }} onClick={() => setChallengeModalOpen(true)}>
+                    <WorkspacePremiumTwoToneIcon sx={{ fontSize: 50, mr: 2 }} style={{ color: '#AE8625' }}/>
+                    <Typography sx={{mr: 2, mb: 0, mt: 1}} style={{ color: '#AE8625'}}>Challenges</Typography>
+                  </Box>
                 </Box>
-              </TooltipMui>
             </div>
             <CardContent>
+
+              <Box display="flex" justifyContent="center" alignItems="center" mb={1} sx={{ mt: { xs: 2, sm: -5, lg:-5 } }}>
+                <IconButton onClick={handlePrevRange}>
+                  <ArrowBack sx={{color: '#fff'}}/>
+                </IconButton>
+                <Typography variant="h6" sx={{ mx: 1 }}>
+                  {format(startDate, 'dd/MM')} - {format(endDate, 'dd/MM')}
+                </Typography>
+                <IconButton onClick={handleNextRange} disabled={rangeIndex === 0}>
+                  <ArrowForward sx={{color: rangeIndex===0 ? 'grey' : '#fff'}}/>
+                </IconButton>
+                <Button variant="outlined" onClick={() => setRangeIndex(0)} disabled={rangeIndex === 0} 
+                  sx={{
+                    fontSize: 12,
+                    ml: 2,
+                    color: 'white',
+                    borderColor: 'white',
+                    '&:hover': {
+                      borderColor: 'white',
+                      backgroundColor: 'rgba(255, 255, 255, 0.1)',
+                    },
+                    '&.Mui-disabled': {
+                      color: 'gray',
+                      borderColor: 'gray',
+                    },
+                  }}>
+                  Today
+                </Button>
+              </Box>
 
               {(selectedTrainingInFilter && selectedTrainingInFilter.name) ? (
                 <Box
@@ -910,9 +1022,9 @@ export default function HomePage() {
                 <Box></Box>
               )}
 
-              <ResponsiveContainer width="100%" height={440} >
-                {Array.isArray(workoutList) && workoutList.length > 0 ? (
-                  <LineChart data={getFilteredData(dataForChart, timeRange)} margin={{ top: 10, right: 0, left: 0, bottom: 40 }}>
+              <ResponsiveContainer width="100%" height={440}>
+                {filteredData && filteredData.length > 0 ? (
+                  <LineChart data={filteredData} margin={{ top: 10, right: 0, left: 0, bottom: 40 }}>
                     <CartesianGrid strokeDasharray="3 3" />
                     <XAxis dataKey="date" stroke="#fff" tick={{ dy: 13 }} />
                     <YAxis stroke="#E43654" yAxisId="left" tick={{ fontWeight: 'bold' }} />
@@ -1004,7 +1116,7 @@ export default function HomePage() {
                               </span>
                             ))}
                           </Typography>
-                          <Typography variant="body2" color="gray">Coach: {workout.coach}</Typography>
+                          <Typography variant="body2" color="gray">Coach: {workout.coach ? workout.coach : '-'}</Typography>
                         </div>
                       </div>
                     ))
@@ -1033,4 +1145,3 @@ export default function HomePage() {
     </div>
   );
 }
-

@@ -1,4 +1,5 @@
 import { BASE_URL } from "../constants";
+import { refreshAuthToken } from "../utils/AuthUtils";
 
 // Obtener el token del usuario autenticado desde el localStorage
 const getAuthToken = () => {
@@ -14,8 +15,8 @@ const handleResponse = async (response: Response) => {
   return response.json();
 };
 
-export const saveUserInfo = async (userInfo: { weight: number; height: number; name: string; email: string; password: string; sex: string; birthday: string; }) => {
-  const token = getAuthToken();
+export const saveUserInfo = async (idToken: string, userInfo: { weight: number; height: number; name: string; email: string; password: string; sex: string; birthday: string; }) => {
+  const token = `Bearer ${idToken}`;
   if (!token) throw new Error('Token no encontrado');
 
   const response = await fetch(`${BASE_URL}/save-user-info`, {
@@ -40,6 +41,18 @@ export const getUserProfile = async () => {
       'Authorization': token
     }
   });
+
+  if (response.status === 403 || response.status === 401) {
+      console.log('Token expirado, intentando renovar...');
+      const newToken = await refreshAuthToken();
+      const retryResponse = await fetch(`${BASE_URL}/get-user-info`, {
+        method: 'GET',
+        headers: {
+          'Authorization': `Bearer ${newToken}`,
+        },
+      });
+      return handleResponse(retryResponse)
+  }
 
   return handleResponse(response);
 };

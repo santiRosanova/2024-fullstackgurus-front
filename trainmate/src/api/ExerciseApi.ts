@@ -106,11 +106,12 @@ export const getExerciseFromCategory = async (category_id: String) => {
     }
   };
 
-export const editExercise = async (exerciseData: { name: string, calories_per_hour: number | string, training_muscle: string, image_url: string }, exercise_id: string) => {
+export const editExercise = async (exerciseData: { name: string, calories_per_hour: number | string, training_muscle: string, image_url: string }, exercise_id: string, old_image: string) => {
         
-        console.log(exerciseData)
         const token = getAuthToken();
         if (!token) throw new Error('Token no encontrado');
+
+        const fullExerciseData = { ...exerciseData, old_image };
     
         try {
         const response = await fetch(`${BASE_URL}/api/exercise/edit-exercise/${exercise_id}`, {
@@ -119,7 +120,7 @@ export const editExercise = async (exerciseData: { name: string, calories_per_ho
             'Content-Type': 'application/json',
             'Authorization': token,
             },
-            body: JSON.stringify(exerciseData),
+            body: JSON.stringify(fullExerciseData),
         });
     
         // Si la respuesta es 401, intentamos renovar el token
@@ -133,7 +134,7 @@ export const editExercise = async (exerciseData: { name: string, calories_per_ho
                 'Content-Type': 'application/json',
                 'Authorization': `Bearer ${newToken}`,
             },
-            body: JSON.stringify(exerciseData),
+            body: JSON.stringify(fullExerciseData),
             });
     
             if (!retryResponse.ok) {

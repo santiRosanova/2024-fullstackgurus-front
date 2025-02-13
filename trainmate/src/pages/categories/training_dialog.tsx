@@ -1,9 +1,10 @@
 import * as React from 'react';
 import { Dialog, DialogTitle, DialogContent, DialogActions, Button, TextField, Select, MenuItem, InputLabel, FormControl, Checkbox, ListItemText, SelectChangeEvent } from '@mui/material';
 import grey from '@mui/material/colors/grey';
-import { saveTraining } from '../../api/TrainingApi';
+import { saveTraining, updateLastModifiedTrainingsTimestamp } from '../../api/TrainingApi';
 import handleCategoryIcon from '../../personalizedComponents/handleCategoryIcon';
 import LoadingButton from '../../personalizedComponents/buttons/LoadingButton';
+import { Box, Typography } from '@mui/material';
 
 interface Exercise {
   id: string;
@@ -72,6 +73,7 @@ const CreateTrainingDialog: React.FC<CreateTrainingDialogProps> = ({ createNewTr
       try {
         setLoadingButton(true)
         const training = await saveTraining(newTraining);
+        await updateLastModifiedTrainingsTimestamp();
         const trainingWithId = { ...newTraining, id: training.id, calories_per_hour_mean: training.calories_per_hour_mean, owner: training.owner };
         setTrainings((prevTrainings) => [...prevTrainings, trainingWithId]);
         setAlertTrainingAddedOpen(true);
@@ -176,7 +178,7 @@ const CreateTrainingDialog: React.FC<CreateTrainingDialogProps> = ({ createNewTr
             }}
           >
             {categoryWithExercises.map((category) => (
-              <MenuItem key={category.id} value={category.id}>
+              <MenuItem key={category.id} value={category.id} sx={{color: category.name == 'Recovery and Stretching' ? '#63a355' : '#fff'}}>
                 <Checkbox checked={selectedCategories.indexOf(category.id) > -1} />
                 {handleCategoryIcon(category.icon)}
                 <ListItemText primary={category.name} sx={{ ml: 1 }} />
@@ -245,6 +247,11 @@ const CreateTrainingDialog: React.FC<CreateTrainingDialogProps> = ({ createNewTr
             </Select>
           </FormControl>
         ))}
+        <Box sx={{ display: 'flex', justifyContent: 'center', mt: 2}}>
+          <Typography variant="body1" sx={{ fontSize: { xs: '0.8rem', sm: '0.8rem', color: '#63a355' } }}> 
+            * Remember that it is always important to add Recovery or Stretching exercises to your training
+          </Typography>
+        </Box>
       </DialogContent>
       <DialogActions>
         <LoadingButton

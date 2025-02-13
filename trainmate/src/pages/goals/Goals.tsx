@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { Box, Typography, Drawer, Divider, IconButton, Collapse, Button, Card, CardContent, CardHeader } from '@mui/material';
-import { LineChart, Line, XAxis, YAxis, Tooltip, PieChart, Pie, Cell, ResponsiveContainer, CartesianGrid, Legend } from 'recharts';
+import { Box, Typography, Drawer, Divider, IconButton, Collapse, Card, CardContent, CardHeader } from '@mui/material';
+import { Tooltip, PieChart, Pie, Cell, Legend } from 'recharts';
 
 import { grey } from '@mui/material/colors';
 import dayjs, { Dayjs } from 'dayjs';
@@ -17,10 +17,6 @@ import isSameOrBefore from 'dayjs/plugin/isSameOrBefore';
 import { Tooltip as TooltipMui } from '@mui/material'; // Alias Tooltip if needed
 import SmsFailedIcon from '@mui/icons-material/SmsFailed';
 import PieChartIcon from '@mui/icons-material/PieChart';
-import TopMiddleAlert from '../../personalizedComponents/TopMiddleAlert';
-
-
-
 
 dayjs.extend(isSameOrBefore);
 
@@ -179,6 +175,7 @@ const GoalsModal: React.FC<GoalsProps> = ({ showDrawer, onClose, open, openForm 
                             label="Start Date"
                             value={dateRange[0]}
                             onChange={(newValue) => handleDateChange([newValue, dateRange[1]])}
+                            format="DD/MM/YYYY"
                             slotProps={{
                                 textField: {
                                     variant: 'outlined',
@@ -234,12 +231,19 @@ const GoalsModal: React.FC<GoalsProps> = ({ showDrawer, onClose, open, openForm 
                                         },
                                     },
                                 },
+                                openPickerButton: {
+                                    sx: {
+                                      color: '#fff',
+                                    },
+                                  },
                             }}
                         />
                         <DatePicker
                             label="End Date"
                             value={dateRange[1]}
                             onChange={(newValue) => handleDateChange([dateRange[0], newValue])}
+                            format="DD/MM/YYYY"
+                            minDate={dateRange[0] || dayjs()}
                             slotProps={{
                                 textField: {
                                     variant: 'outlined',
@@ -295,12 +299,15 @@ const GoalsModal: React.FC<GoalsProps> = ({ showDrawer, onClose, open, openForm 
                                         },
                                     },
                                 },
+                                openPickerButton: {
+                                    sx: {
+                                      color: '#fff',
+                                    },
+                                  },
                             }}
                         />
                     </Box>
                 </LocalizationProvider>
-
-
 
                 <Divider sx={{ marginY: 2, backgroundColor: grey[700] }} />
 
@@ -390,7 +397,7 @@ const GoalsModal: React.FC<GoalsProps> = ({ showDrawer, onClose, open, openForm 
                                 {showPending ? <ExpandLessIcon /> : <ExpandMoreIcon />}
                             </Box>
                         </Divider>
-                        <Divider sx={{ backgroundColor: grey[600] }} />
+                        <Divider sx={{ backgroundColor: grey[600], mb: 2 }} />
                         <Collapse in={showPending}>
                             {pendingGoals.filter((goal) => !goal.completed).map((goal: Goal) => (
                                 <Box

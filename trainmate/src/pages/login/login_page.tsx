@@ -5,8 +5,8 @@ import FormLabel from '@mui/material/FormLabel';
 import { Dumbbell } from "lucide-react";
 import { Link, useNavigate } from 'react-router-dom';
 import { auth } from '../../FirebaseConfig';
-import { signInWithEmailAndPassword, signInWithPopup, GoogleAuthProvider } from 'firebase/auth';
-import { sendResetPasswordEmail } from '../../utils/AuthUtils';
+import { signInWithEmailAndPassword, signInWithPopup, GoogleAuthProvider, signOut } from 'firebase/auth';
+import { sendCustomResetPasswordEmail } from '../../utils/AuthUtils';
 import Dialog from '@mui/material/Dialog';
 import DialogActions from '@mui/material/DialogActions';
 import DialogContent from '@mui/material/DialogContent';
@@ -25,14 +25,27 @@ export default function LogIn() {
   const navigate = useNavigate();
   const [errorLoggingIn, setErrorLoggingIn] = useState(false);
   const [alertOpen, setAlertOpen] = useState(false);
+  const [alertExerciseFillFieldsOpen, setAlertExerciseFillFieldsOpen] = useState(false);
+  const [alertErrorEmailNotVerified, setAlertErrorEmailNotVerified] = useState(false);
 
   const handleEmailChange = (e: React.ChangeEvent<HTMLInputElement>) => setEmail(e.target.value);
   const handlePasswordChange = (e: React.ChangeEvent<HTMLInputElement>) => setPassword(e.target.value);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!email || !password) {
+      setAlertExerciseFillFieldsOpen(true);
+      return;
+    }
     try {
       const data: any = await signInWithEmailAndPassword(auth, email, password);
+      const user = data.user;
+
+      if (!user.emailVerified) {
+        await signOut(auth);
+        setAlertErrorEmailNotVerified(true);
+        return;
+      }
       localStorage.setItem("token", data.user.accessToken);
       setErrorLoggingIn(false);
       navigate('/homepage');
@@ -92,7 +105,7 @@ export default function LogIn() {
 
   const handleSendResetPassword = () => {
     if (forgotEmail) {
-      sendResetPasswordEmail(forgotEmail)
+      sendCustomResetPasswordEmail(auth, forgotEmail)
         .then(() => {
           console.log(`Password reset email sent to ${forgotEmail}`);
           setIsModalOpen(false);
@@ -115,9 +128,12 @@ export default function LogIn() {
   return (
     <div className="min-h-screen bg-black  from-gray-900 to-gray-800 flex flex-col items-center justify-center p-4">
       <div className="w-full max-w-md">
+        <TopMiddleAlert alertText='Please fill all fields' open={alertExerciseFillFieldsOpen} onClose={() => setAlertExerciseFillFieldsOpen(false)} severity='warning' />
         <TopMiddleAlert alertText='Sent email to restore password' open={alertOpen} onClose={() => setAlertOpen(false)} severity='success' />
-        <div className="bg-black border border-gray-600 shadow-lg rounded-lg overflow-hidden">
-          <div className="bg-black p-4 flex items-center justify-center">
+        <TopMiddleAlert alertText='Email not verified. Please verify it before logging in' open={alertErrorEmailNotVerified} onClose={() => setAlertErrorEmailNotVerified(false)} severity='error' />
+
+        <div className="bg-[#161616] border border-gray-600 shadow-lg rounded-lg overflow-hidden">
+          <div className="bg-[#161616] p-4 flex items-center justify-center">
             <Dumbbell className="h-8 w-8 text-white mr-2" />
             <h1 className="text-2xl font-bold text-white">TrainMate</h1>
           </div>
@@ -137,33 +153,33 @@ export default function LogIn() {
                 <div className="w-full border-t border-gray-300"></div>
               </div>
               <div className="relative flex justify-center text-sm">
-                <span className="px-2 bg-black text-gray-500">Or continue with</span>
+                <span className="px-2 bg-[#161616] text-gray-500">Or continue with</span>
               </div>
             </div>
-            <form className="space-y-4" onSubmit={handleSubmit}>
-              <div className="space-y-2 border border-gray-600 rounded">
+            <form className="space-y-4" onSubmit={handleSubmit} noValidate>
+              <div className="space-y-2 border border-gray-600 rounded h-14">
                 <Input
                   id="email"
                   type="email"
                   fullWidth
-                  required
                   value={email}
                   onChange={handleEmailChange}
-                  className="rounded-md p-2 text-white placeholder-white text-sm"  // Add rounded borders and smaller size
+                  className="rounded-md p-2 text-white placeholder-white text-sm"
+                  sx={{ height: '100%' }}
                   style={{ borderRadius: '8px', color: 'white' }}  // Optional inline styles
                   placeholder="Enter your email"  // White placeholder
                 />
               </div>
 
-              <div className="space-y-2 border border-gray-600 rounded">
+              <div className="space-y-2 border border-gray-600 rounded h-14">
                 <Input
                   id="password"
                   type="password"
                   fullWidth
-                  required
                   value={password}
                   onChange={handlePasswordChange}
-                  className="rounded-md p-2 text-white placeholder-white text-sm"  // Add rounded borders and smaller size
+                  className="rounded-md p-2 text-white placeholder-white text-sm"
+                  sx={{ height: '100%' }}
                   style={{ borderRadius: '8px', color: 'white' }}  // Optional inline styles
                   placeholder="Enter your password"  // White placeholder
                 />
