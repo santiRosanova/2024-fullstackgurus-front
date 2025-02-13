@@ -68,7 +68,7 @@ const ResponsiveMenu: React.FC<ResponsiveMenuProps> = ({ handleFilterOpen, handl
           aria-label="menu"
           onClick={handleDrawerOpen}
           sx={{
-            display: { xs: 'block', sm: 'none' },
+            display: { xs: 'block', sm: 'block', lg: 'none' },
             position: 'fixed',
             top: 10,
             right: 10,
@@ -84,7 +84,7 @@ const ResponsiveMenu: React.FC<ResponsiveMenuProps> = ({ handleFilterOpen, handl
         anchor="right"
         open={drawerOpen}
         onClose={handleDrawerClose}
-        sx={{ display: { xs: 'block', sm: 'none' } }}
+        sx={{ display: { xs: 'block', sm: 'block', lg: 'none' } }}
       >
         <Box
           sx={{ width: 250, backgroundColor: grey[800], height: '100%', color: '#fff' }}
@@ -118,7 +118,7 @@ const ResponsiveMenu: React.FC<ResponsiveMenuProps> = ({ handleFilterOpen, handl
       </Drawer>
 
       {/* Normal buttons for large screens */}
-      <Box sx={{ display: { xs: 'none', sm: 'flex' }, gap: 2 }}>
+      <Box sx={{ display: { xs: 'none', sm: 'none', lg: 'flex' }, gap: 2 }}>
         <IconButton aria-label="filter" onClick={handlePhysicalProgressOpen}>
           <TrendingUpIcon sx={{ color: grey[50], fontSize: 40 }} />
           <p className='p-3 text-white'>Physical Progress</p>

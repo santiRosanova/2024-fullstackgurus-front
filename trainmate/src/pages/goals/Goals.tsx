@@ -125,7 +125,7 @@ const GoalsModal: React.FC<GoalsProps> = ({ showDrawer, onClose, open, openForm 
         <Drawer anchor="right" open={open} onClose={onClose}>
             <Box
                 sx={{
-                    width: 400,
+                    width: { xs: '100%', sm: 400, lg: 400 },
                     padding: 2,
                     backgroundColor: grey[900],
                     color: grey[50],
@@ -367,7 +367,7 @@ const GoalsModal: React.FC<GoalsProps> = ({ showDrawer, onClose, open, openForm 
                                 {showCompleted ? <ExpandLessIcon /> : <ExpandMoreIcon />}
                             </Box>
                         </Divider>
-                        <Divider sx={{ backgroundColor: grey[600] }} />
+                        <Divider sx={{ backgroundColor: grey[600], mb: 2 }} />
                         <Collapse in={showCompleted}>
                             {filteredGoals.filter((goal) => goal.completed).map((goal: Goal) => (
                                 <Box
@@ -431,8 +431,8 @@ const GoalsModal: React.FC<GoalsProps> = ({ showDrawer, onClose, open, openForm 
                         {/* Incomplete Goals Section */}
                         {showIncomplete && (
                             <>
-                                <Divider sx={{ marginY: 2, backgroundColor: grey[600] }} >
-                                    <Typography sx={{ color: grey[50], textAlign: 'center' }}>Incomplete Goals</Typography>
+                                <Divider sx={{ marginY: 2, backgroundColor: grey[600], borderRadius: '8px' }} >
+                                    <Typography sx={{ color: grey[50], textAlign: 'center', mb: 1, mt: 1 }}>Incomplete Goals</Typography>
                                     {incompleteGoals.map((goal: Goal) => (
                                         <Box
                                             key={goal.id}

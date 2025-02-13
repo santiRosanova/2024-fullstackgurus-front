@@ -103,7 +103,7 @@ const CalendarModal: React.FC<DrawerProps> = ({ showDrawer, onClose, open }) => 
     <Drawer anchor="right" open={open} onClose={onClose}>
       <Box
         sx={{
-          width: 400,
+          width: { xs: '100%', sm: 400, lg: 400 },
           padding: 2,
           backgroundColor: grey[900],
           color: grey[50],

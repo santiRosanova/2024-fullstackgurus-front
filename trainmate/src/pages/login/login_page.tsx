@@ -15,6 +15,7 @@ import DialogTitle from '@mui/material/DialogTitle';
 import TextField from '@mui/material/TextField';
 import TopMiddleAlert from '../../personalizedComponents/TopMiddleAlert';
 import { getUserProfile } from '../../api/UserAPI';
+import { grey } from '@mui/material/colors';
 
 export default function LogIn() {
   const [email, setEmail] = useState('');
@@ -212,10 +213,18 @@ export default function LogIn() {
         </div>
       </div>
 
-      <Dialog open={isModalOpen} onClose={handleCloseModal}>
+      <Dialog open={isModalOpen} onClose={handleCloseModal}
+      PaperProps={{
+        sx: {
+          backgroundColor: grey[800],
+          color: '#fff',
+          borderRadius: '8px',
+          width: '100%',
+        },
+      }}>
         <DialogTitle>Reset Password</DialogTitle>
         <DialogContent>
-          <DialogContentText>
+          <DialogContentText sx= {{color: '#fff', mb: 2}}>
             Please enter your email address to receive a password reset link.
           </DialogContentText>
           <TextField
@@ -224,15 +233,27 @@ export default function LogIn() {
             label="Email Address"
             type="email"
             fullWidth
+            sx= {{
+              color: '#fff',
+              "& .MuiOutlinedInput-root .MuiOutlinedInput-notchedOutline": {
+                borderColor: grey[100],
+              },
+              "& .MuiInputLabel-root": {
+                color: grey[100],
+              },
+              "& .MuiInputBase-input": {
+                color: grey[100],
+              },
+            }}
             value={forgotEmail}
             onChange={(e) => setForgotEmail(e.target.value)}
           />
         </DialogContent>
         <DialogActions>
-          <Button onClick={handleCloseModal} color="secondary">
+          <Button onClick={handleCloseModal} sx={{color: '#fff'}}>
             Cancel
           </Button>
-          <Button onClick={handleSendResetPassword} color="primary">
+          <Button onClick={handleSendResetPassword} sx={{color: '#fff'}}>
             Send
           </Button>
         </DialogActions>
