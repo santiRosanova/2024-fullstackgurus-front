@@ -8,34 +8,53 @@ import { getAuth, onAuthStateChanged } from 'firebase/auth';
 import ProfilePage from './pages/user/ProfilePage';
 import CategoriesPage from './pages/categories/categories_page';
 import PhysicalProgressPage from './pages/physical_progress/physical_progress_page';
-import ResetPassword from './pages/login/reset_password_page';
+import AuthActionPage from './pages/login/auth_actions_page';
+import { getUserProfile } from './api/UserAPI';
+import { auth } from './FirebaseConfig';
 
 function App() {
   const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null);
+  const [completedProfile, setCompletedProfile] = useState<boolean>(true);
 
-  // Check if token is valid on component mount
   useEffect(() => {
     const auth = getAuth();
     const token = localStorage.getItem("token");
 
-    // Check Firebase authentication state and token
     if (token) {
       onAuthStateChanged(auth, (user) => {
         if (user) {
-          // User is authenticated
           setIsAuthenticated(true);
+          checkIfAllDataIsCompleted();
         } else {
-          // Invalid token, redirect to login
           setIsAuthenticated(false);
         }
       });
     } else {
-      // No token, user is not authenticated
       setIsAuthenticated(false);
     }
   }, []);
 
+  const checkIfAllDataIsCompleted = async () => {
+    try {
+      const profileData = await getUserProfile();
+      const user = auth.currentUser;
 
+      if (!user) {
+        throw new Error("No user authenticated");
+      }
+      const requiredFields = ['fullName', 'gender', 'weight', 'height', 'birthday'];
+      const missingField = requiredFields.some(field => !profileData[field]);
+
+      if (missingField) {
+        setCompletedProfile(false);
+      }
+      else {
+        setCompletedProfile(true);
+      }
+    } catch (error) {
+      console.error('Error al obtener el perfil del usuario:', error);
+    }
+  };
   
 
   if (isAuthenticated === null) {
@@ -47,12 +66,11 @@ function App() {
       <Routes>
         <Route path="/login" element={<LogIn />} />
         <Route path="/signup" element={<SignUp />} />
-        <Route path="/resetpassword" element={<ResetPassword/>}/>
+        <Route path="/authAction" element={<AuthActionPage/>}/>
         
-        {/* If authenticated, show HomePage. If not, redirect to login */}
         <Route 
           path="/homepage" 
-          element={isAuthenticated ? <HomePage /> : <Navigate to="/login" />} 
+          element={isAuthenticated ? (completedProfile ? <HomePage /> : <Navigate to="/profile" />) : <Navigate to="/login" />} 
         />
 
         <Route 
@@ -62,15 +80,14 @@ function App() {
 
         <Route 
           path="/categories" 
-          element={isAuthenticated ? <CategoriesPage /> : <Navigate to="/login" />} 
+          element={isAuthenticated ? (completedProfile ? <CategoriesPage /> : <Navigate to="/profile" />) : <Navigate to="/login" />} 
         />
 
         <Route 
           path="/physicalprogress" 
-          element={isAuthenticated ? <PhysicalProgressPage /> : <Navigate to="/login" />} 
+          element={isAuthenticated ? (completedProfile ? <PhysicalProgressPage /> : <Navigate to="/profile" />) : <Navigate to="/login" />} 
         />
         
-        {/* Redirect any unknown routes to login if not authenticated */}
         <Route 
           path="*" 
           element={isAuthenticated ? <Navigate to="/homepage" /> : <Navigate to="/login" />} 

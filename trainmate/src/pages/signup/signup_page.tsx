@@ -1,15 +1,11 @@
 import React, { useState } from 'react';
 import Button from '@mui/material/Button';
-import TextField from '@mui/material/TextField';
 import { Dumbbell } from "lucide-react";
 import Select, { SelectChangeEvent } from '@mui/material/Select';
 import MenuItem from '@mui/material/MenuItem';
-import InputLabel from '@mui/material/InputLabel';
-import FormControl from '@mui/material/FormControl';
 import { Link, useNavigate } from 'react-router-dom';
-import { auth } from '../../FirebaseConfig';  // Import Firebase auth
-import { createUserWithEmailAndPassword } from 'firebase/auth';
-import { signInWithEmailAndPassword, signInWithPopup, GoogleAuthProvider } from 'firebase/auth';
+import { auth } from '../../FirebaseConfig';
+import { createUserWithEmailAndPassword, signInWithPopup, GoogleAuthProvider, sendEmailVerification, signOut } from 'firebase/auth';
 import { saveUserInfo } from '../../api/UserAPI';
 import { Input } from '@mui/material';
 import LoadingAnimation from '../../personalizedComponents/loadingAnimation';
@@ -30,6 +26,8 @@ export default function SignUp() {
   const [alertWeakPassword, setAlertWeakPassword] = useState(false);
   const [alertSomethingWentWrongOpen, setAlertSomethingWentWrongOpen] = useState(false);
   const [alertIncorrectNumbersOpen, setAlertIncorrectNumbersOpen] = useState(false);
+  const [alertEmailVerificationSent, setAlertEmailVerificationSent] = useState(false);
+  const [sentEmail, setSentEmail] = useState(false);
   const navigate = useNavigate();
   const [formData, setFormData] = useState({
     name: '',
@@ -116,13 +114,20 @@ export default function SignUp() {
     };
 
     try {
-      await createUserWithEmailAndPassword(auth, formDataWithIntegers.email, formDataWithIntegers.password);
-      const data: any = await signInWithEmailAndPassword(auth, formDataWithIntegers.email, formDataWithIntegers.password);
-      localStorage.setItem("token", data.user.accessToken);
-      await saveUserInfo(formDataWithIntegers)
-      setLoading(false)
-      navigate('/homepage');
-      window.location.reload();
+      const userCredential = await createUserWithEmailAndPassword(auth, formDataWithIntegers.email, formDataWithIntegers.password);
+      const user = userCredential.user;
+      const idToken = await user.getIdToken();
+      await saveUserInfo(idToken, formDataWithIntegers);
+      await sendEmailVerification(user);
+      await signOut(auth);
+      setFormData({name: '', email: '', password: '', sex: '', birthday: null as Dayjs | null, weight: '', height: ''});
+      setAlertEmailVerificationSent(true);
+      setSentEmail(true);
+      setLoading(false);
+      setTimeout(() => {
+        navigate('/login');
+      }, 6000);
+
     } catch (error: any) {
       console.error('Error signing up:', error.message);
       setLoading(false)
@@ -142,6 +147,7 @@ export default function SignUp() {
     const provider = new GoogleAuthProvider();
 
     try {
+      setLoading(true);
       const result = await signInWithPopup(auth, provider);
       const user = result.user;
       const idToken = await user.getIdToken();
@@ -172,12 +178,16 @@ export default function SignUp() {
         <TopMiddleAlert alertText='Something went wrong signing up' open={alertSomethingWentWrongOpen} onClose={() => setAlertSomethingWentWrongOpen(false)} severity='warning' /> 
         <TopMiddleAlert alertText='Password should be at least 6 characters long' open={alertWeakPassword} onClose={() => setAlertWeakPassword(false)} severity='warning' />
         <TopMiddleAlert alertText='Please enter valid numbers. Weight must be a number between 25 and 300 and Height between 120 and 240' open={alertIncorrectNumbersOpen} onClose={() => setAlertIncorrectNumbersOpen(false)} severity='warning'/>
+        <TopMiddleAlert alertText='Email verification sent' open={alertEmailVerificationSent} onClose={() => setAlertEmailVerificationSent(false)} severity='success'/>
+
           <div className="bg-[#161616] shadow-lg rounded-lg overflow-hidden border border-gray-600">
               <div className="bg-[#161616] p-4 flex items-center justify-center">
                 <Dumbbell className="h-8 w-8 text-white mr-2" />
                 <h1 className="text-2xl font-bold text-white">TrainMate</h1>
               </div>
               <div className="p-6">
+                {!sentEmail && (
+                  <>
                 <h2 className="text-2xl font-semibold text-center text-white mb-6">Sign Up</h2>
                 <Button variant="outlined" className="w-full mb-4 flex items-center justify-center border-gray-300 text-white" type="button" onClick={handleGoogleSignIn}>
                   <img src={require('../../images/google_logo.png')} alt="Google logo" className="w-5 h-5 mr-2" />
@@ -249,7 +259,7 @@ export default function SignUp() {
                       MenuProps={{
                         PaperProps: {
                           style: {
-                            backgroundColor: 'black',
+                            backgroundColor: '#161616',
                             color: 'white',
                           },
                         },
@@ -365,7 +375,17 @@ export default function SignUp() {
                     <Link to="/login" className="text-white hover:underline">Log In</Link>
                   </p>
                 </div>
+              </>
+              )}
+              {sentEmail && (
+              <div className="text-white text-center">
+                <h2 className="text-xl mb-4">Verification email sent. Please check your email to verify your account before logging in</h2>
+                <Button fullWidth variant="contained" onClick={() => navigate('/login')}>
+                  Back to Log In
+                </Button>
               </div>
+              )}
+            </div>
             </div><div className="mt-8 text-center text-white text-sm">
                 <p>© 2024 TrainMate. All rights reserved.</p>
           </div>

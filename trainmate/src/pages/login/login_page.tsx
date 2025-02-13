@@ -5,8 +5,8 @@ import FormLabel from '@mui/material/FormLabel';
 import { Dumbbell } from "lucide-react";
 import { Link, useNavigate } from 'react-router-dom';
 import { auth } from '../../FirebaseConfig';
-import { signInWithEmailAndPassword, signInWithPopup, GoogleAuthProvider } from 'firebase/auth';
-import { sendCustomResetPasswordEmail, sendResetPasswordEmail } from '../../utils/AuthUtils';
+import { signInWithEmailAndPassword, signInWithPopup, GoogleAuthProvider, signOut } from 'firebase/auth';
+import { sendCustomResetPasswordEmail } from '../../utils/AuthUtils';
 import Dialog from '@mui/material/Dialog';
 import DialogActions from '@mui/material/DialogActions';
 import DialogContent from '@mui/material/DialogContent';
@@ -26,6 +26,7 @@ export default function LogIn() {
   const [errorLoggingIn, setErrorLoggingIn] = useState(false);
   const [alertOpen, setAlertOpen] = useState(false);
   const [alertExerciseFillFieldsOpen, setAlertExerciseFillFieldsOpen] = useState(false);
+  const [alertErrorEmailNotVerified, setAlertErrorEmailNotVerified] = useState(false);
 
   const handleEmailChange = (e: React.ChangeEvent<HTMLInputElement>) => setEmail(e.target.value);
   const handlePasswordChange = (e: React.ChangeEvent<HTMLInputElement>) => setPassword(e.target.value);
@@ -38,6 +39,13 @@ export default function LogIn() {
     }
     try {
       const data: any = await signInWithEmailAndPassword(auth, email, password);
+      const user = data.user;
+
+      if (!user.emailVerified) {
+        await signOut(auth);
+        setAlertErrorEmailNotVerified(true);
+        return;
+      }
       localStorage.setItem("token", data.user.accessToken);
       setErrorLoggingIn(false);
       navigate('/homepage');
@@ -122,6 +130,8 @@ export default function LogIn() {
       <div className="w-full max-w-md">
         <TopMiddleAlert alertText='Please fill all fields' open={alertExerciseFillFieldsOpen} onClose={() => setAlertExerciseFillFieldsOpen(false)} severity='warning' />
         <TopMiddleAlert alertText='Sent email to restore password' open={alertOpen} onClose={() => setAlertOpen(false)} severity='success' />
+        <TopMiddleAlert alertText='Email not verified. Please verify it before logging in' open={alertErrorEmailNotVerified} onClose={() => setAlertErrorEmailNotVerified(false)} severity='error' />
+
         <div className="bg-[#161616] border border-gray-600 shadow-lg rounded-lg overflow-hidden">
           <div className="bg-[#161616] p-4 flex items-center justify-center">
             <Dumbbell className="h-8 w-8 text-white mr-2" />

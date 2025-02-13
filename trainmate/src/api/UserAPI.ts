@@ -15,8 +15,8 @@ const handleResponse = async (response: Response) => {
   return response.json();
 };
 
-export const saveUserInfo = async (userInfo: { weight: number; height: number; name: string; email: string; password: string; sex: string; birthday: string; }) => {
-  const token = getAuthToken();
+export const saveUserInfo = async (idToken: string, userInfo: { weight: number; height: number; name: string; email: string; password: string; sex: string; birthday: string; }) => {
+  const token = `Bearer ${idToken}`;
   if (!token) throw new Error('Token no encontrado');
 
   const response = await fetch(`${BASE_URL}/save-user-info`, {
