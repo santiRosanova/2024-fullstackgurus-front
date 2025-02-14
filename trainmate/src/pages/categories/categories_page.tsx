@@ -508,12 +508,12 @@ export default function CategoriesPage() {
           <IconButton component="a" sx={{ color: 'white' }} onClick={handleBackToHome}>
             <ArrowLeftIcon />
           </IconButton>
-          <img src={require('../../images/logo.png')} alt="Logo" width={200} height={150} className="hidden md:block" />
+          <img src={require('../../images/logo.png')} alt="Logo" width={200} height={150} className="hidden lg:block" />
         </div>
-        <Typography variant="h4" sx={{ fontSize: { xs: '1.3rem', sm: '1.8rem', md: '2.5rem' }, ml: { xs: 0, sm: -12, md: -14 } }}>Categories, Exercises & Trainings</Typography>
+        <Typography variant="h4" sx={{ fontSize: { xs: '1.3rem', sm: '1.8rem', md: '2rem', lg: '2.5rem' }, ml: { xs: 0, sm: 0, md: -10 } }}>Categories, Exercises & Trainings</Typography>
         <div style={{display:'flex', flexDirection:'row', alignItems:'center', justifyContent: 'center'}}>
           <IconButton component="a" sx={{ color: 'white' }} onClick={handleTrophyButton}>
-            <EmojiEventsIcon sx={{ fontSize: { xs: '2rem', sm: '2.5rem', md: '3rem' } }} />
+            <EmojiEventsIcon sx={{ fontSize: { xs: '2rem', sm: '2.5rem', md: '3rem', lg: '3rem' } }} />
           </IconButton>
           <p>Top exercises</p>
           <PopularExercisesModal open={openRankingModal} onClose={handleCloseRankingModal} />
@@ -594,10 +594,10 @@ export default function CategoriesPage() {
                         <Box sx={{ pl: 4 }}>
                           {category.exercises.map((exercise: any) => (
                             <Box key={exercise.id} sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                              <Box sx={{ display: 'flex', alignItems: {xs: 'flex-start', sm: 'center', lg:'center'}, flexDirection: {xs: 'column', sm: 'row', lg:'row'} }}>
+                              <Box sx={{ display: 'flex', alignItems: {xs: 'flex-start', sm: 'flex-start', lg:'center'}, flexDirection: {xs: 'column', sm: 'column', lg:'row'} }}>
                                 <Typography>{exercise.name}</Typography>
-                                <Typography sx={{ fontSize: '0.7rem', marginLeft: {xs: 0, sm: 3, lg:3}, color: grey[500]  }}>({exercise.training_muscle})</Typography>
-                                <Typography sx={{ fontSize: '0.7rem', marginLeft: {xs: 0, sm: 3, lg:3}, color: grey[500]  }}>({exercise.calories_per_hour} kcal/h)</Typography>
+                                <Typography sx={{ fontSize: '0.7rem', marginLeft: {xs: 0, sm: 0, lg:3}, color: grey[500]  }}>({exercise.training_muscle})</Typography>
+                                <Typography sx={{ fontSize: '0.7rem', marginLeft: {xs: 0, sm: 0, lg:3}, color: grey[500]  }}>({exercise.calories_per_hour} kcal/h)</Typography>
                               </Box>
                               <Box>
                                 <Box>
