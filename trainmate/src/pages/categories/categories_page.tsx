@@ -106,6 +106,7 @@ export default function CategoriesPage() {
   const [alertCategoryDeletedErrorOpen, setAlertCategoryDeletedErrorOpen] = useState(false);
   const [alertExerciseDeletedSuccessOpen, setAlertExerciseDeletedSuccessOpen] = useState(false);
   const [alertExerciseDeletedErrorOpen, setAlertExerciseDeletedErrorOpen] = useState(false);
+  const [alertCaloriesPerHourErrorOpen, setAlertCaloriesPerHourErrorOpen] = useState(false);
 
   const [deleteCategoryAlertOpen, setDeleteCategoryAlertOpen] = useState(false);
   const [deleteExerciseAlertOpen, setDeleteExerciseAlertOpen] = useState(false);
@@ -289,13 +290,14 @@ export default function CategoriesPage() {
   };
 
   const handleOpenAddExerciseDialog = (categoryId: string) => {
-    setNewExercise({ ...newExercise, category_id: categoryId, calories_per_hour: newExercise?.calories_per_hour || 0, name: newExercise?.name || '', id: '', training_muscle: '' });
+    setNewExercise({ ...newExercise, category_id: categoryId, calories_per_hour: newExercise?.calories_per_hour || '', name: newExercise?.name || '', id: '', training_muscle: '' });
     setAddExerciseDialogOpen(true);
   };
   const handleCloseAddExerciseDialog = () => {
     setAddExerciseDialogOpen(false);
     setNewExercise(null);
     setImageFile(null)
+    setLoadingButton(false)
   };
 
   const handleOpenEditCategoryDialog = (category: Category) => {
@@ -350,7 +352,6 @@ export default function CategoriesPage() {
     if (newExercise) {
         setUploading(true);
         setLoadingButton(true)
-        setLoadingButton(true)
 
         let image_url = '';
 
@@ -369,6 +370,11 @@ export default function CategoriesPage() {
         };
 
         if (exerciseToSave.name && exerciseToSave.calories_per_hour && exerciseToSave.category_id && exerciseToSave.training_muscle) {
+          if (typeof exerciseToSave.calories_per_hour === 'number' && exerciseToSave.calories_per_hour < 60) {
+            setAlertCaloriesPerHourErrorOpen(true);
+            setLoadingButton(false);
+            return;
+          }
           try {
             const exercise = await saveExercise(exerciseToSave);
             setImageFile(null);
@@ -402,7 +408,11 @@ export default function CategoriesPage() {
         }
         else {
           setAlertExerciseFillFieldsOpen(true);
+          setLoadingButton(false)
         }
+    } else {
+      setAlertExerciseFillFieldsOpen(true);
+      setLoadingButton(false)
     };
   }
 
@@ -531,6 +541,7 @@ export default function CategoriesPage() {
       <TopMiddleAlert alertText='You cannot delete a category that has exercises in a training' open={alertCategoryDeletedErrorOpen} onClose={() => setAlertCategoryDeletedErrorOpen(false)} severity='warning' />
       <TopMiddleAlert alertText='Please fill all fields' open={alertCategoryFillFieldsOpen} onClose={() => setAlertCategoryFillFieldsOpen(false)} severity='warning' />
       <TopMiddleAlert alertText='Please fill all fields' open={alertExerciseFillFieldsOpen} onClose={() => setAlertExerciseFillFieldsOpen(false)} severity='warning' />
+      <TopMiddleAlert alertText='Kcal per Hour must be greater than 60' open={alertCaloriesPerHourErrorOpen} onClose={() => setAlertCaloriesPerHourErrorOpen(false)} severity='warning' />
 
       {
         deleteCategoryAlertOpen &&
@@ -724,13 +735,10 @@ export default function CategoriesPage() {
             id="category-name"
             label="Name"
             InputLabelProps={{
-              style: { color: '#fff' }, // Color del label (Duration)
+              style: { color: '#fff' },
             }}
             InputProps={{
-              style: { color: '#fff' }, // Color del texto dentro del input
-            }}
-            slotProps={{
-              htmlInput: { min: 1, max: 1000 }
+              style: { color: '#fff' },
             }}
             type="text"
             fullWidth
@@ -811,6 +819,7 @@ export default function CategoriesPage() {
               <MenuItem value="Rugby">{handleCategoryIcon('Rugby')}</MenuItem>
               <MenuItem value="Volleyball">{handleCategoryIcon('Volleyball')}</MenuItem>
               <MenuItem value="Yoga">{handleCategoryIcon('Yoga')}</MenuItem>
+              <MenuItem value="Circle">{handleCategoryIcon('Circle')}</MenuItem>
             </Select >
           </FormControl >
         </DialogContent >
@@ -861,15 +870,12 @@ export default function CategoriesPage() {
             variant="standard"
             value={newExercise?.name || ''}
             InputLabelProps={{
-              style: { color: '#fff' }, // Color del label
+              style: { color: '#fff' },
             }}
             InputProps={{
-              style: { color: '#fff' }, // Color del texto dentro del input
+              style: { color: '#fff' }, 
             }}
-            slotProps={{
-              htmlInput: { min: 1, max: 1000 }
-            }}
-            onChange={(e) => setNewExercise({ ...newExercise, name: e.target.value, calories_per_hour: newExercise?.calories_per_hour || 1, category_id: newExercise?.category_id || '', id: '', training_muscle: newExercise?.training_muscle || '' })}
+            onChange={(e) => setNewExercise({ ...newExercise, name: e.target.value, calories_per_hour: newExercise?.calories_per_hour || '', category_id: newExercise?.category_id || '', id: '', training_muscle: newExercise?.training_muscle || '' })}
           />
           <TextField
             margin="dense"
@@ -922,7 +928,7 @@ export default function CategoriesPage() {
                 }
               }
             }}
-            placeholder="Kcal per Hour"
+            placeholder="60"
             InputLabelProps={{
               style: { color: '#fff' }, // Color del label (Duration)
             }}
@@ -1135,6 +1141,7 @@ export default function CategoriesPage() {
                 <MenuItem value="Rugby">{handleCategoryIcon('Rugby')}</MenuItem>
                 <MenuItem value="Volleyball">{handleCategoryIcon('Volleyball')}</MenuItem>
                 <MenuItem value="Yoga">{handleCategoryIcon('Yoga')}</MenuItem>
+                <MenuItem value="Circle">{handleCategoryIcon('Circle')}</MenuItem>
               </Select>
             </FormControl>
           </DialogContent>

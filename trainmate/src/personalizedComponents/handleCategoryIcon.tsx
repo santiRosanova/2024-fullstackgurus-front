@@ -14,7 +14,8 @@ import {FitnessCenter as DumbbellIcon,
     SportsRugby as RugbyIcon,
     SportsVolleyball as VolleyballIcon, 
     Favorite as HeartIcon,
-    SelfImprovement as YogaIcon} from '@mui/icons-material';
+    SelfImprovement as YogaIcon,
+    Circle as CircleIcon} from '@mui/icons-material';
 
 export default function handleCategoryIcon(icon: string) {
     switch (icon) {
@@ -52,6 +53,8 @@ export default function handleCategoryIcon(icon: string) {
         return <VolleyballIcon />;
         case 'Yoga':
         return <YogaIcon />;
+        case 'Circle':
+        return <CircleIcon />;
         default:
         return null;
     }
