@@ -1,4 +1,4 @@
-import { Box, Button, Dialog, DialogContent, DialogTitle, MenuItem, Select } from "@mui/material";
+import { Box, Button, Dialog, DialogContent, DialogTitle, Menu, MenuItem, Select } from "@mui/material";
 import { grey } from "@mui/material/colors";
 
 export const FilterCoachDialog = ({ filterCoachOpen, handleFilterCoachClose, selectedCoachInFilter, setSelectedCoachInFilter, handleFilterClose, coaches }: 
@@ -56,6 +56,7 @@ export const FilterCoachDialog = ({ filterCoachOpen, handleFilterCoachClose, sel
                   {coach.fullName}
                 </MenuItem>
               ))}
+              <MenuItem value="No coach">No coach</MenuItem>
             </Select>
           </DialogContent>
       </Dialog>

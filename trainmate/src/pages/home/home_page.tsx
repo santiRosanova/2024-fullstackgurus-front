@@ -326,7 +326,10 @@ export default function HomePage() {
         allWorkoutsList = allWorkoutsList.filter((workout: Workout) => workout.training_id === selectedTrainingInFilter.id);
       }
 
-      const filteredWorkouts = allWorkoutsList.filter((workout: Workout) => workout.coach === selectedCoach);
+      let filteredWorkouts = allWorkoutsList.filter((workout: Workout) => workout.coach === selectedCoach);
+      if (selectedCoach === 'No coach') {
+        filteredWorkouts = allWorkoutsList.filter((workout: Workout) => workout.coach === '');
+      }
 
       if (filteredWorkouts.length === 0) {
         setWorkoutList([]);
@@ -1129,10 +1132,12 @@ export default function HomePage() {
                           <Typography variant="body2" color="gray">Coach: {workout.coach ? workout.coach : '-'}</Typography>
                         </div>
                       </div>
+                      
                     ))
                   ) : (
                     <Typography variant="body2" color="gray">No workouts available</Typography>
                   )}
+                  {workoutList.length > 0 ? (<Divider sx={{ backgroundColor: 'gray', marginY: 1 }} />) : (<></>)}
                 </ScrollArea>
               </CardContent>
             </Card>
