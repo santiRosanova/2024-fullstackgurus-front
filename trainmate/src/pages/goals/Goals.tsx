@@ -341,18 +341,18 @@ const GoalsModal: React.FC<GoalsProps> = ({ showDrawer, onClose, open, openForm 
 
                 {showPieChart ? (
                     // Pie Chart View
-                    <Card sx={{ backgroundColor: '#161616', color: '#fff', p: 2, height: 420 }} className="border border-gray-600">
-                        <CardHeader title="Goal Distribution" />
-                        <CardContent sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100%', position: 'relative', mt: -6 }}>
+                    <Card sx={{ backgroundColor: '#161616', color: '#fff', p: 0.7, height: 400 }} className="border border-gray-600">
+                        <CardHeader title="Goal Distribution"/>
+                        <CardContent sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100%', position: 'relative', mt: -5 }}>
                             <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', flex: 1 }}>
-                                <PieChart width={400} height={280}>
+                                <PieChart width={270} height={280}>
                                     <Pie data={pieData} dataKey="value" nameKey="name" cx="50%" cy="50%" outerRadius={100} label>
                                         {pieData.map((entry, index) => (
                                             <Cell key={`cell-${index}`} fill={entry.color} />
                                         ))}
                                     </Pie>
                                     <Tooltip contentStyle={{ backgroundColor: 'black', borderRadius: '5px' }} labelStyle={{ color: 'white' }} itemStyle={{ color: '#fff' }} />
-                                    <Legend verticalAlign="top" height={50} wrapperStyle={{ marginTop: 5 }} />
+                                    <Legend verticalAlign="top" height={50} wrapperStyle={{ marginTop: -8 }} />
                                 </PieChart>
                             </Box>
                         </CardContent>
