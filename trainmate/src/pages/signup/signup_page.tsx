@@ -15,6 +15,7 @@ import dayjs, { Dayjs } from 'dayjs';
 import isSameOrAfter from 'dayjs/plugin/isSameOrAfter';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import TopMiddleAlert from '../../personalizedComponents/TopMiddleAlert';
+import { Visibility as EyeIcon, VisibilityOff as ClosedEyeIcon } from '@mui/icons-material';
 
 dayjs.extend(isSameOrAfter);
 
@@ -30,6 +31,7 @@ export default function SignUp() {
   const [alertEmailVerificationSent, setAlertEmailVerificationSent] = useState(false);
   const [incorrectEmail, setIncorrectEmail] = useState(false);
   const [weakPassword, setWeakPassword] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
   const [sentEmail, setSentEmail] = useState(false);
   const navigate = useNavigate();
   const [formData, setFormData] = useState({
@@ -266,23 +268,33 @@ export default function SignUp() {
                   </div>
 
                   {/* Password */}
-                  <div className="space-y-2 border border-gray-600 rounded h-14">
+                    <div className="space-y-2 border border-gray-600 rounded h-14 relative">
                     <Input
                       id="password"
-                      type="password"
+                      type={showPassword ? "text" : "password"}
                       fullWidth
                       value={formData.password}
                       onChange={handleChange}
                       onBlur={verifyPassword}
-                      className="rounded-md p-2 text-white placeholder-white text-sm" // Rounded borders, smaller size
+                      className="rounded-md p-2 text-white placeholder-white text-sm"
                       sx={{ height: '100%' }}
-                      style={{ borderRadius: '8px', color: 'white' }} // Optional inline styles
-                      placeholder="Password" // White placeholder
+                      style={{ borderRadius: '8px', color: 'white' }}
+                      placeholder="Password"
                     />
-                  </div>
-                  <div>
-                    {weakPassword && <p className="text-red-500 text-xs">Password should be at least 6 characters long</p>}
-                  </div>
+                        <span
+                          onClick={() => setShowPassword(!showPassword)}
+                          className="absolute inset-y-0 right-0 pr-3 flex items-center cursor-pointer"
+                        >
+                          {showPassword ? (
+                          <ClosedEyeIcon sx={{color: grey[600], mt: -1}} />
+                          ) : (
+                          <EyeIcon sx={{color: grey[600], mt: -1}} />
+                          )}
+                        </span>
+                      </div>
+                      <div>
+                        {weakPassword && <p className="text-red-500 text-xs">Password should be at least 6 characters long</p>}
+                      </div>
 
                   {/* Sex */}
                   <div className="space-y-2 border border-gray-600 rounded h-14">

@@ -16,6 +16,7 @@ import TextField from '@mui/material/TextField';
 import TopMiddleAlert from '../../personalizedComponents/TopMiddleAlert';
 import { getUserProfile } from '../../api/UserAPI';
 import { grey } from '@mui/material/colors';
+import { Visibility as EyeIcon, VisibilityOff as ClosedEyeIcon } from '@mui/icons-material';
 
 export default function LogIn() {
   const [email, setEmail] = useState('');
@@ -28,6 +29,7 @@ export default function LogIn() {
   const [alertOpen, setAlertOpen] = useState(false);
   const [alertExerciseFillFieldsOpen, setAlertExerciseFillFieldsOpen] = useState(false);
   const [alertErrorEmailNotVerified, setAlertErrorEmailNotVerified] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
 
   const handleEmailChange = (e: React.ChangeEvent<HTMLInputElement>) => setEmail(e.target.value);
   const handlePasswordChange = (e: React.ChangeEvent<HTMLInputElement>) => setPassword(e.target.value);
@@ -172,10 +174,10 @@ export default function LogIn() {
                 />
               </div>
 
-              <div className="space-y-2 border border-gray-600 rounded h-14">
+              <div className="space-y-2 border border-gray-600 rounded h-14 relative">
                 <Input
                   id="password"
-                  type="password"
+                  type={showPassword ? "text" : "password"}
                   fullWidth
                   value={password}
                   onChange={handlePasswordChange}
@@ -184,6 +186,16 @@ export default function LogIn() {
                   style={{ borderRadius: '8px', color: 'white' }}  // Optional inline styles
                   placeholder="Enter your password"  // White placeholder
                 />
+                <span
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute inset-y-0 right-0 pr-3 flex items-center cursor-pointer"
+                >
+                  {showPassword ? (
+                  <ClosedEyeIcon sx={{color: grey[600], mt: -1}} />
+                  ) : (
+                  <EyeIcon sx={{color: grey[600], mt: -1}} />
+                  )}
+                </span>
               </div>
 
               <Button className="w-full" variant="contained" color="primary" type="submit">
