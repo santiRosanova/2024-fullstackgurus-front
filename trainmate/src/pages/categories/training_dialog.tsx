@@ -5,6 +5,7 @@ import { saveTraining, updateLastModifiedTrainingsTimestamp } from '../../api/Tr
 import handleCategoryIcon from '../../personalizedComponents/handleCategoryIcon';
 import LoadingButton from '../../personalizedComponents/buttons/LoadingButton';
 import { Box, Typography } from '@mui/material';
+import TopMiddleAlert from '../../personalizedComponents/TopMiddleAlert';
 
 interface Exercise {
   id: string;
@@ -46,6 +47,8 @@ const CreateTrainingDialog: React.FC<CreateTrainingDialogProps> = ({ createNewTr
   const [selectedExercises, setSelectedExercises] = React.useState<{ [key: string]: string[] }>({});
   const [trainingName, setTrainingName] = React.useState<string>('');
   const [loadingButton, setLoadingButton] = React.useState<boolean>(false)
+  const [alertFillFields, setAlertFillFields] = React.useState<boolean>(false)
+  const [alertAddExercise, setAlertAddExercise] = React.useState<boolean>(false)
 
   const handleCategoryChange = (event: SelectChangeEvent<string[]>) => {
     const { value } = event.target;
@@ -69,7 +72,7 @@ const CreateTrainingDialog: React.FC<CreateTrainingDialogProps> = ({ createNewTr
         return [...allExercises, ...selectedExerciseObjects];
       }, [] as Exercise[]),
     };
-    if (newTraining && newTraining.name) {
+    if (newTraining && newTraining.name && newTraining.exercises.length > 0) {
       try {
         setLoadingButton(true)
         const training = await saveTraining(newTraining);
@@ -84,6 +87,14 @@ const CreateTrainingDialog: React.FC<CreateTrainingDialogProps> = ({ createNewTr
       setLoadingButton(false)
       handleClose();
     }
+    else {
+      if (newTraining.exercises.length == 0) {
+        setAlertAddExercise(true)
+      }
+      else {
+        setAlertFillFields(true)
+      }
+    }
   };
 
   const handleClose = () => {
@@ -94,6 +105,10 @@ const CreateTrainingDialog: React.FC<CreateTrainingDialogProps> = ({ createNewTr
   };
 
   return (
+    <>
+    <TopMiddleAlert alertText='Please fill all fields' open={alertFillFields} onClose={() => setAlertFillFields(false)} severity='warning' />
+    <TopMiddleAlert alertText='Please add at least one exercise' open={alertAddExercise} onClose={() => setAlertAddExercise(false)} severity='warning' />
+
     <Dialog
       open={createNewTraining}
       onClose={handleClose}
@@ -276,6 +291,7 @@ const CreateTrainingDialog: React.FC<CreateTrainingDialogProps> = ({ createNewTr
           />
       </DialogActions>
     </Dialog>
+    </>
   );
 };
 

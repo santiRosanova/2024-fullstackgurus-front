@@ -106,6 +106,7 @@ export default function CategoriesPage() {
   const [alertCategoryDeletedErrorOpen, setAlertCategoryDeletedErrorOpen] = useState(false);
   const [alertExerciseDeletedSuccessOpen, setAlertExerciseDeletedSuccessOpen] = useState(false);
   const [alertExerciseDeletedErrorOpen, setAlertExerciseDeletedErrorOpen] = useState(false);
+  const [alertCaloriesPerHourErrorOpen, setAlertCaloriesPerHourErrorOpen] = useState(false);
 
   const [deleteCategoryAlertOpen, setDeleteCategoryAlertOpen] = useState(false);
   const [deleteExerciseAlertOpen, setDeleteExerciseAlertOpen] = useState(false);
@@ -289,13 +290,14 @@ export default function CategoriesPage() {
   };
 
   const handleOpenAddExerciseDialog = (categoryId: string) => {
-    setNewExercise({ ...newExercise, category_id: categoryId, calories_per_hour: newExercise?.calories_per_hour || 0, name: newExercise?.name || '', id: '', training_muscle: '' });
+    setNewExercise({ ...newExercise, category_id: categoryId, calories_per_hour: newExercise?.calories_per_hour || '', name: newExercise?.name || '', id: '', training_muscle: '' });
     setAddExerciseDialogOpen(true);
   };
   const handleCloseAddExerciseDialog = () => {
     setAddExerciseDialogOpen(false);
     setNewExercise(null);
     setImageFile(null)
+    setLoadingButton(false)
   };
 
   const handleOpenEditCategoryDialog = (category: Category) => {
@@ -350,7 +352,6 @@ export default function CategoriesPage() {
     if (newExercise) {
         setUploading(true);
         setLoadingButton(true)
-        setLoadingButton(true)
 
         let image_url = '';
 
@@ -369,6 +370,11 @@ export default function CategoriesPage() {
         };
 
         if (exerciseToSave.name && exerciseToSave.calories_per_hour && exerciseToSave.category_id && exerciseToSave.training_muscle) {
+          if (typeof exerciseToSave.calories_per_hour === 'number' && exerciseToSave.calories_per_hour < 60) {
+            setAlertCaloriesPerHourErrorOpen(true);
+            setLoadingButton(false);
+            return;
+          }
           try {
             const exercise = await saveExercise(exerciseToSave);
             setImageFile(null);
@@ -402,7 +408,11 @@ export default function CategoriesPage() {
         }
         else {
           setAlertExerciseFillFieldsOpen(true);
+          setLoadingButton(false)
         }
+    } else {
+      setAlertExerciseFillFieldsOpen(true);
+      setLoadingButton(false)
     };
   }
 
@@ -508,12 +518,12 @@ export default function CategoriesPage() {
           <IconButton component="a" sx={{ color: 'white' }} onClick={handleBackToHome}>
             <ArrowLeftIcon />
           </IconButton>
-          <img src={require('../../images/logo.png')} alt="Logo" width={200} height={150} className="hidden md:block" />
+          <img src={require('../../images/logo.png')} alt="Logo" width={200} height={150} className="hidden lg:block" />
         </div>
-        <Typography variant="h4" sx={{ fontSize: { xs: '1.3rem', sm: '1.8rem', md: '2.5rem' }, ml: { xs: 0, sm: -12, md: -14 } }}>Categories, Exercises & Trainings</Typography>
+        <Typography variant="h4" sx={{ fontSize: { xs: '1.3rem', sm: '1.8rem', md: '2rem', lg: '2.5rem' }, ml: { xs: 0, sm: 0, md: -10 } }}>Categories, Exercises & Trainings</Typography>
         <div style={{display:'flex', flexDirection:'row', alignItems:'center', justifyContent: 'center'}}>
           <IconButton component="a" sx={{ color: 'white' }} onClick={handleTrophyButton}>
-            <EmojiEventsIcon sx={{ fontSize: { xs: '2rem', sm: '2.5rem', md: '3rem' } }} />
+            <EmojiEventsIcon sx={{ fontSize: { xs: '2rem', sm: '2.5rem', md: '3rem', lg: '3rem' } }} />
           </IconButton>
           <p>Top exercises</p>
           <PopularExercisesModal open={openRankingModal} onClose={handleCloseRankingModal} />
@@ -531,6 +541,7 @@ export default function CategoriesPage() {
       <TopMiddleAlert alertText='You cannot delete a category that has exercises in a training' open={alertCategoryDeletedErrorOpen} onClose={() => setAlertCategoryDeletedErrorOpen(false)} severity='warning' />
       <TopMiddleAlert alertText='Please fill all fields' open={alertCategoryFillFieldsOpen} onClose={() => setAlertCategoryFillFieldsOpen(false)} severity='warning' />
       <TopMiddleAlert alertText='Please fill all fields' open={alertExerciseFillFieldsOpen} onClose={() => setAlertExerciseFillFieldsOpen(false)} severity='warning' />
+      <TopMiddleAlert alertText='Kcal per Hour must be greater than 60' open={alertCaloriesPerHourErrorOpen} onClose={() => setAlertCaloriesPerHourErrorOpen(false)} severity='warning' />
 
       {
         deleteCategoryAlertOpen &&
@@ -594,30 +605,29 @@ export default function CategoriesPage() {
                         <Box sx={{ pl: 4 }}>
                           {category.exercises.map((exercise: any) => (
                             <Box key={exercise.id} sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                              <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                              <Box sx={{ display: 'flex', alignItems: {xs: 'flex-start', sm: 'flex-start', lg:'center'}, flexDirection: {xs: 'column', sm: 'column', lg:'row'} }}>
                                 <Typography>{exercise.name}</Typography>
-                                <Typography sx={{ fontSize: '0.7rem', marginLeft: 3 }}>({exercise.training_muscle})</Typography>
-                                <Typography sx={{ fontSize: '0.7rem', marginLeft: 3 }}>({exercise.calories_per_hour} kcal/h)</Typography>
+                                <Typography sx={{ fontSize: '0.7rem', marginLeft: {xs: 0, sm: 0, lg:3}, color: grey[500]  }}>({exercise.training_muscle})</Typography>
+                                <Typography sx={{ fontSize: '0.7rem', marginLeft: {xs: 0, sm: 0, lg:3}, color: grey[500]  }}>({exercise.calories_per_hour} kcal/h)</Typography>
                               </Box>
                               <Box>
-                                  <Box>
-                                    {!exercise.public && (
-                                    <IconButton size="small" color="inherit" onClick={() => handleOpenEditExerciseDialog(exercise)}>
-                                      <EditIcon />
+                                <Box>
+                                  {!exercise.public && (
+                                  <IconButton size="small" color="inherit" onClick={() => handleOpenEditExerciseDialog(exercise)}>
+                                    <EditIcon />
+                                  </IconButton>
+                                  )}
+                                  {!exercise.public && (
+                                  <IconButton size="small" color="inherit" onClick={() => handleExerciseDataToDelete(exercise.id, category.id)}>
+                                    <DeleteIcon />
+                                  </IconButton>
+                                  )}
+                                  {exercise.image_url && (
+                                    <IconButton size="small" color="inherit" onClick={() => handleOpenImageModal(exercise.image_url)}>
+                                      <EyeIcon />
                                     </IconButton>
-                                    )}
-                                    {!exercise.public && (
-                                    <IconButton size="small" color="inherit" onClick={() => handleExerciseDataToDelete(exercise.id, category.id)}>
-                                      <DeleteIcon />
-                                    </IconButton>
-                                    )}
-                                    {exercise.image_url && (
-                                      <IconButton size="small" color="inherit" onClick={() => handleOpenImageModal(exercise.image_url)}>
-                                        <EyeIcon />
-                                      </IconButton>
-                                    )}
-                                  </Box>
-
+                                  )}
+                                </Box>
                               </Box>
                             </Box>
                           ))}
@@ -637,9 +647,9 @@ export default function CategoriesPage() {
               </CardContent>
             </Card>
             <Dialog open={imageModalOpen} onClose={handleCloseImageModal} fullWidth maxWidth="sm">
-            <div className='border border-gray-600 rounded-mx'> 
-              <DialogTitle className='bg-black text-white'>Exercise Image</DialogTitle>
-              <DialogContent className='bg-black'>
+            <div className='bg-[#161616] border border-gray-600 '> 
+              <DialogTitle className='bg-[#161616] text-white'>Exercise Image</DialogTitle>
+              <DialogContent className='bg-[#161616]'>
                 {selectedImage ? (
                   <Box sx={{ display: 'flex', justifyContent: 'center' }}>
                     <img src={selectedImage} alt="Exercise" style={{ maxWidth: '100%', maxHeight: '400px' }} />
@@ -648,7 +658,7 @@ export default function CategoriesPage() {
                   <DialogContentText>No image available</DialogContentText>
                 )}
               </DialogContent>
-              <DialogActions className='bg-black'>
+              <DialogActions className='bg-[#161616]'>
                 <Button onClick={handleCloseImageModal} sx={{ color: 'white' }}>
                   Close
                 </Button>
@@ -692,7 +702,7 @@ export default function CategoriesPage() {
                             <Box key={exercise.id} sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                               <Box sx={{ display: 'flex', alignItems: 'center' }}>
                                 <Typography>{exercise.name}</Typography>
-                                <Typography sx={{ fontSize: '0.7rem', marginLeft: 3 }}>({exercise.calories_per_hour} kcal/h)</Typography>
+                                <Typography sx={{ fontSize: '0.7rem', marginLeft: 3, color: grey[500] }}>({exercise.calories_per_hour} kcal/h)</Typography>
                               </Box>
                             </Box>
                           ))}
@@ -725,13 +735,10 @@ export default function CategoriesPage() {
             id="category-name"
             label="Name"
             InputLabelProps={{
-              style: { color: '#fff' }, // Color del label (Duration)
+              style: { color: '#fff' },
             }}
             InputProps={{
-              style: { color: '#fff' }, // Color del texto dentro del input
-            }}
-            slotProps={{
-              htmlInput: { min: 1, max: 1000 }
+              style: { color: '#fff' },
             }}
             type="text"
             fullWidth
@@ -812,6 +819,7 @@ export default function CategoriesPage() {
               <MenuItem value="Rugby">{handleCategoryIcon('Rugby')}</MenuItem>
               <MenuItem value="Volleyball">{handleCategoryIcon('Volleyball')}</MenuItem>
               <MenuItem value="Yoga">{handleCategoryIcon('Yoga')}</MenuItem>
+              <MenuItem value="Circle">{handleCategoryIcon('Circle')}</MenuItem>
             </Select >
           </FormControl >
         </DialogContent >
@@ -862,15 +870,12 @@ export default function CategoriesPage() {
             variant="standard"
             value={newExercise?.name || ''}
             InputLabelProps={{
-              style: { color: '#fff' }, // Color del label
+              style: { color: '#fff' },
             }}
             InputProps={{
-              style: { color: '#fff' }, // Color del texto dentro del input
+              style: { color: '#fff' }, 
             }}
-            slotProps={{
-              htmlInput: { min: 1, max: 1000 }
-            }}
-            onChange={(e) => setNewExercise({ ...newExercise, name: e.target.value, calories_per_hour: newExercise?.calories_per_hour || 1, category_id: newExercise?.category_id || '', id: '', training_muscle: newExercise?.training_muscle || '' })}
+            onChange={(e) => setNewExercise({ ...newExercise, name: e.target.value, calories_per_hour: newExercise?.calories_per_hour || '', category_id: newExercise?.category_id || '', id: '', training_muscle: newExercise?.training_muscle || '' })}
           />
           <TextField
             margin="dense"
@@ -923,7 +928,7 @@ export default function CategoriesPage() {
                 }
               }
             }}
-            placeholder="Kcal per Hour"
+            placeholder="60"
             InputLabelProps={{
               style: { color: '#fff' }, // Color del label (Duration)
             }}
@@ -1136,6 +1141,7 @@ export default function CategoriesPage() {
                 <MenuItem value="Rugby">{handleCategoryIcon('Rugby')}</MenuItem>
                 <MenuItem value="Volleyball">{handleCategoryIcon('Volleyball')}</MenuItem>
                 <MenuItem value="Yoga">{handleCategoryIcon('Yoga')}</MenuItem>
+                <MenuItem value="Circle">{handleCategoryIcon('Circle')}</MenuItem>
               </Select>
             </FormControl>
           </DialogContent>
