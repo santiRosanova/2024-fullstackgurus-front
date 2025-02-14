@@ -594,30 +594,29 @@ export default function CategoriesPage() {
                         <Box sx={{ pl: 4 }}>
                           {category.exercises.map((exercise: any) => (
                             <Box key={exercise.id} sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                              <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                              <Box sx={{ display: 'flex', alignItems: {xs: 'flex-start', sm: 'center', lg:'center'}, flexDirection: {xs: 'column', sm: 'row', lg:'row'} }}>
                                 <Typography>{exercise.name}</Typography>
-                                <Typography sx={{ fontSize: '0.7rem', marginLeft: 3 }}>({exercise.training_muscle})</Typography>
-                                <Typography sx={{ fontSize: '0.7rem', marginLeft: 3 }}>({exercise.calories_per_hour} kcal/h)</Typography>
+                                <Typography sx={{ fontSize: '0.7rem', marginLeft: {xs: 0, sm: 3, lg:3}, color: grey[500]  }}>({exercise.training_muscle})</Typography>
+                                <Typography sx={{ fontSize: '0.7rem', marginLeft: {xs: 0, sm: 3, lg:3}, color: grey[500]  }}>({exercise.calories_per_hour} kcal/h)</Typography>
                               </Box>
                               <Box>
-                                  <Box>
-                                    {!exercise.public && (
-                                    <IconButton size="small" color="inherit" onClick={() => handleOpenEditExerciseDialog(exercise)}>
-                                      <EditIcon />
+                                <Box>
+                                  {!exercise.public && (
+                                  <IconButton size="small" color="inherit" onClick={() => handleOpenEditExerciseDialog(exercise)}>
+                                    <EditIcon />
+                                  </IconButton>
+                                  )}
+                                  {!exercise.public && (
+                                  <IconButton size="small" color="inherit" onClick={() => handleExerciseDataToDelete(exercise.id, category.id)}>
+                                    <DeleteIcon />
+                                  </IconButton>
+                                  )}
+                                  {exercise.image_url && (
+                                    <IconButton size="small" color="inherit" onClick={() => handleOpenImageModal(exercise.image_url)}>
+                                      <EyeIcon />
                                     </IconButton>
-                                    )}
-                                    {!exercise.public && (
-                                    <IconButton size="small" color="inherit" onClick={() => handleExerciseDataToDelete(exercise.id, category.id)}>
-                                      <DeleteIcon />
-                                    </IconButton>
-                                    )}
-                                    {exercise.image_url && (
-                                      <IconButton size="small" color="inherit" onClick={() => handleOpenImageModal(exercise.image_url)}>
-                                        <EyeIcon />
-                                      </IconButton>
-                                    )}
-                                  </Box>
-
+                                  )}
+                                </Box>
                               </Box>
                             </Box>
                           ))}
@@ -637,9 +636,9 @@ export default function CategoriesPage() {
               </CardContent>
             </Card>
             <Dialog open={imageModalOpen} onClose={handleCloseImageModal} fullWidth maxWidth="sm">
-            <div className='border border-gray-600 rounded-mx'> 
-              <DialogTitle className='bg-black text-white'>Exercise Image</DialogTitle>
-              <DialogContent className='bg-black'>
+            <div className='bg-[#161616] border border-gray-600 '> 
+              <DialogTitle className='bg-[#161616] text-white'>Exercise Image</DialogTitle>
+              <DialogContent className='bg-[#161616]'>
                 {selectedImage ? (
                   <Box sx={{ display: 'flex', justifyContent: 'center' }}>
                     <img src={selectedImage} alt="Exercise" style={{ maxWidth: '100%', maxHeight: '400px' }} />
@@ -648,7 +647,7 @@ export default function CategoriesPage() {
                   <DialogContentText>No image available</DialogContentText>
                 )}
               </DialogContent>
-              <DialogActions className='bg-black'>
+              <DialogActions className='bg-[#161616]'>
                 <Button onClick={handleCloseImageModal} sx={{ color: 'white' }}>
                   Close
                 </Button>
@@ -692,7 +691,7 @@ export default function CategoriesPage() {
                             <Box key={exercise.id} sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                               <Box sx={{ display: 'flex', alignItems: 'center' }}>
                                 <Typography>{exercise.name}</Typography>
-                                <Typography sx={{ fontSize: '0.7rem', marginLeft: 3 }}>({exercise.calories_per_hour} kcal/h)</Typography>
+                                <Typography sx={{ fontSize: '0.7rem', marginLeft: 3, color: grey[500] }}>({exercise.calories_per_hour} kcal/h)</Typography>
                               </Box>
                             </Box>
                           ))}
