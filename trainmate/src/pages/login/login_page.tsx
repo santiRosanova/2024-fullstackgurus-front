@@ -1,11 +1,11 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import Button from '@mui/material/Button';
 import Input from '@mui/material/Input';
 import FormLabel from '@mui/material/FormLabel';
 import { Dumbbell } from "lucide-react";
 import { Link, useNavigate } from 'react-router-dom';
 import { auth } from '../../FirebaseConfig';
-import { signInWithEmailAndPassword, signInWithPopup, GoogleAuthProvider, signOut } from 'firebase/auth';
+import { signInWithEmailAndPassword, signInWithPopup, GoogleAuthProvider, signOut, signInWithRedirect, getRedirectResult } from 'firebase/auth';
 import { sendCustomResetPasswordEmail } from '../../utils/AuthUtils';
 import Dialog from '@mui/material/Dialog';
 import DialogActions from '@mui/material/DialogActions';
@@ -89,18 +89,28 @@ export default function LogIn() {
 
   const handleGoogleSignIn = async () => {
     try {
-      const result = await signInWithPopup(auth, provider);
-      const user = result.user;
-      const idToken = await user.getIdToken();
-      localStorage.setItem("token", idToken);
-
-      await checkIfAllDataIsCompleted();
-      console.log('User logged in:', user);
-
+      await signInWithRedirect(auth, provider);
     } catch (error) {
       console.error('Error en el inicio de sesión con Google:', error);
     }
   };
+
+  useEffect(() => {
+    getRedirectResult(auth)
+      .then(async (result) => {
+        if (result?.user) {
+          const user = result.user;
+          const idToken = await user.getIdToken();
+          localStorage.setItem("token", idToken);
+
+          await checkIfAllDataIsCompleted();
+          console.log('User logged in:', user);
+        }
+      })
+      .catch((error) => {
+        console.error('Error getting redirect result:', error);
+      });
+  }, []);
 
   const handleForgotPasswordClick = () => {
     setIsModalOpen(true);
