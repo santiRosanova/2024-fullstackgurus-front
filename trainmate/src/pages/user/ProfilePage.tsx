@@ -14,6 +14,7 @@ import dayjs, { Dayjs } from 'dayjs';
 import { DatePicker, LocalizationProvider } from '@mui/x-date-pickers';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 
+
 // --- Style objects ---
 const baseTextFieldStyles = {
   // Any base styles you want in all states
@@ -277,7 +278,7 @@ export default function ProfilePage() {
     }
   };
 
-  const handleSave = async () => {
+  const handleSave = () => {
     try {
       const token = localStorage.getItem("token");
       if (!token) throw new Error("Token not found");
@@ -320,19 +321,20 @@ export default function ProfilePage() {
         height: heightNumber,
       };
 
-      await updateUserProfile(profileData);
-      setMissingFields(false);
-      setMissingFieldsAlert(false);
-      
-      if (isFirstTime) {
-        setIsEditing(false);
-        window.location.reload();
-        //navigate("/homepage");
-      } else {
-        console.log("Profile updated successfully");
-        setIsEditing(false);
-        setAlertOpen(true);
-      }
+      updateUserProfile(profileData)
+        .then(() => {
+          setMissingFields(false);
+          setMissingFieldsAlert(false);
+
+          if (isFirstTime) {
+            setIsEditing(false);
+            window.location.href = "/homepage";
+          } else {
+            console.log("Profile updated successfully");
+            setIsEditing(false);
+            setAlertOpen(true);
+          }
+        });
     } catch (error) {
       console.error("Error updating profile:", error);
     }
@@ -571,13 +573,6 @@ export default function ProfilePage() {
               </form>
             </CardContent>
           </Card>
-          <Button 
-            variant="outlined"
-            onClick={handleBackToHome}
-            sx={{ mt: 2, color: grey[400], borderColor: grey[400] }}
-          >
-            Go to Homepage
-          </Button>
           <Button
             variant="outlined"
             onClick={handleLogOut}
