@@ -19,8 +19,6 @@ export const saveGoal = async (goalData: { title: string; description: string; s
     const token = localStorage.getItem('token');
     if (!token) throw new Error('Token not found');
 
-    console.log(goalData.startDate)
-
     const formattedGoalData = {
         ...goalData,
         startDate: goalData.startDate ? new Date(goalData.startDate).toISOString().split('T')[0] : null,
@@ -38,7 +36,6 @@ export const saveGoal = async (goalData: { title: string; description: string; s
         });
 
         if (response.status === 403 || response.status === 401) {
-            console.log('Token expired, attempting to renew...');
             const newToken = await refreshAuthToken();
             const retryResponse = await fetch(`${BASE_URL}/api/goals/create-goal`, {
                 method: 'POST',
@@ -83,9 +80,13 @@ export const getGoals = async (startDate?: string, endDate?: string): Promise<Go
     });
 
     if (response.status === 403 || response.status === 401) {
-        console.log('Token expired, attempting to renew...');
         const newToken = await refreshAuthToken();
-        const retryResponse = await fetch(`${BASE_URL}/api/goals/get-all-goals`)
+        const retryResponse = await fetch(`${BASE_URL}/api/goals/get-all-goals`, {
+            method: 'GET',
+            headers: {
+              'Authorization': `Bearer ${newToken}`,
+            },
+          });
 
         if (!retryResponse.ok) {
             const errorData = await retryResponse.json();

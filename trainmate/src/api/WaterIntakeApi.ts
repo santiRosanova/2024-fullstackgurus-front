@@ -20,7 +20,6 @@ export const getWaterIntakeHistory = async (startDate: string, endDate: string) 
 
     // Si la respuesta es 403, intentamos renovar el token
     if (response.status === 403 || response.status === 401) {
-        console.log('Token expirado, intentando renovar...');
         const newToken = await refreshAuthToken(); // Renueva el token
         // Intentamos la solicitud de nuevo con el nuevo token
         const retryResponse = await fetch(`${BASE_URL}/api/water-intake/get-water-intake-history?start_date=${startDate}&end_date=${endDate}`, {
@@ -70,7 +69,6 @@ export const getWaterIntakeHistory = async (startDate: string, endDate: string) 
   
       // Si la respuesta es 401, intentamos renovar el token
       if (response.status === 403 || response.status === 401) {
-        console.log('Token expirado, intentando renovar...');
         const newToken = await refreshAuthToken(); // Renueva el token
         // Intentamos la solicitud de nuevo con el nuevo token
         const retryResponse = await fetch(`${BASE_URL}/api/water-intake/add`, {

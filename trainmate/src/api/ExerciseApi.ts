@@ -20,7 +20,6 @@ export const getExerciseFromCategory = async (category_id: String) => {
 
     // Si la respuesta es 401, intentamos renovar el token
     if (response.status === 403 || response.status === 401) {
-        console.log('Token expirado, intentando renovar...');
         const newToken = await refreshAuthToken(); // Renueva el token
         // Intentamos la solicitud de nuevo con el nuevo token
         const retryResponse = await fetch(`${BASE_URL}/api/exercise/get-exercises-by-category/${category_id}`, {
@@ -72,7 +71,6 @@ export const getExerciseFromCategory = async (category_id: String) => {
   
       // Si la respuesta es 401, intentamos renovar el token
       if (response.status === 403 || response.status === 401) {
-        console.log('Token expirado, intentando renovar...');
         const newToken = await refreshAuthToken(); // Renueva el token
         // Intentamos la solicitud de nuevo con el nuevo token
         const retryResponse = await fetch(`${BASE_URL}/api/exercise/save-exercise`, {
@@ -125,7 +123,6 @@ export const editExercise = async (exerciseData: { name: string, calories_per_ho
     
         // Si la respuesta es 401, intentamos renovar el token
         if (response.status === 403 || response.status === 401) {
-            console.log('Token expirado, intentando renovar...');
             const newToken = await refreshAuthToken(); // Renueva el token
             // Intentamos la solicitud de nuevo con el nuevo token
             const retryResponse = await fetch(`${BASE_URL}/api/exercise/edit-exercise/${exercise_id}`, {
@@ -180,7 +177,6 @@ export const deleteExercise = async (exercise_id: string, trainings: any) => {
 
         // Si la respuesta es 401, intentamos renovar el token
         if (response.status === 403 || response.status === 401) {
-            console.log('Token expirado, intentando renovar...');
             const newToken = await refreshAuthToken(); // Renueva el token
             // Intentamos la solicitud de nuevo con el nuevo token
             const retryResponse = await fetch(`${BASE_URL}/api/exercise/delete-exercise/${exercise_id}`, {

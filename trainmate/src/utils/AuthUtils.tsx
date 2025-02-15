@@ -1,18 +1,14 @@
-import { getAuth, sendPasswordResetEmail, updatePassword, Auth } from "firebase/auth";
+import { getAuth, sendPasswordResetEmail, Auth } from "firebase/auth";
 import { PAGE_URL } from "../constants";
 
-// Función para renovar el token
 export const refreshAuthToken = async () => {
   try {
     const auth = getAuth();
     const user = auth.currentUser;
 
     if (user) {
-      // Forzar la renovación del token
       const token = await user.getIdToken(true);
-      // Actualizar el token en localStorage
       localStorage.setItem('token', token);
-      console.log('Token actualizado:', token);
       return token;
     } else {
       throw new Error('Usuario no autenticado');

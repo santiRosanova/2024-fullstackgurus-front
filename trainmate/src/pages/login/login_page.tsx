@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import Button from '@mui/material/Button';
 import Input from '@mui/material/Input';
-import FormLabel from '@mui/material/FormLabel';
 import { Dumbbell } from "lucide-react";
 import { Link, useNavigate } from 'react-router-dom';
 import { auth } from '../../FirebaseConfig';
@@ -49,8 +48,8 @@ export default function LogIn() {
 
       if (!user.emailVerified) {
         await signOut(auth);
-        setAlertErrorEmailNotVerified(true);
         setLoading(false);
+        setAlertErrorEmailNotVerified(true);
         return;
       }
       localStorage.setItem("token", data.user.accessToken);
@@ -118,7 +117,6 @@ export default function LogIn() {
     if (forgotEmail) {
       sendCustomResetPasswordEmail(auth, forgotEmail)
         .then(() => {
-          console.log(`Password reset email sent to ${forgotEmail}`);
           setIsModalOpen(false);
           setForgotEmail('')
           setAlertOpen(true);

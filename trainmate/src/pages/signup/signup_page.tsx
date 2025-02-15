@@ -20,7 +20,6 @@ import { Visibility as EyeIcon, VisibilityOff as ClosedEyeIcon } from '@mui/icon
 dayjs.extend(isSameOrAfter);
 
 export default function SignUp() {
-  const provider = new GoogleAuthProvider();
   const [loading, setLoading] = useState(false);
   const [alertExerciseFillFieldsOpen, setAlertExerciseFillFieldsOpen] = useState(false);
   const [alertEmailAlreadyInUseOpen, setAlertEmailAlreadyInUseOpen] = useState(false);
@@ -193,6 +192,8 @@ export default function SignUp() {
 
     } catch (error) {
       console.error('Error en el inicio de sesión con Google:', error);
+    } finally {
+      setLoading(false);
     }
   };
   return (

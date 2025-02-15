@@ -1,4 +1,4 @@
-import { Box, Button, Dialog, DialogContent, DialogTitle, Menu, MenuItem, Select } from "@mui/material";
+import { Dialog, DialogContent, DialogTitle, MenuItem, Select } from "@mui/material";
 import { grey } from "@mui/material/colors";
 
 export const FilterCoachDialog = ({ filterCoachOpen, handleFilterCoachClose, selectedCoachInFilter, setSelectedCoachInFilter, handleFilterClose, coaches }: 
@@ -22,7 +22,6 @@ export const FilterCoachDialog = ({ filterCoachOpen, handleFilterCoachClose, sel
               onChange={(e) => { 
                 const selectedCoach = e.target.value;
                 setSelectedCoachInFilter(selectedCoach); 
-                console.log(selectedCoach);
                 handleFilterCoachClose(selectedCoach); 
                 handleFilterClose() }}
               displayEmpty

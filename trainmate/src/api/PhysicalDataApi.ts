@@ -27,7 +27,6 @@ export const getPhysicalData = async () => {
 
   // Si la respuesta es 403, intentamos renovar el token
   if (response.status === 403 || response.status === 401) {
-      console.log('Token expirado, intentando renovar...');
       const newToken = await refreshAuthToken(); // Renueva el token
       // Intentamos la solicitud de nuevo con el nuevo token
       const retryResponse = await fetch(`${BASE_URL}/api/physical-data/get-physical-data`, {
@@ -76,7 +75,6 @@ export const savePhysicalData = async (saveData: PhysicalData) => {
   
         // Si la respuesta es 403, intentamos renovar el token
         if (response.status === 403 || response.status === 401) {
-          console.log('Token expirado, intentando renovar...');
           const newToken = await refreshAuthToken(); // Renueva el token
           // Intentamos la solicitud de nuevo con el nuevo token
           const retryResponse = await fetch(`${BASE_URL}/api/physical-data/add`, {

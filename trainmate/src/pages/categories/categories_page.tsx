@@ -139,13 +139,12 @@ export default function CategoriesPage() {
   };
 
 
-  const [imageFile, setImageFile] = useState<File | null>(null); // State to store the selected image file
-  const [uploading, setUploading] = useState(false); // State to track upload status
+  const [imageFile, setImageFile] = useState<File | null>(null);
+  const [uploading, setUploading] = useState(false);
 
-  // File input change handler
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
-      setImageFile(e.target.files[0]); // Store the selected image file
+      setImageFile(e.target.files[0]);
     }
   };
 
@@ -202,7 +201,6 @@ export default function CategoriesPage() {
       localStorage.removeItem('categories_with_exercises'); // Ya que se actualizaron exercises, hago que después se vuelva a cargar
     } catch (error) {
       setAlertExerciseDeletedErrorOpen(true);
-      console.log('Error al eliminar el ejercicio:', error);
       console.error('Error al eliminar el ejercicio:', error);
     }
   };
@@ -228,7 +226,6 @@ export default function CategoriesPage() {
   const getAllTrainings = async () => {
     try {
       const trainings = await getTrainings();
-      console.log('Trainings:', trainings);
       return Array.isArray(trainings) ? trainings : [];
     } catch (error) {
       console.error('Error al obtener los entrenamientos:', error);
@@ -248,9 +245,7 @@ export default function CategoriesPage() {
           const storedTrainings = JSON.parse(localStorage.getItem('trainings') || '[]');
           if (lastModifiedTimestamp && storedTrainings.length > 0 && lastModifiedTimestamp === localTimestamp) {
             setTrainings(storedTrainings);
-            console.log('Trainings loaded from local storage');
           } else {
-            console.log("Fetching trainings...");
             const trainings = await getAllTrainings();
             if (trainings) {
               setTrainings(trainings);
@@ -284,7 +279,6 @@ export default function CategoriesPage() {
   const getExercisesFromCategory = async (category: Category) => {
     try {
       const exercises = await getExerciseFromCategory(category.id);
-      console.log("Setting category with exercises", category, exercises);
       setCategoryWithExercises((prev) => [
         ...prev,
         { ...category, exercises }

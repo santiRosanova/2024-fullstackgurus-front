@@ -33,7 +33,7 @@ const Last30DaysCalendar: React.FC<Last30DaysCalendarProps> = ({ dataForChart })
 
     last30DaysData.forEach(item => {
       if (item.Minutes > 0) {
-        exerciseSet.add(item.date); // e.g. '23/01'
+        exerciseSet.add(item.date);
       }
     });
 
@@ -111,9 +111,7 @@ const Last30DaysCalendar: React.FC<Last30DaysCalendarProps> = ({ dataForChart })
         </Typography>
       </Card>
 
-      {/* Dialog replaces the old Modal */}
       <Dialog open={open} onClose={handleClose} PaperProps={{ sx: { backgroundColor: grey[800], borderRadius:'8px' } }}>
-        {/* Same Card styling, but now inside the Dialog */}
         <Card sx={{width: 360, maxWidth: '100%', p: 2, outline: 'none', backgroundColor: grey[800], borderRadius:'8px'}}>
           <CardContent>
             <Typography variant="h6" mb={2} color="#fff" fontWeight="bold"> Last 30 Days </Typography>

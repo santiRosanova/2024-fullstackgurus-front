@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { LineChart, Line, XAxis, YAxis, Tooltip, PieChart, Pie, Cell, ResponsiveContainer, CartesianGrid, Legend } from 'recharts';
-import { Box, Typography, IconButton, TextField, Button, Card, CardContent, CardHeader, SelectChangeEvent } from '@mui/material';
+import { Box, Typography, IconButton, TextField, Card, CardContent, CardHeader, SelectChangeEvent } from '@mui/material';
 import { ArrowBack as ArrowLeftIcon } from '@mui/icons-material';
 import { useNavigate } from 'react-router-dom';
 import { getPhysicalData, savePhysicalData } from '../../api/PhysicalDataApi';
@@ -113,12 +113,12 @@ export default function PhysicalProgressPage() {
       let maxValue = 0;
       let minValue = 0;
       let setter: React.Dispatch<React.SetStateAction<string>>;
-      if (name == 'weight') {
+      if (name === 'weight') {
         maxValue = 300
         minValue = 25
         setter = setWeight
       } 
-      else if (name == 'bodyFat') {
+      else if (name === 'bodyFat') {
         maxValue = 150
         minValue = 1
         setter = setBodyFat
@@ -173,7 +173,6 @@ export default function PhysicalProgressPage() {
         body_fat: parsedBodyFat, 
         body_muscle: parsedBodyMuscle 
       });
-      console.log('Datos físicos guardados correctamente');
       setLoadingButton(false)
       setAlertDataAddedOpen(true)
       setPhysicalDataCount(physicalDataCount + 1)

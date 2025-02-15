@@ -15,11 +15,8 @@ import { DatePicker, LocalizationProvider } from '@mui/x-date-pickers';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 
 
-// --- Style objects ---
 const baseTextFieldStyles = {
-  // Any base styles you want in all states
   "& .MuiOutlinedInput-root .MuiOutlinedInput-notchedOutline": {
-    // fallback border color
     borderColor: grey[700],
   },
   "& .MuiInputLabel-root": {
@@ -27,7 +24,6 @@ const baseTextFieldStyles = {
   },
 };
 
-// Editing vs disabled text fields
 const editingTextFieldStyles = {
   backgroundColor: "#161616",
   "& .MuiOutlinedInput-root": {
@@ -66,7 +62,6 @@ const disabledTextFieldStyles = {
   },
 };
 
-// Editing vs disabled select
 const editingSelectStyles = {
   color: "#fff",
   backgroundColor: "#161616",
@@ -85,36 +80,30 @@ const editingSelectStyles = {
 };
 
 const disabledSelectStyles = {
-  // Force the background and text color
   backgroundColor: "#161616 !important",
   color: `${grey[400]} !important`,
   WebkitTextFillColor: `${grey[400]} !important`,
   opacity: "1 !important",
 
-  // The arrow icon
   "& .MuiSelect-icon": {
     color: `${grey[900]} !important`,
   },
 
-  // The outline for the disabled state
   "& .MuiOutlinedInput-root.Mui-disabled .MuiOutlinedInput-notchedOutline": {
     borderColor: `${grey[700]} !important`,
   },
 
-  // If MUI also applies .Mui-disabled on the root
   "&.Mui-disabled": {
     backgroundColor: "#161616 !important",
     color: `${grey[400]} !important`,
     WebkitTextFillColor: `${grey[400]} !important`,
     opacity: "1 !important",
 
-    // Double-check the outline again inside .Mui-disabled
     "& .MuiOutlinedInput-notchedOutline": {
       borderColor: `${grey[700]} !important`,
     },
   },
 
-  // The text inside the Select when disabled
   "& .MuiSelect-select.Mui-disabled": {
     color: `${grey[700]} !important`,
     WebkitTextFillColor: `${grey[700]} !important`,
@@ -122,7 +111,6 @@ const disabledSelectStyles = {
   },
 };
 
-// For the DatePicker text field
 const editingDatePickerStyles = {
   backgroundColor: "#161616",
   "& .MuiOutlinedInput-root": {
@@ -174,13 +162,12 @@ export default function ProfilePage() {
     weight: '',
     height: '',
     email: '',
-    birthday: '', // stored as YYYY-MM-DD
+    birthday: '',
   });
 
   const navigate = useNavigate();
   const auth = getAuth();
 
-  // If required fields are missing or if user explicitly clicked "Edit," fields become editable.
   const editable = isEditing && missingFields;
 
   useEffect(() => {
@@ -197,7 +184,6 @@ export default function ProfilePage() {
           throw new Error('No user authenticated');
         }
 
-        // Check if required fields are missing
         const requiredFields = ['fullName', 'gender', 'weight', 'height', 'birthday'];
         const missingField = requiredFields.some(field => !profileData[field]);
         if (missingField) {
@@ -283,19 +269,16 @@ export default function ProfilePage() {
       const token = localStorage.getItem("token");
       if (!token) throw new Error("Token not found");
 
-      // Check for empty fields
       const { full_name, gender, weight, height, birthday } = userProfile;
       if (!full_name.trim() || !gender.trim() || !weight || !height || !birthday) {
         setAlertExerciseFillFieldsOpen(true);
         return;
       }
 
-      // Validate numeric ranges
       let weightNumber = parseFloat(weight);
       let heightNumber = parseFloat(height);
       let hasError = false;
 
-      // Validate Weight
       if (isNaN(weightNumber) || weightNumber > 300 || weightNumber < 25) {
         setAlertErrorWeight(true);
         hasError = true;
@@ -303,7 +286,6 @@ export default function ProfilePage() {
         setAlertErrorWeight(false);
       }
 
-      // Validate Height
       if (isNaN(heightNumber) || heightNumber > 240 || heightNumber < 120) {
         setAlertErrorHeight(true);
         hasError = true;
@@ -330,7 +312,6 @@ export default function ProfilePage() {
             setIsEditing(false);
             window.location.href = "/homepage";
           } else {
-            console.log("Profile updated successfully");
             setIsEditing(false);
             setAlertOpen(true);
           }
