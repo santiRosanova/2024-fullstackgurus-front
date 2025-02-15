@@ -43,7 +43,6 @@ export const getUserProfile = async () => {
   });
 
   if (response.status === 403 || response.status === 401) {
-      console.log('Token expirado, intentando renovar...');
       const newToken = await refreshAuthToken();
       const retryResponse = await fetch(`${BASE_URL}/get-user-info`, {
         method: 'GET',

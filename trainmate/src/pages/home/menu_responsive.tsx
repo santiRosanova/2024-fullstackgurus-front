@@ -62,7 +62,6 @@ const ResponsiveMenu: React.FC<ResponsiveMenuProps> = ({ handleFilterOpen, handl
 
   return (
     <>
-      {/* Hamburger icon for small screens */}
       {!goalsDrawerOpen && (
         <IconButton
           aria-label="menu"
@@ -79,7 +78,6 @@ const ResponsiveMenu: React.FC<ResponsiveMenuProps> = ({ handleFilterOpen, handl
         </IconButton>
       )}
 
-      {/* Small screen drawer */}
       <Drawer
         anchor="right"
         open={drawerOpen}
@@ -117,7 +115,6 @@ const ResponsiveMenu: React.FC<ResponsiveMenuProps> = ({ handleFilterOpen, handl
         </Box>
       </Drawer>
 
-      {/* Normal buttons for large screens */}
       <Box sx={{ display: { xs: 'none', sm: 'none', lg: 'flex' }, gap: 2 }}>
         <IconButton aria-label="filter" onClick={handlePhysicalProgressOpen}>
           <TrendingUpIcon sx={{ color: grey[50], fontSize: 40 }} />

@@ -5,14 +5,14 @@ import CalendarTodayIcon from '@mui/icons-material/CalendarToday';
 import { grey } from '@mui/material/colors';
 
 interface DataForChart {
-  date: string;      // e.g. "23/01"
-  timestamp: number; // e.g. 1674441600000
+  date: string;
+  timestamp: number;
   Calories: number;
   Minutes: number;
 }
 
 interface Last30DaysCalendarProps {
-  dataForChart: DataForChart[]; // All historical data
+  dataForChart: DataForChart[]; 
 }
 
 const Last30DaysCalendar: React.FC<Last30DaysCalendarProps> = ({ dataForChart }) => {
@@ -21,26 +21,22 @@ const Last30DaysCalendar: React.FC<Last30DaysCalendarProps> = ({ dataForChart })
   // 1) Filter the full historical data to only the last 30 days
   const last30DaysData = useMemo(() => {
     const today = new Date().getTime();
-    const cutoff = subDays(new Date(), 30).getTime();  // 30 days ago
+    const cutoff = subDays(new Date(), 30).getTime(); 
     return dataForChart.filter(item => {
-      // Keep only entries whose timestamp is >= cutoff
       return item.timestamp >= cutoff && item.timestamp <= today;
     });
   }, [dataForChart]);
 
   // 2) Compute how many days in the last 30 had NO exercise
-  //    Build a set of 'dd/MM' strings for days that actually had exercise
   const { restDaysCount, exerciseSet } = useMemo(() => {
     const exerciseSet = new Set<string>();
 
-    // For each day in the last 30 days data, if Minutes>0 we consider it an exercise day
     last30DaysData.forEach(item => {
       if (item.Minutes > 0) {
-        exerciseSet.add(item.date); // e.g. '23/01'
+        exerciseSet.add(item.date);
       }
     });
 
-    // Now check all calendar days for the last 30 days
     let restCount = 0;
     for (let i = 0; i < 30; i++) {
       const day = subDays(new Date(), i);
@@ -53,7 +49,6 @@ const Last30DaysCalendar: React.FC<Last30DaysCalendarProps> = ({ dataForChart })
     return { restDaysCount: restCount, exerciseSet };
   }, [last30DaysData]);
 
-  // 3) Build an array of the last 30 days in ascending order (oldest first)
   const last30DaysArray = useMemo(() => {
     const arr: Date[] = [];
     for (let i = 29; i >= 0; i--) {
@@ -62,13 +57,11 @@ const Last30DaysCalendar: React.FC<Last30DaysCalendarProps> = ({ dataForChart })
     return arr;
   }, []);
 
-  // Modal open/close
   const handleOpen = () => setOpen(true);
   const handleClose = () => setOpen(false);
 
   return (
     <>
-      {/* A small Card that shows calendar + rest days count (click to open) */}
       <Card
         variant="outlined"
         sx={{
@@ -118,9 +111,7 @@ const Last30DaysCalendar: React.FC<Last30DaysCalendarProps> = ({ dataForChart })
         </Typography>
       </Card>
 
-      {/* Dialog replaces the old Modal */}
       <Dialog open={open} onClose={handleClose} PaperProps={{ sx: { backgroundColor: grey[800], borderRadius:'8px' } }}>
-        {/* Same Card styling, but now inside the Dialog */}
         <Card sx={{width: 360, maxWidth: '100%', p: 2, outline: 'none', backgroundColor: grey[800], borderRadius:'8px'}}>
           <CardContent>
             <Typography variant="h6" mb={2} color="#fff" fontWeight="bold"> Last 30 Days </Typography>
@@ -133,8 +124,8 @@ const Last30DaysCalendar: React.FC<Last30DaysCalendarProps> = ({ dataForChart })
                   <Tooltip title={hasExercise ? 'Exercise day' : 'Rest day'} key={index}>
                   <Box
                     sx={{
-                      width: 36,
-                      height: 36,
+                      width: {xs: 30, sm: 36, lg:36},
+                      height: {xs: 30, sm: 36, lg:36},
                       display: 'flex',
                       alignItems: 'center',
                       justifyContent: 'center',

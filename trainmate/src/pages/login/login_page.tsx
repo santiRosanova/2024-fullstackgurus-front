@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import Button from '@mui/material/Button';
 import Input from '@mui/material/Input';
-import FormLabel from '@mui/material/FormLabel';
 import { Dumbbell } from "lucide-react";
 import { Link, useNavigate } from 'react-router-dom';
 import { auth } from '../../FirebaseConfig';
@@ -17,6 +16,7 @@ import TopMiddleAlert from '../../personalizedComponents/TopMiddleAlert';
 import { getUserProfile } from '../../api/UserAPI';
 import { grey } from '@mui/material/colors';
 import { Visibility as EyeIcon, VisibilityOff as ClosedEyeIcon } from '@mui/icons-material';
+import LoadingAnimation from '../../personalizedComponents/loadingAnimation';
 
 export default function LogIn() {
   const [email, setEmail] = useState('');
@@ -30,6 +30,7 @@ export default function LogIn() {
   const [alertExerciseFillFieldsOpen, setAlertExerciseFillFieldsOpen] = useState(false);
   const [alertErrorEmailNotVerified, setAlertErrorEmailNotVerified] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
+  const [loading, setLoading] = useState(false);
 
   const handleEmailChange = (e: React.ChangeEvent<HTMLInputElement>) => setEmail(e.target.value);
   const handlePasswordChange = (e: React.ChangeEvent<HTMLInputElement>) => setPassword(e.target.value);
@@ -41,21 +42,25 @@ export default function LogIn() {
       return;
     }
     try {
-      const data: any = await signInWithEmailAndPassword(auth, email, password);
+      setLoading(true);
+      const data: any = await signInWithEmailAndPassword(auth, email.toLowerCase(), password);
       const user = data.user;
 
       if (!user.emailVerified) {
         await signOut(auth);
+        setLoading(false);
         setAlertErrorEmailNotVerified(true);
         return;
       }
       localStorage.setItem("token", data.user.accessToken);
       setErrorLoggingIn(false);
+      setLoading(false);
       navigate('/homepage');
       window.location.reload();
     } catch (error: any) {
       console.error('Error logging in:', error.message);
       setErrorLoggingIn(true);
+      setLoading(false);
     }
   };
 
@@ -89,17 +94,19 @@ export default function LogIn() {
 
   const handleGoogleSignIn = async () => {
     try {
+      setLoading(true);
       const result = await signInWithPopup(auth, provider);
       const user = result.user;
       const idToken = await user.getIdToken();
       localStorage.setItem("token", idToken);
-
       await checkIfAllDataIsCompleted();
-      console.log('User logged in:', user);
 
     } catch (error) {
       console.error('Error en el inicio de sesión con Google:', error);
+    } finally {
+      setLoading(false);
     }
+
   };
 
   const handleForgotPasswordClick = () => {
@@ -110,7 +117,6 @@ export default function LogIn() {
     if (forgotEmail) {
       sendCustomResetPasswordEmail(auth, forgotEmail)
         .then(() => {
-          console.log(`Password reset email sent to ${forgotEmail}`);
           setIsModalOpen(false);
           setForgotEmail('')
           setAlertOpen(true);
@@ -130,6 +136,10 @@ export default function LogIn() {
 
   return (
     <div className="min-h-screen bg-black  from-gray-900 to-gray-800 flex flex-col items-center justify-center p-4">
+      {loading ? (
+        <LoadingAnimation />
+      ) : (
+        <>
       <div className="w-full max-w-md">
         <TopMiddleAlert alertText='Please fill all fields' open={alertExerciseFillFieldsOpen} onClose={() => setAlertExerciseFillFieldsOpen(false)} severity='warning' />
         <TopMiddleAlert alertText='Sent email to restore password' open={alertOpen} onClose={() => setAlertOpen(false)} severity='success' />
@@ -168,7 +178,7 @@ export default function LogIn() {
                   value={email}
                   onChange={handleEmailChange}
                   className="rounded-md p-2 text-white placeholder-white text-sm"
-                  sx={{ height: '100%' }}
+                  sx={{ height: '100%'}}
                   style={{ borderRadius: '8px', color: 'white' }}  // Optional inline styles
                   placeholder="Enter your email"  // White placeholder
                 />
@@ -270,6 +280,8 @@ export default function LogIn() {
           </Button>
         </DialogActions>
       </Dialog>
+      </>
+      )}
     </div>
   );
 }

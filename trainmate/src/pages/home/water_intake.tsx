@@ -18,7 +18,7 @@ const WaterIntakeCard: React.FC = () => {
   const [loadingRemove, setLoadingRemove] = useState(false);
   const dailyGoal = 2000;
 
-  const todayDate = formatDateToYYYYMMDD(new Date()); // Current date for comparison
+  const todayDate = formatDateToYYYYMMDD(new Date());
 
 
   const fetchDailyWaterIntake = async () => {
@@ -39,7 +39,7 @@ const WaterIntakeCard: React.FC = () => {
   };
 
   const addWater = async () => {
-    if (currentDate === todayDate) { // Only allow if today
+    if (currentDate === todayDate) {
       setLoadingAdd(true);
       try {
         await addWaterIntake(currentDate, 150);
@@ -51,7 +51,7 @@ const WaterIntakeCard: React.FC = () => {
   };
 
   const removeWater = async () => {
-    if (currentDate === todayDate && waterIntake >= 150) { // Only allow if today
+    if (currentDate === todayDate && waterIntake >= 150) { 
       setLoadingRemove(true);
       try {
         await addWaterIntake(currentDate, -150);
@@ -78,7 +78,7 @@ const WaterIntakeCard: React.FC = () => {
     fetchDailyWaterIntake();
   }, [currentDate]);
 
-  const intakePercentage = Math.min((waterIntake / dailyGoal) * 100, 100); // porcentaje para la barra de progreso
+  const intakePercentage = Math.min((waterIntake / dailyGoal) * 100, 100);
 
   return (
     <Card sx={{ flex: 1, backgroundColor: '#161616', color: '#fff', width: '100%' }} className='border border-gray-600'>
@@ -115,9 +115,6 @@ const WaterIntakeCard: React.FC = () => {
               alignItems="center"
               justifyContent="center"
             >
-              {/* <Typography variant="h6" component="div" color="white">
-                {Math.round(intakePercentage)}%
-              </Typography> */}
               <Typography variant="body2" color="grey">
                 {waterIntake}ml
               </Typography>
@@ -126,7 +123,6 @@ const WaterIntakeCard: React.FC = () => {
         </Box>
 
         <div className="flex justify-center space-x-4">
-          {/* Button with loading spinner */}
           <LoadingButton
             isLoading={loadingRemove}
             onClick={removeWater}

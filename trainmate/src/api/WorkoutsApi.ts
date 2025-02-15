@@ -9,7 +9,6 @@ const getAuthToken = () => {
 export const saveWorkout = async (token: string, workoutData: { training_id: string, coach: string, duration: number, date: string }) => {
   try {
 
-    console.log(workoutData.date)
     const response = await fetch(`${BASE_URL}/api/workouts/save-workout`, {
       method: 'POST',
       headers: {
@@ -21,7 +20,6 @@ export const saveWorkout = async (token: string, workoutData: { training_id: str
 
     // Si la respuesta es 401, intentamos renovar el token
     if (response.status === 403 || response.status === 401) {
-      console.log('Token expirado, intentando renovar...');
       const newToken = await refreshAuthToken(); // Renueva el token
       // Intentamos la solicitud de nuevo con el nuevo token
       const retryResponse = await fetch(`${BASE_URL}/api/workouts/save-workout`, {
@@ -64,7 +62,6 @@ export const getWorkouts = async (token: string, startDate?: string, endDate?: s
     } else if (startDate) {
       query = `?startDate=${startDate}`;
     } else if (endDate) {
-      console.log(endDate)
       query = `?endDate=${endDate}`;
     }
 
@@ -77,7 +74,6 @@ export const getWorkouts = async (token: string, startDate?: string, endDate?: s
 
     // Si la respuesta es 401, intentamos renovar el token
     if (response.status === 403 || response.status === 401) {
-      console.log('Token expirado, intentando renovar...');
       const newToken = await refreshAuthToken(); // Renueva el token
       // Intentamos la solicitud de nuevo con el nuevo token
       const retryResponse = await fetch(`${BASE_URL}/api/workouts/workouts${query}`, {
@@ -137,7 +133,6 @@ export const getWorkoutsCalories = async (token: string, startDate?: string, end
 
     // Si la respuesta es 401, intentamos renovar el token
     if (response.status === 403 || response.status === 401) {
-      console.log('Token expirado, intentando renovar...');
       const newToken = await refreshAuthToken(); // Renueva el token
       // Intentamos la solicitud de nuevo con el nuevo token
       const retryResponse = await fetch(`${BASE_URL}/api/workouts/get-workouts-calories${query}`, {
@@ -181,7 +176,6 @@ export const cancelWorkout = async (token: string, workoutId: string) => {
     });
 
     if (response.status === 403 || response.status === 401) {
-      console.log('Token expired, attempting to renew...');
       const newToken = await refreshAuthToken();
       const retryResponse = await fetch(`${BASE_URL}/api/workouts/cancel-workout/${workoutId}`, {
         method: 'DELETE',
@@ -226,7 +220,6 @@ export const cancelWorkout = async (token: string, workoutId: string) => {
 
     // Si la respuesta es 403, intentamos renovar el token
     if (response.status === 403 || response.status === 401) {
-        console.log('Token expirado, intentando renovar...');
         const newToken = await refreshAuthToken(); // Renueva el token
         // Intentamos la solicitud de nuevo con el nuevo token
         const retryResponse = await fetch(`${BASE_URL}/api/workouts/last-modified`, {
@@ -273,7 +266,6 @@ export const cancelWorkout = async (token: string, workoutId: string) => {
 
     // Si la respuesta es 403, intentamos renovar el token
     if (response.status === 403 || response.status === 401) {
-        console.log('Token expirado, intentando renovar...');
         const newToken = await refreshAuthToken(); // Renueva el token
         // Intentamos la solicitud de nuevo con el nuevo token
         const retryResponse = await fetch(`${BASE_URL}/api/workouts/update-last-modified`, {

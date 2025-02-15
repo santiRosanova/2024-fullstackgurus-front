@@ -142,13 +142,10 @@ export default function HomePage() {
   const [coaches, setCoaches] = useState([]);
   const [coachSelected, setCoachSelected] = useState('');
   const [filterOpen, setFilterOpen] = useState(false);
-  const [filterDateOpen, setFilterDateOpen] = useState(false);
   const [filterTrainingOpen, setFilterTrainingOpen] = useState(false);
   const [filterCoachOpen, setFilterCoachOpen] = useState(false);
-  const [filterExerciseOpen, setFilterExerciseOpen] = useState(false);
   const [selectedTrainingInFilter, setSelectedTrainingInFilter] = useState<Trainings | null>(null);
   const [selectedCoachInFilter, setSelectedCoachInFilter] = useState<string>('');
-  const [selectedExerciseInFilter, setSelectedExerciseInFilter] = useState<Workout | null>(null);
   const [categoryWithExercises, setCategoryWithExercises] = useState<CategoryWithExercises[]>([]);
   const [topExercisesDone, setTopExercisesDone] = useState<topCategoriesWithExercises[]>([]);
   const [trainings, setTrainings] = useState<Trainings[]>([]);
@@ -273,22 +270,6 @@ export default function HomePage() {
     setFilterOpen(false);
   }
 
-  const handleFilterDateOpen = () => {
-    setFilterDateOpen(true);
-  }
-
-  const handleFilterTrainingOpen = () => {
-    setFilterTrainingOpen(true);
-  }
-
-  const handleFilterExerciseOpen = () => {
-    setFilterExerciseOpen(true);
-  }
-
-  const handleFilterDateClose = () => {
-    setFilterDateOpen(false);
-  }
-
   const handleGoToNewTraining = () => {
     navigate('/categories');
   }
@@ -386,10 +367,6 @@ export default function HomePage() {
     }
   };
 
-  const handleFilterExerciseClose = () => {
-    setFilterExerciseOpen(false);
-  }
-
   const handleOpenWorkoutAdding = () => {
     setOpenWorkoutAdding(true);
     setOpen(false);
@@ -423,7 +400,6 @@ export default function HomePage() {
             duration: parseInt(newWorkout.duration, 10),
             date: newWorkout.date.format('YYYY-MM-DD'),
           });
-          console.log('Workout saved successfully');
 
           const today = dayjs().format('YYYY-MM-DD');
           if (newWorkout.date.format('YYYY-MM-DD') > today) {
@@ -469,7 +445,6 @@ export default function HomePage() {
   const getAllTrainings = async () => {
     try {
       const trainings = await getTrainings();
-      console.log('Trainings:', trainings);
       return Array.isArray(trainings) ? trainings : [];
     } catch (error) {
       console.error('Error al obtener los entrenamientos:', error);
@@ -485,7 +460,6 @@ export default function HomePage() {
         const TTL = 60 * 60 * 1000; // 1 hora en milisegundos (Despues de una hora, se reinicia el localStorage)
 
         // Step 1: Fetch Categories and Exercises
-        console.log("Fetching categories and exercises...");
         const lastModifiedCategoriesTimestamp = await getLastModifiedCategoryTimestamp();
         const categories_from_local_storage = JSON.parse(localStorage.getItem('categories') || '[]');
         const categories_timestamp = parseInt(localStorage.getItem('categories_timestamp') || '0', 10);
@@ -512,9 +486,7 @@ export default function HomePage() {
         }
 
         // Step 2: Fetch Workouts
-        console.log("Fetching workouts...");
         const lastModifiedWorkoutsTimestamp = await getLastModifiedWorkoutsTimestamp();
-        console.log('Last modified workouts timestamp:', lastModifiedWorkoutsTimestamp);
         const localWorkoutTimestamp = parseInt(localStorage.getItem('workouts_timestamp') || '0', 10);
         const workouts_from_local_storage = JSON.parse(localStorage.getItem('workouts') || '[]');
 
@@ -524,7 +496,6 @@ export default function HomePage() {
         if (workouts_from_local_storage.length > 0 && Object.keys(calories_duration_per_day_from_local_storage).length > 0 && (lastModifiedWorkoutsTimestamp === localWorkoutTimestamp)) {
           setWorkoutList(workouts_from_local_storage);
           setCaloriesPerDay(calories_duration_per_day_from_local_storage);
-          console.log('Workouts and calories per day loaded from local storage');
         } else {
           const workouts = await getAllWorkouts();
           const validWorkouts = workouts.filter((workout: Workout) => workout.duration && workout.date && workout.total_calories);
@@ -539,14 +510,12 @@ export default function HomePage() {
           localStorage.setItem('calories_duration_per_day', JSON.stringify(calories_duration_per_day));
         }
 
-        // Step 3: Fetch Coaches (fijarse si vale la pena guardar en local storage)
-        console.log("Fetching coaches...");
+        // Step 3: Fetch Coaches
         const coaches_from_local_storage = JSON.parse(localStorage.getItem('coaches') || '[]');
         const coaches_timestamp = parseInt(localStorage.getItem('coaches_timestamp') || '0', 10);
 
         if (coaches_from_local_storage.length > 0 && (now - coaches_timestamp < TTL)) {
           setCoaches(coaches_from_local_storage);
-          console.log('Coaches loaded from local storage');
         } else {
           const coaches = await getCoaches();
           setCoaches(coaches);
@@ -560,9 +529,7 @@ export default function HomePage() {
         const storedTrainings = JSON.parse(localStorage.getItem('trainings') || '[]');
         if (lastModifiedTrainingTimestamp && storedTrainings.length > 0 && lastModifiedTrainingTimestamp === localTrainingTimestamp) {
           setTrainings(storedTrainings);
-          console.log('Trainings loaded from local storage');
         } else {
-          console.log("Fetching trainings...");
           const trainings = await getAllTrainings();
           if (trainings) {
             setTrainings(trainings);
@@ -572,8 +539,7 @@ export default function HomePage() {
         }
 
         // Step 5: Fetch Challenges
-        console.log("Fetching challenges...");
-        getChallengesList(); // Assuming this does not need to be awaited
+        getChallengesList();
       } catch (error) {
         console.error('Error fetching data:', error);
       } finally {
@@ -626,15 +592,12 @@ export default function HomePage() {
         <DialogTitle sx={{ textAlign: 'center', fontWeight: 'bold' }}>Filter By</DialogTitle>
         <DialogContent>
           <Box display="flex" justifyContent="space-around" alignItems="center" mt={2} >
-            <Box textAlign="center" mx={3}>
+            <Box textAlign="center" mr={{xs: 3, sm: 5}}>
               <Button sx={{ backgroundColor: grey[700], borderColor: grey[900] }} onClick={() => setFilterTrainingOpen(true)} variant="contained">Training</Button>
             </Box>
-            <Box textAlign="center" mx={3}>
+            <Box textAlign="center" >
               <Button sx={{ backgroundColor: grey[700], borderColor: grey[900] }} onClick={() => setFilterCoachOpen(true)} variant="contained">Coach</Button>
             </Box>
-            {/* <Box textAlign="center" mx={3}>
-              <Button sx={{ backgroundColor: grey[700], borderColor: grey[900]}} onClick={() => setFilterExerciseOpen(true)} variant="contained">Exercise</Button>
-            </Box> */}
           </Box>
         </DialogContent>
       </Dialog>
@@ -644,9 +607,6 @@ export default function HomePage() {
 
       <FilterCoachDialog filterCoachOpen={filterCoachOpen} handleFilterCoachClose={handleFilterCoachClose} selectedCoachInFilter={selectedCoachInFilter}
         setSelectedCoachInFilter={setSelectedCoachInFilter} coaches={coaches} handleFilterClose={handleFilterClose} />
-
-      {/* <FilterExerciseDialog filterExerciseOpen={filterExerciseOpen} handleFilterExerciseClose={handleFilterExerciseClose} selectedExerciseInFilter={selectedExerciseInFilter}
-      setSelectedExerciseInFilter={setSelectedExerciseInFilter} handleFilterClose={handleFilterClose} workoutList={workoutList}/> */}
 
       <Dialog open={open} onClose={handleClose}
         PaperProps={{

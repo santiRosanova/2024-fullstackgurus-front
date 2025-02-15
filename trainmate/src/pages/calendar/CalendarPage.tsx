@@ -7,7 +7,6 @@ import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import { cancelWorkout, getWorkouts } from '../../api/WorkoutsApi';
 import isSameOrAfter from 'dayjs/plugin/isSameOrAfter';
 import CloseIcon from '@mui/icons-material/Close';
-import { DemoContainer } from '@mui/x-date-pickers/internals/demo';
 import LoadingButton from '../../personalizedComponents/buttons/LoadingButton';
 import DeleteIcon from '@mui/icons-material/Delete';
 
@@ -20,7 +19,6 @@ interface DrawerProps {
 }
 
 const CalendarModal: React.FC<DrawerProps> = ({ showDrawer, onClose, open }) => {
-  const [isLoading, setIsLoading] = useState(false)
   interface Event {
     id: string;
     name: string;
@@ -78,7 +76,6 @@ const CalendarModal: React.FC<DrawerProps> = ({ showDrawer, onClose, open }) => 
     if (open) {
       handleDateChange(dateRange);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open]);
 
 
@@ -116,7 +113,7 @@ const CalendarModal: React.FC<DrawerProps> = ({ showDrawer, onClose, open }) => 
           sx={{
             position: 'absolute',
             top: 8,
-            left: 8, // Position at top left
+            left: 8,
             color: grey[50],
           }}
           aria-label="close"

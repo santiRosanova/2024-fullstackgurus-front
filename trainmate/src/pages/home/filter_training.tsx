@@ -1,4 +1,4 @@
-import { Box, Button, Dialog, DialogContent, DialogTitle, MenuItem, Select } from "@mui/material";
+import { Dialog, DialogContent, DialogTitle, MenuItem, Select } from "@mui/material";
 import { grey } from "@mui/material/colors";
 
 export const FilterTrainingDialog = ({ filterTrainingOpen, handleFilterTrainingClose, selectedTrainingInFilter, setSelectedTrainingInFilter, trainings, handleFilterClose }: 

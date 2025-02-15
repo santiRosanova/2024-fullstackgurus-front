@@ -1,17 +1,11 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { auth } from '../../FirebaseConfig';
-import {
-  verifyPasswordResetCode,
-  confirmPasswordReset,
-  applyActionCode,
-} from 'firebase/auth';
+import {verifyPasswordResetCode, confirmPasswordReset, applyActionCode} from 'firebase/auth';
 
-// MUI
 import Button from '@mui/material/Button';
 import Input from '@mui/material/Input';
 
-// Custom components
 import TopMiddleAlert from '../../personalizedComponents/TopMiddleAlert';
 import { Dumbbell } from 'lucide-react';
 
@@ -20,26 +14,20 @@ type Step = 'loading' | 'verifyEmail' | 'resetPassword' | 'success' | 'error';
 export default function AuthActionPage() {
   const navigate = useNavigate();
 
-  // URL parameters
   const [mode, setMode] = useState<string | null>(null);
   const [oobCode, setOobCode] = useState<string | null>(null);
-
-  // For reset password
   const [newPassword, setNewPassword] = useState<string>('');
   const [confirmPassword, setConfirmPassword] = useState<string>('');
 
-  // Step state
   const [step, setStep] = useState<Step>('loading');
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
-  // Alerts
   const [alertPasswordsOpen, setAlertPasswordsOpen] = useState(false);
   const [alertSuccessVerificationOpen, setAlertSuccessVerificationOpen] = useState(false);
   const [alertSuccessPasswordOpen, setAlertSuccessPasswordOpen] = useState(false);
   const [alertWeakPassword, setAlertWeakPassword] = useState(false);
 
   useEffect(() => {
-    // Read query params: ?mode=xxx & oobCode=xxx
     const queryParams = new URLSearchParams(window.location.search);
     const modeFromUrl = queryParams.get('mode');
     const codeFromUrl = queryParams.get('oobCode');
@@ -53,7 +41,6 @@ export default function AuthActionPage() {
     setMode(modeFromUrl);
     setOobCode(codeFromUrl);
 
-    // Depending on mode, do the corresponding action
     if (modeFromUrl === 'verifyEmail') {
       handleVerifyEmail(codeFromUrl);
     } else if (modeFromUrl === 'resetPassword') {
@@ -64,9 +51,6 @@ export default function AuthActionPage() {
     }
   }, []);
 
-  /**
-   * Verify Email Flow
-   */
   const handleVerifyEmail = async (code: string) => {
     try {
       await applyActionCode(auth, code);
@@ -83,9 +67,6 @@ export default function AuthActionPage() {
     }
   };
 
-  /**
-   * Reset Password Flow
-   */
   const handleSubmitReset = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!oobCode) {
@@ -105,10 +86,7 @@ export default function AuthActionPage() {
     }
 
     try {
-      // 1) Verify code
       await verifyPasswordResetCode(auth, oobCode);
-
-      // 2) Confirm new password
       await confirmPasswordReset(auth, oobCode, newPassword);
 
       setStep('success');
@@ -131,7 +109,6 @@ export default function AuthActionPage() {
 
   return (
     <div className="min-h-screen bg-black from-gray-900 to-gray-800 flex flex-col items-center justify-center p-4">
-      {/* Alerts */}
       <TopMiddleAlert alertText="Success! Password has been changed" open={alertSuccessPasswordOpen} onClose={() => setAlertSuccessPasswordOpen(false)} severity="success"/>
       <TopMiddleAlert alertText="Success! Email has been verified" open={alertSuccessVerificationOpen} onClose={() => setAlertSuccessVerificationOpen(false)} severity="success"/>
       <TopMiddleAlert alertText="Passwords do not match." open={alertPasswordsOpen} onClose={() => setAlertPasswordsOpen(false)} severity="error"/>
@@ -139,7 +116,6 @@ export default function AuthActionPage() {
 
       <div className="w-full max-w-md">
         <div className="bg-[#161616] border border-gray-600 shadow-lg rounded-lg overflow-hidden">
-          {/* Header */}
           <div className="bg-[#161616] p-4 flex items-center justify-center">
             <Dumbbell className="h-8 w-8 text-white mr-2" />
             <h1 className="text-2xl font-bold text-white">TrainMate</h1>
@@ -234,7 +210,6 @@ export default function AuthActionPage() {
               </div>
             )}
 
-            {/* Generic error if the user lands here in an invalid state */}
             {step === 'error' && (
                 <div className="text-white text-center">
                   <h2 className="text-2xl font-semibold mb-4">Oops!</h2>

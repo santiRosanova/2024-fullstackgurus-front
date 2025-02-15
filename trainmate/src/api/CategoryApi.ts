@@ -6,14 +6,6 @@ const getAuthToken = () => {
     return token ? `Bearer ${token}` : null;
 };
 
-const handleResponse = async (response: Response) => {
-if (!response.ok) {
-    const errorData = await response.json();
-    throw new Error(errorData.error || 'Error desconocido en la solicitud');
-}
-return response.json();
-};
-
 export const getCategories = async () => {
     const token = getAuthToken();
     if (!token) throw new Error('Token no encontrado');
@@ -28,7 +20,6 @@ export const getCategories = async () => {
 
     // Si la respuesta es 403, intentamos renovar el token
     if (response.status === 403 || response.status === 401) {
-        console.log('Token expirado, intentando renovar...');
         const newToken = await refreshAuthToken(); // Renueva el token
         // Intentamos la solicitud de nuevo con el nuevo token
         const retryResponse = await fetch(`${BASE_URL}/api/category/get-categories`, {
@@ -80,7 +71,6 @@ export const getCategories = async () => {
   
       // Si la respuesta es 401, intentamos renovar el token
       if (response.status === 403 || response.status === 401) {
-        console.log('Token expirado, intentando renovar...');
         const newToken = await refreshAuthToken(); // Renueva el token
         // Intentamos la solicitud de nuevo con el nuevo token
         const retryResponse = await fetch(`${BASE_URL}/api/category/save-category`, {
@@ -131,7 +121,6 @@ export const getCategories = async () => {
 
     // Si la respuesta es 401, intentamos renovar el token
     if (response.status === 403 || response.status === 401) {
-        console.log('Token expirado, intentando renovar...');
         const newToken = await refreshAuthToken(); // Renueva el token
         // Intentamos la solicitud de nuevo con el nuevo token
         const retryResponse = await fetch(`${BASE_URL}/api/category/edit-category/${category_id}`, {
@@ -168,7 +157,6 @@ export const getCategories = async () => {
 export const deleteCategory = async (category_id: string, trainings: any) => {
   // Primero hago validacion de que la categoría no tenga ejercicios que se encuentren en entrenamientos
   const exercisesInTrainings = trainings.some((training: any) => training.exercises.some((exercise: any) => exercise.category_id === category_id));
-  console.log(exercisesInTrainings);
   if (exercisesInTrainings) {
     throw new Error('No se puede eliminar la categoría porque tiene ejercicios que se encuentran en entrenamientos');
   }
@@ -186,7 +174,6 @@ export const deleteCategory = async (category_id: string, trainings: any) => {
 
     // Si la respuesta es 401, intentamos renovar el token
     if (response.status === 403 || response.status === 401) {
-        console.log('Token expirado, intentando renovar...');
         const newToken = await refreshAuthToken(); // Renueva el token
         // Intentamos la solicitud de nuevo con el nuevo token
         const retryResponse = await fetch(`${BASE_URL}/api/category/delete-category/${category_id}`, {
@@ -233,7 +220,6 @@ export const deleteCategory = async (category_id: string, trainings: any) => {
 
     // Si la respuesta es 403, intentamos renovar el token
     if (response.status === 403 || response.status === 401) {
-        console.log('Token expirado, intentando renovar...');
         const newToken = await refreshAuthToken(); // Renueva el token
         // Intentamos la solicitud de nuevo con el nuevo token
         const retryResponse = await fetch(`${BASE_URL}/api/category/last-modified`, {
@@ -280,7 +266,6 @@ export const deleteCategory = async (category_id: string, trainings: any) => {
 
     // Si la respuesta es 403, intentamos renovar el token
     if (response.status === 403 || response.status === 401) {
-        console.log('Token expirado, intentando renovar...');
         const newToken = await refreshAuthToken(); // Renueva el token
         // Intentamos la solicitud de nuevo con el nuevo token
         const retryResponse = await fetch(`${BASE_URL}/api/category/update-last-modified`, {

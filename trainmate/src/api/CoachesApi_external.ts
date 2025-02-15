@@ -30,7 +30,6 @@ export const getCoaches = async () => {
         fullName: `${coach.Name} ${coach.Lastname}`,
         uid: `${coach.uid}`,
       }));
-      console.log(filteredCoaches);
     return filteredCoaches;
     
     } catch (error) {

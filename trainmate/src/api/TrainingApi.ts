@@ -20,7 +20,6 @@ const getAuthToken = () => {
 
     // Si la respuesta es 403, intentamos renovar el token
     if (response.status === 403 || response.status === 401) {
-        console.log('Token expirado, intentando renovar...');
         const newToken = await refreshAuthToken(); // Renueva el token
         // Intentamos la solicitud de nuevo con el nuevo token
         const retryResponse = await fetch(`${BASE_URL}/api/trainings/get-trainings`, {
@@ -60,7 +59,6 @@ const getAuthToken = () => {
 
     const exercisesIds = trainingData.exercises.map((ex: { id: string, calories_per_hour: number }) => ({ id: ex.id, calories_per_hour: ex.calories_per_hour }));
     const modifiedTrainingData = {'exercises': exercisesIds, 'name': trainingData.name}
-    console.log(modifiedTrainingData)
 
     try {
       const response = await fetch(`${BASE_URL}/api/trainings/save-training`, {
@@ -74,7 +72,6 @@ const getAuthToken = () => {
   
       // Si la respuesta es 401, intentamos renovar el token
       if (response.status === 403 || response.status === 401) {
-        console.log('Token expirado, intentando renovar...');
         const newToken = await refreshAuthToken(); // Renueva el token
         // Intentamos la solicitud de nuevo con el nuevo token
         const retryResponse = await fetch(`${BASE_URL}/api/trainings/save-training`, {
@@ -122,7 +119,6 @@ const getAuthToken = () => {
 
     // Si la respuesta es 403, intentamos renovar el token
     if (response.status === 403 || response.status === 401) {
-        console.log('Token expirado, intentando renovar...');
         const newToken = await refreshAuthToken(); // Renueva el token
         // Intentamos la solicitud de nuevo con el nuevo token
         const retryResponse = await fetch(`${BASE_URL}/api/trainings/last-modified`, {
@@ -169,7 +165,6 @@ const getAuthToken = () => {
 
     // Si la respuesta es 403, intentamos renovar el token
     if (response.status === 403 || response.status === 401) {
-        console.log('Token expirado, intentando renovar...');
         const newToken = await refreshAuthToken(); // Renueva el token
         // Intentamos la solicitud de nuevo con el nuevo token
         const retryResponse = await fetch(`${BASE_URL}/api/trainings/update-last-modified`, {

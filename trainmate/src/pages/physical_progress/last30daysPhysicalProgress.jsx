@@ -40,7 +40,7 @@ const Last30DaysProgress = ({ last30DaysData }) => {
     <Box>
       <Box sx={{ display: 'flex', flexDirection: 'row', mt: 8, justifyContent: 'center' }}>
         <Typography variant="h6" sx={{ textAlign: 'left' }}> Last 30 days: </Typography>
-        <Box sx={{ display: 'flex', flexDirection: { xs: 'column', sm: 'row', md: 'row' }, gap: { xs: 2, sm: 5, md: 18 }, mt: 0, ml: { xs: 2, sm: 5, md: 10 } }}>
+        <Box sx={{ display: 'flex', flexDirection: { xs: 'column', sm: 'row', md: 'row', lg: 'row' }, gap: { xs: 2, sm: 5, md: 5, lg: 18 }, mt: 0, ml: { xs: 2, sm: 5, md: 5, lg: 10 } }}>
 
           <Typography variant="body1" sx={{ textAlign: 'left', display: 'flex', alignItems: 'center' }}>
             {renderChangeIcon(last30DaysData.Weight?.change, '#0088FE')}
