@@ -168,7 +168,7 @@ export default function LogIn() {
                   value={email}
                   onChange={handleEmailChange}
                   className="rounded-md p-2 text-white placeholder-white text-sm"
-                  sx={{ height: '100%' }}
+                  sx={{ height: '100%'}}
                   style={{ borderRadius: '8px', color: 'white' }}  // Optional inline styles
                   placeholder="Enter your email"  // White placeholder
                 />

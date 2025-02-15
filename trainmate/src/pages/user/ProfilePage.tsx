@@ -538,6 +538,7 @@ export default function ProfilePage() {
                   value={userProfile.weight}
                   onChange={handleNumericChange}
                   disabled={!isEditing}
+                  placeholder="Weight (kg)"
                   sx={{
                     ...baseTextFieldStyles,
                     ...(isEditing ? editingTextFieldStyles : disabledTextFieldStyles),
@@ -553,6 +554,7 @@ export default function ProfilePage() {
                   value={userProfile.height}
                   onChange={handleNumericChange}
                   disabled={!isEditing}
+                  placeholder="Height (cm)"
                   sx={{
                     ...baseTextFieldStyles,
                     ...(isEditing ? editingTextFieldStyles : disabledTextFieldStyles),

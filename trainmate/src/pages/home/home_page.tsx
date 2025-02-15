@@ -273,22 +273,6 @@ export default function HomePage() {
     setFilterOpen(false);
   }
 
-  const handleFilterDateOpen = () => {
-    setFilterDateOpen(true);
-  }
-
-  const handleFilterTrainingOpen = () => {
-    setFilterTrainingOpen(true);
-  }
-
-  const handleFilterExerciseOpen = () => {
-    setFilterExerciseOpen(true);
-  }
-
-  const handleFilterDateClose = () => {
-    setFilterDateOpen(false);
-  }
-
   const handleGoToNewTraining = () => {
     navigate('/categories');
   }
@@ -385,10 +369,6 @@ export default function HomePage() {
       setCaloriesPerDay(calories_duration_per_dayList);
     }
   };
-
-  const handleFilterExerciseClose = () => {
-    setFilterExerciseOpen(false);
-  }
 
   const handleOpenWorkoutAdding = () => {
     setOpenWorkoutAdding(true);
@@ -539,7 +519,7 @@ export default function HomePage() {
           localStorage.setItem('calories_duration_per_day', JSON.stringify(calories_duration_per_day));
         }
 
-        // Step 3: Fetch Coaches (fijarse si vale la pena guardar en local storage)
+        // Step 3: Fetch Coaches
         console.log("Fetching coaches...");
         const coaches_from_local_storage = JSON.parse(localStorage.getItem('coaches') || '[]');
         const coaches_timestamp = parseInt(localStorage.getItem('coaches_timestamp') || '0', 10);
@@ -573,7 +553,7 @@ export default function HomePage() {
 
         // Step 5: Fetch Challenges
         console.log("Fetching challenges...");
-        getChallengesList(); // Assuming this does not need to be awaited
+        getChallengesList();
       } catch (error) {
         console.error('Error fetching data:', error);
       } finally {
@@ -626,15 +606,12 @@ export default function HomePage() {
         <DialogTitle sx={{ textAlign: 'center', fontWeight: 'bold' }}>Filter By</DialogTitle>
         <DialogContent>
           <Box display="flex" justifyContent="space-around" alignItems="center" mt={2} >
-            <Box textAlign="center" mx={3}>
+            <Box textAlign="center" mr={{xs: 3, sm: 5}}>
               <Button sx={{ backgroundColor: grey[700], borderColor: grey[900] }} onClick={() => setFilterTrainingOpen(true)} variant="contained">Training</Button>
             </Box>
-            <Box textAlign="center" mx={3}>
+            <Box textAlign="center" >
               <Button sx={{ backgroundColor: grey[700], borderColor: grey[900] }} onClick={() => setFilterCoachOpen(true)} variant="contained">Coach</Button>
             </Box>
-            {/* <Box textAlign="center" mx={3}>
-              <Button sx={{ backgroundColor: grey[700], borderColor: grey[900]}} onClick={() => setFilterExerciseOpen(true)} variant="contained">Exercise</Button>
-            </Box> */}
           </Box>
         </DialogContent>
       </Dialog>
@@ -644,9 +621,6 @@ export default function HomePage() {
 
       <FilterCoachDialog filterCoachOpen={filterCoachOpen} handleFilterCoachClose={handleFilterCoachClose} selectedCoachInFilter={selectedCoachInFilter}
         setSelectedCoachInFilter={setSelectedCoachInFilter} coaches={coaches} handleFilterClose={handleFilterClose} />
-
-      {/* <FilterExerciseDialog filterExerciseOpen={filterExerciseOpen} handleFilterExerciseClose={handleFilterExerciseClose} selectedExerciseInFilter={selectedExerciseInFilter}
-      setSelectedExerciseInFilter={setSelectedExerciseInFilter} handleFilterClose={handleFilterClose} workoutList={workoutList}/> */}
 
       <Dialog open={open} onClose={handleClose}
         PaperProps={{

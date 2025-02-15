@@ -5,7 +5,6 @@ import ArrowDownwardIcon from '@mui/icons-material/ArrowDownward';
 import HorizontalRuleIcon from '@mui/icons-material/HorizontalRule';
 
 const Last30DaysProgress = ({ last30DaysData }) => {
-  // Function to render the change icon based on the value
   const renderChangeIcon = (change, color) => {
     if (change > 0) {
       return <ArrowUpwardIcon style={{ color: color, marginRight: '4px' }} />;
@@ -18,7 +17,6 @@ const Last30DaysProgress = ({ last30DaysData }) => {
     }
   };
 
-  // Function to generate the performance message based on changes
   const getPerformanceMessage = (last30DaysData) => {
     const caloriesChange = last30DaysData.Calories?.change ?? 0;
     const minutesChange = last30DaysData.Minutes?.change ?? 0;
@@ -40,7 +38,6 @@ const Last30DaysProgress = ({ last30DaysData }) => {
 
   return (
     <Box>
-      {/* Header and Metrics Display */}
       <Box
         sx={{
           display: 'flex',
@@ -66,7 +63,6 @@ const Last30DaysProgress = ({ last30DaysData }) => {
             ml: { xs: 2, sm: 5, md: 10 },
           }}
         >
-          {/* Calories */}
           <Typography
             variant="body1"
             sx={{ textAlign: 'left', display: 'flex', alignItems: 'center' }}
@@ -75,7 +71,6 @@ const Last30DaysProgress = ({ last30DaysData }) => {
             Calories: {last30DaysData.Calories?.change?.toFixed(1) ?? 'N/A'} kcal
           </Typography>
 
-          {/* Minutes */}
           <Typography
             variant="body1"
             sx={{ textAlign: 'left', display: 'flex', alignItems: 'center' }}
@@ -86,7 +81,6 @@ const Last30DaysProgress = ({ last30DaysData }) => {
         </Box>
       </Box>
 
-      {/* Performance Message */}
       <Box sx={{ display: 'flex', justifyContent: 'center', mt: 0 }}>
         <Typography
           variant="body1"

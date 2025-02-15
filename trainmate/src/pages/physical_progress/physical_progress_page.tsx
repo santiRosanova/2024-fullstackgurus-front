@@ -233,7 +233,6 @@ export default function PhysicalProgressPage() {
         <Box sx={{flex: 1, mb: 12}}>
           <Typography variant="h4" sx={{ fontSize: { xs: '1.3rem', sm: '1.8rem', md: '2.5rem' }, position: 'absolute', left: '50%', transform: 'translateX(-50%)'}}>Physical Progress</Typography>
         </Box>
-
       </Box>
 
       <TopMiddleAlert alertText='Added new entry successfully' open={alertDataAddedOpen} onClose={() => setAlertDataAddedOpen(false)} severity='success'/>

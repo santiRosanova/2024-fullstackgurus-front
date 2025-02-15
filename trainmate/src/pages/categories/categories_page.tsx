@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useRef } from 'react';
-import { Button, Card, CardContent, CardHeader, Typography, TextField, InputLabel, Box, Accordion, AccordionSummary, AccordionDetails, Dialog, DialogTitle, DialogContent, DialogActions, IconButton, MenuItem, Select, FormControl} from '@mui/material';
+import { Button, Card, CardContent, CardHeader, Typography, TextField, InputLabel, Box, Accordion, AccordionSummary, AccordionDetails, Dialog, DialogTitle, DialogContent, DialogActions, IconButton, MenuItem, Select, FormControl, CircularProgress} from '@mui/material';
 import { Add as PlusIcon, Edit as EditIcon, Delete as DeleteIcon, ArrowBack as ArrowLeftIcon, ExpandMore as ExpandMoreIcon } from '@mui/icons-material';
 import EmojiEventsIcon from '@mui/icons-material/EmojiEvents';
 import { useNavigate } from 'react-router-dom';
@@ -113,6 +113,7 @@ export default function CategoriesPage() {
   const [categoryDataToDelete, setCategoryDataToDelete] = useState('');
   const [exerciseDataToDelete, setExerciseDataToDelete] = useState<{ exerciseId: string, categoryId: string } | null>(null);
   const [loadingButton, setLoadingButton] = useState<boolean>(false)
+  const [loadingImage, setLoadingImage] = useState(false);
 
   // Add state for the modal to display the image
   const [imageModalOpen, setImageModalOpen] = useState(false);
@@ -274,8 +275,12 @@ export default function CategoriesPage() {
     }
   }, []);
 
-  // Pensar quizás en optimizar esta funcionalidad, ya que se hace una llamada a la API por cada categoría, lo cual puede ser ineficiente
-  // Podríamos hacer una unica llamada, mandando todas las categorías y que nos devuelva listas de todas las categorías con todos sus ejercicios
+  useEffect(() => {
+    if (imageModalOpen) {
+      setLoadingImage(true);
+    }
+  }, [imageModalOpen, selectedImage]);
+
   const getExercisesFromCategory = async (category: Category) => {
     try {
       const exercises = await getExerciseFromCategory(category.id);
@@ -448,9 +453,7 @@ export default function CategoriesPage() {
           const storage = getStorage();
           const storageRef = ref(storage, `exercises/${imageFile.name}`);
 
-          // Upload the new image to Firebase Storage
           await uploadBytes(storageRef, imageFile);
-          // Get the download URL for the uploaded image
           image_url_old = editingExercise.image_url;
           image_url = await getDownloadURL(storageRef);
         }
@@ -512,7 +515,7 @@ export default function CategoriesPage() {
   };
 
   return (
-    <Box sx={{ 'backgroundColor': 'black', color: 'white', p: 4 }}  >
+    <Box sx={{ 'backgroundColor': 'black', color: 'white', p: 4, minHeight: '100vh' }}  >
       <Box component="header" sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 6 }}>
         <div className="flex items-center">
           <IconButton component="a" sx={{ color: 'white' }} onClick={handleBackToHome}>
@@ -647,23 +650,43 @@ export default function CategoriesPage() {
               </CardContent>
             </Card>
             <Dialog open={imageModalOpen} onClose={handleCloseImageModal} fullWidth maxWidth="sm">
-            <div className='bg-[#161616] border border-gray-600 '> 
-              <DialogTitle className='bg-[#161616] text-white'>Exercise Image</DialogTitle>
-              <DialogContent className='bg-[#161616]'>
-                {selectedImage ? (
-                  <Box sx={{ display: 'flex', justifyContent: 'center' }}>
-                    <img src={selectedImage} alt="Exercise" style={{ maxWidth: '100%', maxHeight: '400px' }} />
-                  </Box>
-                ) : (
-                  <DialogContentText>No image available</DialogContentText>
-                )}
-              </DialogContent>
-              <DialogActions className='bg-[#161616]'>
-                <Button onClick={handleCloseImageModal} sx={{ color: 'white' }}>
-                  Close
-                </Button>
-              </DialogActions>
-            </div>
+              <div className='bg-[#161616] border border-gray-600'>
+                <DialogTitle className='bg-[#161616] text-white'>Exercise Image</DialogTitle>
+                <DialogContent className='bg-[#161616]'>
+                  {selectedImage ? (
+                    <Box 
+                      sx={{ 
+                        display: 'flex', 
+                        justifyContent: 'center', 
+                        alignItems: 'center', 
+                        minHeight: '400px', 
+                        position: 'relative' 
+                      }}
+                    >
+                      {loadingImage && (
+                        <CircularProgress sx={{color: '#fff', position: 'absolute'}}/>
+                      )}
+                      <img 
+                        src={selectedImage} 
+                        alt="Exercise" 
+                        style={{ 
+                          maxWidth: '100%', 
+                          maxHeight: '400px', 
+                          display: loadingImage ? 'none' : 'block' 
+                        }} 
+                        onLoad={() => setLoadingImage(false)}
+                      />
+                    </Box>
+                  ) : (
+                    <DialogContentText>No image available</DialogContentText>
+                  )}
+                </DialogContent>
+                <DialogActions className='bg-[#161616]'>
+                  <Button onClick={handleCloseImageModal} sx={{ color: 'white' }}>
+                    Close
+                  </Button>
+                </DialogActions>
+              </div>
             </Dialog>
 
             {/* Nueva Card de Trainings */}

@@ -40,3 +40,11 @@
 .custom-brush .recharts-brush-texts text {
   fill: #FFFFFF; /* Set text color to white */
 }
+
+/* Aplica a campos de tipo texto/contraseña/autocompletables */
+input:-webkit-autofill,
+input:-webkit-autofill:hover,
+input:-webkit-autofill:focus {
+  -webkit-box-shadow: 0 0 0 1000px #161616 inset !important; 
+  -webkit-text-fill-color: #fff !important;
+}
