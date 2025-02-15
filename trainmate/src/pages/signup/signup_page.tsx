@@ -144,7 +144,7 @@ export default function SignUp() {
     };
 
     try {
-      const userCredential = await createUserWithEmailAndPassword(auth, formDataWithIntegers.email, formDataWithIntegers.password);
+      const userCredential = await createUserWithEmailAndPassword(auth, formDataWithIntegers.email.toLowerCase(), formDataWithIntegers.password);
       const user = userCredential.user;
       const idToken = await user.getIdToken();
       await saveUserInfo(idToken, formDataWithIntegers);
@@ -182,7 +182,6 @@ export default function SignUp() {
       const user = result.user;
       const idToken = await user.getIdToken();
       localStorage.setItem("token", idToken);
-      // Verificar si es el primer inicio de sesión
       const isFirstLogin = user.metadata.creationTime === user.metadata.lastSignInTime;
 
       if (isFirstLogin) {

@@ -17,6 +17,7 @@ import TopMiddleAlert from '../../personalizedComponents/TopMiddleAlert';
 import { getUserProfile } from '../../api/UserAPI';
 import { grey } from '@mui/material/colors';
 import { Visibility as EyeIcon, VisibilityOff as ClosedEyeIcon } from '@mui/icons-material';
+import LoadingAnimation from '../../personalizedComponents/loadingAnimation';
 
 export default function LogIn() {
   const [email, setEmail] = useState('');
@@ -30,6 +31,7 @@ export default function LogIn() {
   const [alertExerciseFillFieldsOpen, setAlertExerciseFillFieldsOpen] = useState(false);
   const [alertErrorEmailNotVerified, setAlertErrorEmailNotVerified] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
+  const [loading, setLoading] = useState(false);
 
   const handleEmailChange = (e: React.ChangeEvent<HTMLInputElement>) => setEmail(e.target.value);
   const handlePasswordChange = (e: React.ChangeEvent<HTMLInputElement>) => setPassword(e.target.value);
@@ -41,21 +43,25 @@ export default function LogIn() {
       return;
     }
     try {
-      const data: any = await signInWithEmailAndPassword(auth, email, password);
+      setLoading(true);
+      const data: any = await signInWithEmailAndPassword(auth, email.toLowerCase(), password);
       const user = data.user;
 
       if (!user.emailVerified) {
         await signOut(auth);
         setAlertErrorEmailNotVerified(true);
+        setLoading(false);
         return;
       }
       localStorage.setItem("token", data.user.accessToken);
       setErrorLoggingIn(false);
+      setLoading(false);
       navigate('/homepage');
       window.location.reload();
     } catch (error: any) {
       console.error('Error logging in:', error.message);
       setErrorLoggingIn(true);
+      setLoading(false);
     }
   };
 
@@ -89,17 +95,19 @@ export default function LogIn() {
 
   const handleGoogleSignIn = async () => {
     try {
+      setLoading(true);
       const result = await signInWithPopup(auth, provider);
       const user = result.user;
       const idToken = await user.getIdToken();
       localStorage.setItem("token", idToken);
-
       await checkIfAllDataIsCompleted();
-      console.log('User logged in:', user);
 
     } catch (error) {
       console.error('Error en el inicio de sesión con Google:', error);
+    } finally {
+      setLoading(false);
     }
+
   };
 
   const handleForgotPasswordClick = () => {
@@ -130,6 +138,10 @@ export default function LogIn() {
 
   return (
     <div className="min-h-screen bg-black  from-gray-900 to-gray-800 flex flex-col items-center justify-center p-4">
+      {loading ? (
+        <LoadingAnimation />
+      ) : (
+        <>
       <div className="w-full max-w-md">
         <TopMiddleAlert alertText='Please fill all fields' open={alertExerciseFillFieldsOpen} onClose={() => setAlertExerciseFillFieldsOpen(false)} severity='warning' />
         <TopMiddleAlert alertText='Sent email to restore password' open={alertOpen} onClose={() => setAlertOpen(false)} severity='success' />
@@ -270,6 +282,8 @@ export default function LogIn() {
           </Button>
         </DialogActions>
       </Dialog>
+      </>
+      )}
     </div>
   );
 }
