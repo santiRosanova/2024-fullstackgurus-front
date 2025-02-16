@@ -19,6 +19,7 @@ import { muscularGroups } from "../../enums/muscularGroups";
 import PopularExercisesModal from './popular_exercise_modal';
 import LoadingAnimation from '../../personalizedComponents/loadingAnimation';
 import LoadingButton from '../../personalizedComponents/buttons/LoadingButton';
+import { handleNumberKeyPressWithoutDecimals } from '../../functions/numeric_key_press';
 
 interface CategoryWithExercises {
   id: string;
@@ -337,8 +338,8 @@ export default function CategoriesPage() {
         setLoadingButton(false)
         console.error('Error al guardar la categoría:', error)
       }
-      setLoadingButton(false)
       handleCloseAddCategoryDialog();
+      setLoadingButton(false)
     }
     else {
       setAlertCategoryFillFieldsOpen(true);
@@ -394,7 +395,6 @@ export default function CategoriesPage() {
             );
             setNewExercise(null);
             setAlertExerciseAddedOpen(true);
-            setLoadingButton(false);
             await updateLastModifiedCategoryTimestamp();
             localStorage.removeItem('categories');
             localStorage.removeItem('categories_with_exercises');
@@ -521,8 +521,8 @@ export default function CategoriesPage() {
         <div style={{display:'flex', flexDirection:'row', alignItems:'center', justifyContent: 'center'}}>
           <IconButton component="a" sx={{ color: 'white' }} onClick={handleTrophyButton}>
             <EmojiEventsIcon sx={{ fontSize: { xs: '2rem', sm: '2.5rem', md: '3rem', lg: '3rem' } }} />
+            <Typography sx={{fontSize: { xs: '1rem', sm: '1rem', md: '1.5rem', lg: '1.5rem' }}}>Top exercises</Typography>
           </IconButton>
-          <p>Top exercises</p>
           <PopularExercisesModal open={openRankingModal} onClose={handleCloseRankingModal} />
         </div>
       </Box >
@@ -945,6 +945,7 @@ export default function CategoriesPage() {
                 }
               }
             }}
+            onKeyDown={handleNumberKeyPressWithoutDecimals}
             placeholder="60"
             InputLabelProps={{
               style: { color: '#fff' }, // Color del label (Duration)
@@ -967,7 +968,7 @@ export default function CategoriesPage() {
                   ...newExercise,
                   training_muscle: e.target.value,
                   name: newExercise?.name || '',
-                  calories_per_hour: newExercise?.calories_per_hour || 1,
+                  calories_per_hour: newExercise?.calories_per_hour || '',
                   category_id: newExercise?.category_id || '',
                   id: ''
                 })
@@ -1253,10 +1254,10 @@ export default function CategoriesPage() {
                 variant="standard"
                 value={editingExercise.calories_per_hour ?? ''}
                 InputLabelProps={{
-                  style: { color: '#fff' }, // Color del label
+                  style: { color: '#fff' },
                 }}
                 InputProps={{
-                  style: { color: '#fff' }, // Color del texto dentro del input
+                  style: { color: '#fff' },
                 }}
                 onChange={(e) => {
                   const value = e.target.value;
@@ -1285,6 +1286,7 @@ export default function CategoriesPage() {
                     }
                   }
                 }}
+                onKeyDown={handleNumberKeyPressWithoutDecimals}
                 placeholder="KCal Per Hour"
                 slotProps={{
                   htmlInput: { min: 1, max: 4000 }

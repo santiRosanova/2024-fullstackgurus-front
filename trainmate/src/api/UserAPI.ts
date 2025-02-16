@@ -71,17 +71,3 @@ export const updateUserProfile = async (userInfo: { full_name?: string; gender?:
 
   return handleResponse(response);
 };
-
-export const deleteUser = async () => {
-  const token = getAuthToken();
-  if (!token) throw new Error('Token no encontrado');
-
-  const response = await fetch(`${BASE_URL}/delete-user`, {
-    method: 'DELETE',
-    headers: {
-      'Authorization': token
-    }
-  });
-
-  return handleResponse(response);
-};
