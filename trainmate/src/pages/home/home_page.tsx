@@ -49,6 +49,7 @@ import dayjs, { Dayjs } from 'dayjs';
 import isSameOrAfter from 'dayjs/plugin/isSameOrAfter';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import { DatePicker, LocalizationProvider } from '@mui/x-date-pickers';
+import { handleNumberKeyPressWithoutDecimals } from '../../functions/numeric_key_press';
 
 dayjs.extend(isSameOrAfter);
 
@@ -802,6 +803,7 @@ export default function HomePage() {
                 }
               }
             }}
+            onKeyDown={handleNumberKeyPressWithoutDecimals}
             placeholder="In minutes"
             type="number"
             InputLabelProps={{

@@ -16,6 +16,7 @@ import isSameOrAfter from 'dayjs/plugin/isSameOrAfter';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import TopMiddleAlert from '../../personalizedComponents/TopMiddleAlert';
 import { Visibility as EyeIcon, VisibilityOff as ClosedEyeIcon } from '@mui/icons-material';
+import { handleNumberKeyPress } from '../../functions/numeric_key_press';
 
 dayjs.extend(isSameOrAfter);
 
@@ -394,6 +395,7 @@ export default function SignUp() {
                         fullWidth
                         value={formData.weight}
                         onChange={handleNumericChange}
+                        onKeyDown={handleNumberKeyPress}
                         className="rounded-md p-2 text-white placeholder-white text-sm"
                         sx={{ height: '100%' }}
                         style={{ borderRadius: '8px', color: 'white' }}
@@ -407,6 +409,7 @@ export default function SignUp() {
                         fullWidth
                         value={formData.height}
                         onChange={handleNumericChange}
+                        onKeyDown={handleNumberKeyPress}
                         className="rounded-md p-2 text-white placeholder-white text-sm"
                         sx={{ height: '100%' }}
                         style={{ borderRadius: '8px', color: 'white' }}

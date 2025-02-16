@@ -18,6 +18,7 @@ import dayjs, { Dayjs } from 'dayjs';
 import isSameOrAfter from 'dayjs/plugin/isSameOrAfter';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import { grey } from '@mui/material/colors';
+import { handleNumberKeyPress } from '../../functions/numeric_key_press';
 
 dayjs.extend(isSameOrAfter);
 
@@ -377,6 +378,7 @@ export default function PhysicalProgressPage() {
                   fullWidth
                   value={weight}
                   onChange={(e) => handleNumericChange(e)}
+                  onKeyDown={handleNumberKeyPress}
                   InputLabelProps={{
                     style: { color: '#fff' },
                   }}
@@ -400,6 +402,7 @@ export default function PhysicalProgressPage() {
                   fullWidth
                   value={bodyMuscle}
                   onChange={(e) => handleNumericChange(e)}
+                  onKeyDown={handleNumberKeyPress}
                   InputLabelProps={{
                     style: { color: '#fff' },
                   }}
@@ -423,6 +426,7 @@ export default function PhysicalProgressPage() {
                   fullWidth
                   value={bodyFat}
                   onChange={(e) => handleNumericChange(e)}
+                  onKeyDown={handleNumberKeyPress}
                   InputLabelProps={{
                     style: { color: '#fff' },
                   }}

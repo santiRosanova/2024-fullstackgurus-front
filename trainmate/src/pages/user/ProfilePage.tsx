@@ -13,6 +13,7 @@ import LoadingAnimation from '../../personalizedComponents/loadingAnimation';
 import dayjs, { Dayjs } from 'dayjs';
 import { DatePicker, LocalizationProvider } from '@mui/x-date-pickers';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
+import { handleNumberKeyPress } from '../../functions/numeric_key_press';
 
 
 const baseTextFieldStyles = {
@@ -518,6 +519,7 @@ export default function ProfilePage() {
                   type="number"
                   value={userProfile.weight}
                   onChange={handleNumericChange}
+                  onKeyDown={handleNumberKeyPress}
                   disabled={!isEditing}
                   placeholder="Weight (kg)"
                   sx={{
@@ -534,6 +536,7 @@ export default function ProfilePage() {
                   type="number"
                   value={userProfile.height}
                   onChange={handleNumericChange}
+                  onKeyDown={handleNumberKeyPress}
                   disabled={!isEditing}
                   placeholder="Height (cm)"
                   sx={{
