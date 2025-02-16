@@ -32,8 +32,10 @@ const Last30DaysCalendar: React.FC<Last30DaysCalendarProps> = ({ dataForChart })
     const exerciseSet = new Set<string>();
 
     last30DaysData.forEach(item => {
+      const [day, month] = item.date.split('/'); 
+      const dayMonth = `${day}/${month}`;
       if (item.Minutes > 0) {
-        exerciseSet.add(item.date);
+        exerciseSet.add(dayMonth);
       }
     });
 

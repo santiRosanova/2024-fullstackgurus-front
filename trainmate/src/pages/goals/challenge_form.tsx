@@ -26,6 +26,7 @@ const ChallengeForm: React.FC<ChallengeFormProps> = ({ isOpen, onCancel, onSave 
   const [isLoading, setIsLoading] = useState(false);
   const [alertSaveGoalErrorOpen, setAlertSaveGoalErrorOpen] = useState(false);
   const [alertSaveGoalErrorMessage, setAlertSaveGoalErrorMessage] = useState('');
+  const [alertSaveGoalSuccessOpen, setAlertSaveGoalSuccessOpen] = useState(false);
 
   // Handler for TextField changes
   const handleTextFieldChange = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -50,6 +51,7 @@ const ChallengeForm: React.FC<ChallengeFormProps> = ({ isOpen, onCancel, onSave 
       if (onSave) onSave(savedGoal); // Call onSave callback if provided
       onCancel(); // Close the form
       setFormData({ startDate: null as Dayjs | null, endDate: null as Dayjs | null, title: '', description: '' }); // Clear form data
+      setAlertSaveGoalSuccessOpen(true);
     } catch (error) {
       console.error('Error saving goal:', error);
       setAlertSaveGoalErrorMessage('Failed to save goal. ' + error);
@@ -62,6 +64,7 @@ const ChallengeForm: React.FC<ChallengeFormProps> = ({ isOpen, onCancel, onSave 
   return (
       <>
       <TopMiddleAlert alertText={alertSaveGoalErrorMessage} open={alertSaveGoalErrorOpen} onClose={() => setAlertSaveGoalErrorOpen(false)} severity='error'/>
+      <TopMiddleAlert alertText={'Goal saved successfully.'} open={alertSaveGoalSuccessOpen} onClose={() => setAlertSaveGoalSuccessOpen(false)} severity='success'/>
         <Dialog open={isOpen} onClose={onCancel} PaperProps={{
           sx: {
             backgroundColor: grey[800],
