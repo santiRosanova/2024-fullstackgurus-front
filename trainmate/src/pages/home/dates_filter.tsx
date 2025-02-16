@@ -1,8 +1,7 @@
 export const getFilteredData = (caloriesPerDay: Record<string, any>, startDate: Date, endDate: Date) => {
   
   return Object.keys(caloriesPerDay).map(key => {
-      const [day, month] = caloriesPerDay[key].date.split('/').map(Number);
-      const year = new Date().getFullYear(); 
+      const [day, month, year] = caloriesPerDay[key].date.split('/').map(Number);
       const entryDate = new Date(year, month - 1, day);
       return { ...caloriesPerDay[key], entryDate };
     })
